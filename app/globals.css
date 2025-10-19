@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/* ---------------------- Fonts ---------------------- */
+@font-face {
+  font-family: 'JetBrainsMonoNF';
+  src: url('/fonts/JetBrainsMonoNerdFont-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Set your custom fonts */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: 'JetBrainsMonoNF', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-mono); /* Apply Nerd Font globally */
+}
+
+/* ---------------- Animations ---------------- */
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease-in-out;
+}
+
+@keyframes tilt {
+  0%, 50% { transform: rotate(-3deg); }
+  51%, 100% { transform: rotate(3deg); }
+}
+.animate-tilt {
+  animation: tilt 0.8s steps(1, end) infinite;
+}
+
+/* ---------------- Custom dashed border ---------------- */
+.custom-dash {
+  border-bottom: 3px dashed transparent;
+  border-image: repeating-linear-gradient(
+    to right,
+    #9ca3af 0,      /* dash color */
+    #9ca3af 8px,    /* dash length */
+    transparent 5px,
+    transparent 14px
+  ) 1;
+}
