@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import SpotifyTerminal from "./SpotifyTerminal";
 
 export default function About() {
   const [fastfetch, setFastfetch] = useState("");
@@ -53,7 +54,7 @@ export default function About() {
         clearInterval(interval);
         setTimeout(() => setDoneLinks(true), 200);
       }
-    }, 120);
+    }, 50);
     return () => clearInterval(interval);
   }, [startLinks]);
 
@@ -104,11 +105,11 @@ export default function About() {
           <div className="p-8 font-jetbrains text-xl flex flex-wrap">
             <span className="text-[#39ff14]">pucas01</span>
             <span className="text-[#FFFFFF]">@</span>
-            <span className="text-[#DF990D]">PucasDocker</span>
+            <span className="text-[#D73DA3]">PucasDocker</span>
             <span className="text-[#FFFFFF]">:</span>
             <span className="text-[#FF5555]">~</span>
             <span className="text-[#FFFFFF]">$</span>
-            <span className="text-[#FFFFFF]">‎ {fastfetch}</span>
+            <span className="text-[#FFFFFF]">&nbsp;{fastfetch}</span>
             <span className="cursor animate-blink">|</span>
           </div>
         )}
@@ -153,37 +154,36 @@ export default function About() {
         )}
       </div>
 
-      {/* SECOND TERMINAL */}
-      <div
-        ref={secondRef}
-        className="flex-1 min-w-[400px] min-h-[200px] max-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col"
-      >
+      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[200px] max-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex">
+        <div className="flex-1">
+          {!doneLinks && (
+            <div className="p-8 font-jetbrains text-xl flex flex-wrap">
+              <span className="text-[#39ff14]">pucas01</span>
+              <span className="text-white">@</span>
+              <span className="text-[#D73DA3]">PucasDocker</span>
+              <span className="text-white">:</span>
+              <span className="text-[#FF5555]">~</span>
+              <span className="text-white">$</span>
+              <span className="text-white">&nbsp;{linksCmd}</span>
+              <span className="cursor animate-blink">|</span>
+            </div>
+          )}
 
-        {/* Typing intro 2 */}
-        {!doneLinks && (
-          <div className="p-8 font-jetbrains text-xl flex flex-wrap">
-            <span className="text-[#39ff14]">pucas01</span>
-            <span className="text-[#FFFFFF]">@</span>
-            <span className="text-[#DF990D]">PucasDocker</span>
-            <span className="text-[#FFFFFF]">:</span>
-            <span className="text-[#FF5555]">~</span>
-            <span className="text-[#FFFFFF]">$</span>
-            <span className="text-[#FFFFFF]">‎ {linksCmd}</span>
-            <span className="cursor animate-blink">|</span>
-          </div>
-        )}
-
-        {/* Links output */}
-        {doneLinks && (
-          <div className="p-8 text-xl space-y-2 text-[#39ff14] font-jetbrains">
-            <p> Twitter  <a className="decoration-[#39ff14] text-[#FFFFFF] underline-offset-5 hover:underline decoration-wavy" href="https://x.com/Pucas02">x.com/Pucas02</a></p>
-            <p> GitHub  <a className="decoration-[#39ff14] text-[#FFFFFF] underline-offset-5 hover:underline decoration-wavy" href="https://github.com/pucas01">github.com/pucas01</a></p>
-            <p> Discord  <a className="text-[#FFFFFF]">pucas01</a></p>
-            <p> Tiktok  <a className="decoration-[#39ff14] text-[#FFFFFF] underline-offset-5 hover:underline decoration-wavy" href="https://https://www.tiktok.com/@pucas02.com/pucas01">tiktok.com/@pucas02</a></p>
-          </div>
-        )}
+          {doneLinks && (
+            <div className="p-8 text-xl space-y-2 text-[#39ff14] font-jetbrains">
+              <p> Twitter  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://x.com/Pucas02">x.com/Pucas02</a></p>
+              <p> GitHub  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://github.com/pucas01">github.com/pucas01</a></p>
+              <p> Discord  <a className="text-white">pucas01</a></p>
+              <p> Tiktok  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://www.tiktok.com/@pucas02">tiktok.com/@pucas02</a></p>
+            </div>
+          )}
       </div>
-
+        <div className="flex-1">
+        </div>
+      </div>
+      <div>
+        <SpotifyTerminal />
+      </div>
     </div>
   );
 }
