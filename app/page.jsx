@@ -8,7 +8,7 @@ export default function Page() {
   const [active, setActive] = useState("/about");
   const [transitioning, setTransitioning] = useState(false);
   const [popping, setPopping] = useState(null);
-
+  
   const NavClick = (page) => {
     if (page === active) return;
     setPopping(page);
