@@ -19,7 +19,7 @@ export default function Page() {
       setActive(page);
       setTransitioning(false);
       setPopping(null);
-    }, 2000);
+    }, 1000);
   };
 
   return (
