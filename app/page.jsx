@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import About from "./components/about/about.jsx";
 import Projects from "./components/projects/projects.jsx";
+import GuestBook from "./components/guestbook/guestbook.jsx";
 
 export default function Page() {
   const [active, setActive] = useState("/about");
@@ -33,7 +34,7 @@ export default function Page() {
 
       <nav className="flex justify-center gap-6 bg-[rgba(9,9,9,0.9)] border-[#1f1f29] py-3">
         <div className="inline-flex gap-6 custom-dash pb-2">
-          {["/about", "/projects", "/collection", "/other"].map((page) => (
+          {["/about", "/projects", "/collection", "/guestbook"].map((page) => (
             <button
               key={page}
               onClick={() => NavClick(page)}
@@ -65,8 +66,8 @@ export default function Page() {
       <main className="flex-1 pr-16 pl-16">
         {active === "/about" && <About />}
         {active === "/projects" && <Projects />}
-        {active === "/collection" && <section className="text-center"></section>}
-        {active === "/other" && <section className="text-center"></section>}
+        {active === "/collection"}
+        {active === "/guestbook" && <GuestBook />}
       </main>
     </div>
   );

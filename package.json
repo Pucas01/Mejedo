@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "next dev --turbopack",
     "dev:backend": "cd backend && node server.js",
     "build": "next build --turbopack",
@@ -13,6 +13,7 @@
   "dependencies": {
     "ansi-to-html": "^0.7.2",
     "asciify-image": "^0.1.1",
+    "dompurify": "^3.3.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "lucide-react": "^0.546.0",
