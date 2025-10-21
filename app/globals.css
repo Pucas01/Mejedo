@@ -47,6 +47,7 @@ body {
 
 .custom-dash {
   border-bottom: 3px dashed transparent;
+  padding-bottom: 20px;
   border-image: repeating-linear-gradient(
     to right,
     #9ca3af 0,      /* dash color */
