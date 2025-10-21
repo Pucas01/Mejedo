@@ -1,5 +1,5 @@
 "use client";
-import ProjectTerminal from "./ProjectTerminal";
+import ProjectTerminal from "./projectTerminal";
 import { projects } from "./projectsData";
 
 export default function Projects() {

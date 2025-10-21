@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import SpotifyTerminal from "./SpotifyTerminal";
+import Whoami from "./whoami";
 
 export default function About() {
   const [fastfetch, setFastfetch] = useState("");
@@ -161,12 +162,6 @@ export default function About() {
                 <p><span className="text-[#39ff14]">Languages:</span> Dutch, English</p>
                 <p><span className="text-[#39ff14]">Experience:</span> SysAdmin, Linux, Networking</p>
                 <p><span className="text-[#39ff14]">Likes:</span> Linux, Music, Anime / Manga, Games, Retro Consoles</p>
-                <p>
-                  <span className="text-[#39ff14]">Music: </span>
-                  <a href="https://stats.fm/pucas01" className="decoration-[#39ff14] underline-offset-5 hover:underline decoration-wavy">
-                    https://stats.fm/pucas01
-                  </a>
-                </p>
                 <p><span className="text-[#39ff14]">OS:</span> Arch Linux x86_64</p>
                 <p><span className="text-[#39ff14]">Terminal:</span> kitty 0.43.1</p>
                 <p><span className="text-[#39ff14]">Shell:</span> fish 4.1.2</p>
@@ -182,8 +177,10 @@ export default function About() {
           </div>
         )}
       </div>
-
-      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[235px] max-h-[235px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex">
+        <div>
+          <Whoami />
+        </div>
+      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[275px] max-h-[275px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex">
         <div className="flex-1">
           {!doneLinks && (
             <div className="p-8 font-jetbrains text-xl flex flex-wrap">
@@ -204,7 +201,8 @@ export default function About() {
               <p> GitHub  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://github.com/pucas01">github.com/pucas01</a></p>
               <p> Discord  <a className="text-white">pucas01</a></p>
               <p> Tiktok  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://www.tiktok.com/@pucas02">tiktok.com/@pucas02</a></p>
-              <p> LinkedIn  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://www.linkedin.com/in/lucas-verhelst-653839293/">linkedin.com/in/lucas-verhelst/</a></p>
+              <p> Spotify  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://open.spotify.com/user/lucas_v2006">spotify.com/user/pucas01</a></p>
+              <p>󰲿 stats.fm  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://stats.fm/pucas01">stats.fm/pucas01</a></p>
             </div>
           )}
       </div>
