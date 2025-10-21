@@ -49,6 +49,7 @@ export default function ProjectTerminal({ project }) {
             />
           )}
           <h3 className="text-[#39ff14] text-lg font-bold mb-2">{project.name}</h3>
+          <p className="text-sm text-gray-300 mb-2">Status: {project.status}</p>
           <p className="text-sm text-center text-gray-300 mb-2">{project.description}</p>
           <p className="text-sm text-gray-300 mb-2">{project.commit}</p>
           {project.link && (
