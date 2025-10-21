@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import About from "./components/about.jsx"
+import Projects from "./components/Projects.jsx";
 
 export default function Page() {
   const [active, setActive] = useState("/about");
@@ -48,9 +49,9 @@ export default function Page() {
       </nav>
 
       {transitioning && (
-        <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none transition-opacity duration-300 animate-fade-in">
+        <div className="fixed inset-0 flex items-center justify-center z-20 pointer-events-none transition-opacity duration-300 animate-fade-in">
           <Image
-            src="/medjed.png" // replace with your own image in /public/images/
+            src="/medjed.png"
             alt="Loading..."
             width={180}
             height={12}
@@ -70,8 +71,7 @@ export default function Page() {
         )}
 
         {active === "/projects" && (
-          <section className="text-center">
-          </section>
+          <Projects />
         )}
 
         {active === "/collection" && (

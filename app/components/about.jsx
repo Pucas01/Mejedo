@@ -9,6 +9,8 @@ export default function About() {
   const [doneFastfetch, setDoneFastfetch] = useState(false);
   const [doneLinks, setDoneLinks] = useState(false);
   const [startLinks, setStartLinks] = useState(false);
+  const [uptime, setUptime] = useState("");
+  const birthday = new Date("2006-10-11"); 
 
   const command1 = "fastfetch";
   const command2 = "find . -maxdepth 1 -type l -ls";
@@ -29,7 +31,7 @@ export default function About() {
     return () => clearInterval(interval);
   }, []);
 
-  // Observe second terminal for scrolling
+  // fetch
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -43,7 +45,7 @@ export default function About() {
     };
   }, []);
 
-  // Second typing (links)
+  // (links)
   useEffect(() => {
     if (!startLinks) return;
     let i = 0;
@@ -94,6 +96,33 @@ export default function About() {
 "⠀⠀⠀⠀⠀⠀⠀⠸⢸⡼⠁⠀⠘⡆⢹⡌⠀⠀⠀⠱⣵⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢣⡇⠀⠀⠀⠀⠀⠀⠀⢀⣠⣾⠁⠀⡏⠀⠀⢇⡿⣷⠇⣰⢫⣇⠀⠀⠀",
   ];
 
+ useEffect(() => {
+    function calcLife() {
+      const now = new Date();
+
+      let years = now.getFullYear() - birthday.getFullYear();
+      let months = now.getMonth() - birthday.getMonth();
+      let days = now.getDate() - birthday.getDate();
+
+      if (days < 0) {
+        months--;
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+        days += prevMonth;
+      }
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      setUptime(`${years}y ${months}m ${days}d`);
+    }
+
+    calcLife();
+    const interval = setInterval(calcLife, 86400000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex flex-col gap-4 p-4 min-h-screen text-white justify-start">
 
@@ -105,7 +134,7 @@ export default function About() {
           <div className="p-8 font-jetbrains text-xl flex flex-wrap">
             <span className="text-[#39ff14]">pucas01</span>
             <span className="text-[#FFFFFF]">@</span>
-            <span className="text-[#D73DA3]">PucasDocker</span>
+            <span className="text-[#D73DA3]">PucasArch</span>
             <span className="text-[#FFFFFF]">:</span>
             <span className="text-[#FF5555]">~</span>
             <span className="text-[#FFFFFF]">$</span>
@@ -124,10 +153,10 @@ export default function About() {
               <div className="flex flex-col text-left text-[#FFFFFF] space-y-1">
                 <p><span className="text-[#39ff14]">pucas01</span>
                    <span className="text-[#FFFFFF]">@</span>
-                   <span className="text-[#39ff14]">PucasDocker</span></p>
+                   <span className="text-[#39ff14]">PucasArch</span></p>
                 <p>-----------------</p>
                 <p><span className="text-[#39ff14]">Host:</span> Pucas01</p>
-                <p><span className="text-[#39ff14]">Uptime:</span> 19 years</p>
+                <p><span className="text-[#39ff14]">Uptime:</span> {uptime}</p>
                 <p><span className="text-[#39ff14]">Locale:</span> Netherlands</p>
                 <p><span className="text-[#39ff14]">Languages:</span> Dutch, English</p>
                 <p><span className="text-[#39ff14]">Experience:</span> SysAdmin, Linux, Networking</p>
@@ -154,13 +183,13 @@ export default function About() {
         )}
       </div>
 
-      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[200px] max-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex">
+      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[235px] max-h-[235px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex">
         <div className="flex-1">
           {!doneLinks && (
             <div className="p-8 font-jetbrains text-xl flex flex-wrap">
               <span className="text-[#39ff14]">pucas01</span>
               <span className="text-white">@</span>
-              <span className="text-[#D73DA3]">PucasDocker</span>
+              <span className="text-[#D73DA3]">PucasArch</span>
               <span className="text-white">:</span>
               <span className="text-[#FF5555]">~</span>
               <span className="text-white">$</span>
@@ -175,6 +204,7 @@ export default function About() {
               <p> GitHub  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://github.com/pucas01">github.com/pucas01</a></p>
               <p> Discord  <a className="text-white">pucas01</a></p>
               <p> Tiktok  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://www.tiktok.com/@pucas02">tiktok.com/@pucas02</a></p>
+              <p> LinkedIn  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://www.linkedin.com/in/lucas-verhelst-653839293/">linkedin.com/in/lucas-verhelst/</a></p>
             </div>
           )}
       </div>

@@ -92,7 +92,7 @@ export default function SpotifyTerminal() {
         <div className="p-8 font-jetbrains text-xl flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>
           <span className="text-white">@</span>
-          <span className="text-[#D73DA3]">PucasDocker</span>
+          <span className="text-[#D73DA3]">PucasArch</span>
           <span className="text-white">:</span>
           <span className="text-[#FF5555]">~</span>
           <span className="text-white">$</span>
