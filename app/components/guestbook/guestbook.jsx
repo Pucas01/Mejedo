@@ -57,15 +57,19 @@ export default function GuestBook() {
     <div className="flex flex-col p-4 gap-4">
       {/* Input Terminal */}
       <div className="flex-1 min-w-[400px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col p-4">
-        <div>
-          <p>
-            <span>Woah a guestbook thats wild!</span>
-          </p>
+        <div className="space-y-">
+          <p>┌─ Guestbook ───────────────────────────────</p>
+          <p>│ Woah, a guestbook! That's pretty wild!</p>
+          <p>│</p>
+          <p>│ Feel free to leave a message if you're cool.</p>
+          <p>│</p>
+          <p>│ Nickname and Message fields support HTML, sanitized with DOMPurify.</p>
+          <p className="pb-2">└───────────────────────────────────────────</p>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-2 font-jetbrains">
           <input
             type="text"
-            placeholder="Your Nickname"
+            placeholder="Nickname / Username"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="bg-[#121217] border border-[#39ff14] text-[#39ff14] px-2 py-1"
@@ -74,7 +78,16 @@ export default function GuestBook() {
             type="text"
             placeholder="Website (optional)"
             value={website}
-            onChange={(e) => setWebsite(e.target.value)}
+            onChange={(e) => {
+              let val = e.target.value;
+
+              
+              if (val && !val.startsWith("https://") && !val.startsWith("http://")) {
+                val = "https://" + val;
+              }
+
+              setWebsite(val);
+            }}
             className="bg-[#121217] border border-[#39ff14] text-[#39ff14] px-2 py-1"
           />
           <textarea
@@ -104,7 +117,7 @@ export default function GuestBook() {
                 dangerouslySetInnerHTML={{ __html: msg.name }}
               />
               {msg.website && (
-                <a href={msg.website} className="underline hover:text-white">
+                <a href={msg.website} className=" hover:text-white">
                   {` (${msg.website})`}
                 </a>
               )} — {new Date(msg.timestamp).toLocaleString()}
