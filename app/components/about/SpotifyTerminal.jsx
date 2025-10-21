@@ -6,7 +6,6 @@ export default function SpotifyTerminal() {
   const [spotifyCmd, setSpotifyCmd] = useState("");
   const [doneSpotify, setDoneSpotify] = useState(false);
   const [track, setTrack] = useState(null);
-  const [lastTrack, setLastTrack] = useState(null);
   const [startSpotify, setStartSpotify] = useState(false);
   const secondRef = useRef(null);
 
@@ -16,20 +15,15 @@ export default function SpotifyTerminal() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) setStartSpotify(true);
-      },
+      (entries) => entries[0].isIntersecting && setStartSpotify(true),
       { threshold: 0.3 }
     );
     if (secondRef.current) observer.observe(secondRef.current);
-    return () => {
-      if (secondRef.current) observer.unobserve(secondRef.current);
-    };
+    return () => secondRef.current && observer.unobserve(secondRef.current);
   }, []);
 
   useEffect(() => {
     if (!startSpotify) return;
-
     let i = 0;
     const interval = setInterval(() => {
       setSpotifyCmd(command.slice(0, i));
@@ -38,7 +32,7 @@ export default function SpotifyTerminal() {
         clearInterval(interval);
         setTimeout(() => setDoneSpotify(true), 200);
       }
-    }, 50);
+    }, 40);
     return () => clearInterval(interval);
   }, [startSpotify]);
 
@@ -50,12 +44,11 @@ export default function SpotifyTerminal() {
         const res = await fetch("/api/spotify-now-playing");
         const data = await res.json();
 
-        if (data && data.is_playing) {
-          const current = { ...data, playing: true };
-          setTrack(current);
-          setLastTrack(current);
-        } else if (lastTrack) {
-          setTrack({ ...lastTrack, playing: false });
+        if (data.track) {
+          setTrack({
+            ...data.track,
+            playing: data.track.is_playing,
+          });
         } else {
           setTrack({
             name: "Nothing Played Yet",
@@ -64,7 +57,7 @@ export default function SpotifyTerminal() {
             albumArt: null,
             url: "#",
             asciiArt: null,
-            playing: false
+            playing: false,
           });
         }
       } catch (err) {
@@ -73,9 +66,9 @@ export default function SpotifyTerminal() {
     }
 
     fetchTrack();
-    const interval = setInterval(fetchTrack, 5000);
+    const interval = setInterval(fetchTrack, 2000);
     return () => clearInterval(interval);
-  }, [startSpotify, lastTrack]);
+  }, [startSpotify]);
 
   return (
     <div
@@ -101,21 +94,39 @@ export default function SpotifyTerminal() {
             className="mr-6 select-none"
             style={{ whiteSpace: "pre" }}
             dangerouslySetInnerHTML={{
-              __html: track.asciiArt ? ansiConverter.toHtml(track.asciiArt) : `
+              __html: track.asciiArt
+                ? ansiConverter.toHtml(track.asciiArt)
+                : `
   ███████████
   ██ No    ██
   ██ Album ██
   ██ Art   ██
-  ███████████`
+  ███████████`,
             }}
           />
+
           <div className="text-xl space-y-1 text-white">
-            <p><span className="text-[#39ff14]">Now Playing:</span> {track.name} {track.playing ? "(Playing)" : "(Paused)"}</p>
-            <p><span className="text-[#39ff14]">Artist:</span> {track.artist}</p>
-            <p><span className="text-[#39ff14]">Album:</span> {track.album}</p>
+            <p>
+              <span className="text-[#39ff14]">Now Playing:</span>{" "}
+              {track.name}{" "}
+              {!track.playing && track.name !== "Nothing Played Yet" && (
+                <span className="text-[#FF5555]">[PAUSED]</span>
+              )}
+            </p>
+            <p>
+              <span className="text-[#39ff14]">Artist:</span> {track.artist}
+            </p>
+            <p>
+              <span className="text-[#39ff14]">Album:</span> {track.album}
+            </p>
             <p>
               <span className="text-[#39ff14]">Source:</span>{" "}
-              <a className="text-white decoration-[#39ff14] underline-offset-5 hover:underline decoration-wavy" href={track.url}>Spotify</a>
+              <a
+                className="text-white decoration-[#39ff14] underline-offset-5 hover:underline decoration-wavy"
+                href={track.url}
+              >
+                Spotify
+              </a>
             </p>
           </div>
         </div>

@@ -23,4 +23,12 @@ export const projects = [
     image: "/logo_temp.webp",
     link: "/",
   },
+  {
+    name: "Chainsawman Character Status",
+    description: "Little website that shows what characters are alive, and is the home of the CSMMTL (chainsawman meme tierlist).",
+    commit:"Initial Commit ⬤ ?????",
+    status:"REALLY OLD",
+    image: "/kysasa.webp",
+    link: "https://csm.pucas01.com",
+  },
 ];

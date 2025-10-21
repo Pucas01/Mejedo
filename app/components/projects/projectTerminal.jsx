@@ -16,7 +16,7 @@ export default function ProjectTerminal({ project }) {
         clearInterval(interval);
         setTimeout(() => setDoneTyping(true), 200);
       }
-    }, 50);
+    }, 100);
     return () => clearInterval(interval);
   }, [command]);
 
