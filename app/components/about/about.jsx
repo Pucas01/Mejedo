@@ -162,6 +162,7 @@ export default function About() {
                 <p><span className="text-[#39ff14]">Languages:</span> Dutch, English</p>
                 <p><span className="text-[#39ff14]">Experience:</span> SysAdmin, Linux, Networking</p>
                 <p><span className="text-[#39ff14]">Likes:</span> Linux, Music, Anime / Manga, Games, Retro Consoles</p>
+                <p>-----------------</p>
                 <p><span className="text-[#39ff14]">OS:</span> Arch Linux x86_64</p>
                 <p><span className="text-[#39ff14]">Terminal:</span> kitty 0.43.1</p>
                 <p><span className="text-[#39ff14]">Shell:</span> fish 4.1.2</p>
@@ -180,7 +181,7 @@ export default function About() {
         <div>
           <Whoami />
         </div>
-      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[275px] max-h-[275px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex">
+      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[310px] max-h-[310px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex">
         <div className="flex-1">
           {!doneLinks && (
             <div className="p-8 font-jetbrains text-xl flex flex-wrap">
@@ -203,6 +204,7 @@ export default function About() {
               <p> Tiktok  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://www.tiktok.com/@pucas02">tiktok.com/@pucas02</a></p>
               <p> Spotify  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://open.spotify.com/user/lucas_v2006">spotify.com/user/pucas01</a></p>
               <p>󰲿 stats.fm  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://stats.fm/pucas01">stats.fm/pucas01</a></p>
+              <p> AniList  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://anilist.co/user/pucas01/">anilist.co/user/pucas01/</a></p>
             </div>
           )}
       </div>

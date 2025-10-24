@@ -7,7 +7,6 @@ const DATA_FILE = path.join(process.cwd(), "config", "guestbook.json");
 const CONFIG_DIR = path.join(process.cwd(), "config");
 if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR);
 
-// Ensure the JSON file exists
 if (!fs.existsSync(DATA_FILE)) {
   fs.writeFileSync(DATA_FILE, JSON.stringify([]));
 }

@@ -1,5 +1,6 @@
 import "./globals.css";
 import localFont from "next/font/local";
+import Footer from "./components/footer/footer";
 
 const jetbrainsMonoNF = localFont({
   src: "../public/fonts/JetBrainsMonoNerdFont-Regular.ttf",
@@ -8,7 +9,7 @@ const jetbrainsMonoNF = localFont({
 });
 
 export const metadata = {
-  title: "mejedo",
+  title: "Pucas01 | Mejedo",
   description: "Portfolio website",
 };
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={jetbrainsMonoNF.variable}>
       <body className="flex flex-col min-h-screen font-[var(--font-jetbrains)]">
         {children}
+        <Footer />
       </body>
     </html>
   );

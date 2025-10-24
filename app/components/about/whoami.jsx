@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 
 export default function Whoami({
   aboutText = `### Intro
-Hi! im Lucas, im some? years old ( just look at the fetch  ) and a cis guy from the Netherlands
+Hi! im Lucas, im... some? years old ( just look at the fetch  ) and a cis guy from the Netherlands
 not really a developer but website are fun i guess, im more of a SysAdmin guy (Selfhosting, Networking, Linux)
 |
 ### Fav things

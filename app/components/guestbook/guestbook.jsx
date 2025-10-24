@@ -26,7 +26,6 @@ export default function GuestBook() {
     e.preventDefault();
     if (!name || !message) return;
 
-    // ✅ Sanitize both name and message
     const sanitizedName = DOMPurify.sanitize(name, { USE_PROFILES: { html: true } });
     const sanitizedMessage = DOMPurify.sanitize(message, { USE_PROFILES: { html: true } });
     const sanitizedWebsite = website
@@ -54,7 +53,7 @@ export default function GuestBook() {
   };
 
   return (
-    <div className="flex flex-col p-4 gap-4">
+    <div className="flex flex-col p-4 gap-4 text-xl">
       {/* Input Terminal */}
       <div className="flex-1 min-w-[400px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col p-4">
         <div className="space-y-">

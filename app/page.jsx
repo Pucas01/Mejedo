@@ -2,21 +2,23 @@
 
 import { useState } from "react";
 import Image from "next/image";
+
 import About from "./components/about/about.jsx";
 import Projects from "./components/projects/projects.jsx";
 import GuestBook from "./components/guestbook/guestbook.jsx";
+import FutabaOverlay from "./components/easteregg/futaba.jsx";
 
 export default function Page() {
   const [active, setActive] = useState("/about");
   const [transitioning, setTransitioning] = useState(false);
   const [popping, setPopping] = useState(null);
+  const [open, setEgg] = useState(false);
 
   const NavClick = (page) => {
     if (page === active) return;
     setPopping(page);
     setTransitioning(true);
 
-    // Wait for loader duration then switch page
     setTimeout(() => {
       setActive(page);
       setTransitioning(false);
@@ -25,14 +27,15 @@ export default function Page() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[url(/LaptopHQ.png)] bg-auto text-white relative overflow-hidden">
-      <header className="p-4 text-center bg-[rgba(9,9,9,0.9)] text-[#39ff14]">
-        <h1 className="text-4xl font-bold flex items-center justify-center gap-2">
+    <div className="flex flex-col min-h-screen bg-[url(/LaptopSHQ.png)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
+      <header className="p-4 text-center cursor-pointer bg-[#090909] text-[#39ff14]">
+        <h1 className="text-4xl font-bold flex items-center justify-center gap-2"
+            onClick={() => setEgg(true)}>
           /home/pucas01
         </h1>
       </header>
 
-      <nav className="flex justify-center gap-6 bg-[rgba(9,9,9,0.9)] border-[#1f1f29] py-3">
+      <nav className="flex justify-center gap-6 bg-[#090909] border-b-2 border-[#39ff14] py-3">
         <div className="inline-flex gap-6 custom-dash pb-2">
           {["/about", "/projects", "/collection", "/guestbook"].map((page) => (
             <button
@@ -68,6 +71,13 @@ export default function Page() {
         {active === "/projects" && <Projects />}
         {active === "/collection"}
         {active === "/guestbook" && <GuestBook />}
+
+        <FutabaOverlay
+        show={open}
+        imgSrc="/FutabaEasterEgg.webp"  
+        audioSrc="/FutabaEasterEgg.mp3"      
+        onClose={() => setEgg(false)}
+      />
       </main>
     </div>
   );
