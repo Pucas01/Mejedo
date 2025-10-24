@@ -21,7 +21,7 @@ export default function ProjectTerminal({ project }) {
   }, [command]);
 
   return (
-    <div className="flex-1 min-w-[550px] max-w-[550px] min-h-[350px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col m-2">
+    <div className="flex-1 min-w-[550px] max-w-[550px] min-h-[410px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col m-2">
       
       {!doneTyping && (
         <div className="p-4 font-jetbrains text-lg flex flex-wrap">
