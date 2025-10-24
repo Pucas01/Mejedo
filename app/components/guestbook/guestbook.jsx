@@ -53,7 +53,7 @@ export default function GuestBook() {
   };
 
   return (
-    <div className="flex flex-col p-4 gap-4">
+    <div className="flex flex-col p-4 gap-4 text-xl">
       <div className="flex-1 min-w-[400px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col p-4">
         <div className="space-y-">
           <p>┌─ Guestbook ───────────────────────────────</p>
