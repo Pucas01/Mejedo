@@ -47,7 +47,6 @@ export default function FutabaOverlay({ show, onClose, imgSrc, audioSrc }) {
       <img
         src={loadedSrc}
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        alt="Animated"
         style={{ background: "transparent" }}
       />
       <audio ref={audioRef} src={audioSrc} />
