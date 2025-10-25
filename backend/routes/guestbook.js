@@ -11,38 +11,83 @@ if (!fs.existsSync(DATA_FILE)) {
   fs.writeFileSync(DATA_FILE, JSON.stringify([]));
 }
 
-// GET all messages
+// Helper: read/write messages
+const readMessages = () => JSON.parse(fs.readFileSync(DATA_FILE));
+const writeMessages = (msgs) => fs.writeFileSync(DATA_FILE, JSON.stringify(msgs, null, 2));
+
+// GET all approved messages (for public)
 router.get("/", (req, res) => {
   try {
-    const raw = fs.readFileSync(DATA_FILE);
-    const messages = JSON.parse(raw);
-    res.json(messages);
+    const messages = readMessages().filter((m) => m.approved);
+    res.json(messages.reverse());
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// POST a new message
+// GET all messages (for admin, including pending)
+router.get("/admin", (req, res) => {
+  try {
+    const messages = readMessages();
+    res.json(messages.reverse());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST new message (pending approval)
 router.post("/", (req, res) => {
   try {
     const { name, message, website } = req.body;
     if (!name || !message) return res.status(400).json({ error: "Name and message required" });
 
-    const raw = fs.readFileSync(DATA_FILE);
-    const messages = JSON.parse(raw);
-
+    const messages = readMessages();
     const newMessage = {
       id: Date.now(),
       name,
-      message,       // can include HTML
+      message,
       website: website || "",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      approved: false, // pending by default
+      reply: "",
     };
 
     messages.push(newMessage);
-    fs.writeFileSync(DATA_FILE, JSON.stringify(messages, null, 2));
+    writeMessages(messages);
 
     res.status(201).json(newMessage);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH approve a message
+router.patch("/approve/:id", (req, res) => {
+  try {
+    const messages = readMessages();
+    const msg = messages.find((m) => m.id == req.params.id);
+    if (!msg) return res.status(404).json({ error: "Message not found" });
+
+    msg.approved = true;
+    writeMessages(messages);
+    res.json(msg);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH reply to a message
+router.patch("/reply/:id", (req, res) => {
+  try {
+    const { reply } = req.body;
+    const messages = readMessages();
+    const msg = messages.find((m) => m.id == req.params.id);
+    if (!msg) return res.status(404).json({ error: "Message not found" });
+
+    msg.reply = reply || "";
+    writeMessages(messages);
+    writeMessages(messages);
+    res.json(msg);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
