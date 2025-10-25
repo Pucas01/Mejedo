@@ -70,6 +70,7 @@ body {
 }
 .animate-blink {
   animation: blink 1s step-end infinite;
+  display: inline;
 }
 
 @keyframes fadeInSlow {
