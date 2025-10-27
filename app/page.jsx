@@ -65,7 +65,7 @@ export default function Page() {
       {transitioning && (
         <div className="fixed inset-0 flex items-center justify-center z-20 pointer-events-none">
           <Image
-            src="/medjed.png"
+            src="/projects/medjed.png"
             alt="Loading..."
             width={180}
             height={12}
