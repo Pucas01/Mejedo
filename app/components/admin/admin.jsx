@@ -77,6 +77,7 @@ export default function AnimePage() {
         )}
         {doneLogin && (
           <div className="space-y-2 mt-2">
+            <header className="text-2xl text-[#39ff14]">Admin Area</header>
             <p>So you might be thinking to yourself, "why the actual fuck can i go to this page" 
                 well its because i cant really hide it anyway so why not make it visible! 
                 you won't see much but theres some funny stuff here to look at i guess, 
@@ -133,60 +134,70 @@ export default function AnimePage() {
         )}
         {doneImg && (
           <>
-          <header className="flex flex-col gap-4 max-w-sm mx-auto text-2xl pb-6">my shitpost collection</header>
+          <header className="flex flex-col gap-4 mx-auto text-2xl pb-6">Random Images i like (Almost all of these are made by me)</header>
           <div className="flex flex-wrap justify-center gap-4">
             <img
-              src="https://pbs.twimg.com/media/GwfNg5rXcAEDTZE?format=jpg&name=large"
+              src="/randomimages/AsaScaredBingBong.png"
+              alt="BingBong"
+              className="h-[180px] object-cover">
+              </img>
+              <img
+              src="/randomimages/FutabaPull.jpg"
+              alt="pullTheTrigger"
+              className="h-[180px] object-cover">
+              </img>
+              <img
+              src="/randomimages/ifyoulauch.jpg"
+              alt="Lauch"
+              className="h-[180px] object-cover">
+              </img>
+              <img
+              src="/randomimages/junpei.gif"
+              alt="Iyuri"
+              className="h-[180px] object-cover">
+              </img>
+              <img
+              src="/randomimages/Yoshizawa.gif"
+              alt="KMS"
+              className="h-[180px] object-cover">
+              </img>
+              <img
+              src="/randomimages/TetoArch.png"
+              alt="ArchBTW"
+              className="h-[180px] object-cover">
+              </img>
+              <img
+              src="/randomimages/InstallArch.png"
+              alt="Arch BTW"
+              className="h-[180px] object-cover">
+              </img>
+              <img
+              src="/randomimages/DrStone.png"
+              alt="Gay"
+              className="h-[180px] object-cover">
+              </img>
+              <img
+              src="/randomimages/FUnny.png"
               alt="woops"
               className="h-[180px] object-cover">
               </img>
               <img
-              src="https://pbs.twimg.com/media/Gv6jZsmXsAAueC4?format=jpg&name=large"
+              src="/randomimages/GersonGold.png"
               alt="woops"
               className="h-[180px] object-cover">
               </img>
               <img
-              src="https://pbs.twimg.com/media/G1iSc9CXoAAOR8y?format=png&name=small"
+              src="/Wokoto.png"
               alt="woops"
               className="h-[180px] object-cover">
               </img>
               <img
-              src="https://cdn.discordapp.com/attachments/1119236154244476988/1431647320021139639/AsaScaredBingBong.png?ex=68fe2cf7&is=68fcdb77&hm=fe41c01adda55de2a534b3a2a0f8dbd9e9be0a681f8f1865befdab2cdd11e632&"
+              src="/randomimages/SoCool.webp"
               alt="woops"
               className="h-[180px] object-cover">
               </img>
               <img
-              src="https://pbs.twimg.com/media/GyG2uMuWQAA9hSB?format=jpg&name=large"
-              alt="woops"
-              className="h-[180px] object-cover">
-              </img>
-              <img
-              src="https://cdn.discordapp.com/attachments/1119236154244476988/1431646174091411537/RezePeace.gif?ex=68fe2be6&is=68fcda66&hm=029db9ed9e4ce1bf9d2eab0111f91f34deb249d45748e07c6936f745d65b283a&"
-              alt="woops"
-              className="h-[180px] object-cover">
-              </img>
-              <img
-              src="https://media.discordapp.net/attachments/1119236154244476988/1431647672527360082/junpei.gif?ex=68fe2d4b&is=68fcdbcb&hm=a0c04f895b4792bad68e226da871b27fa37172baabf5179da3f53a6f8e03d39e&="
-              alt="woops"
-              className="h-[180px] object-cover">
-              </img>
-              <img
-              src="https://media.tenor.com/j1ZZH_VaffUAAAAM/ado-true.gif"
-              alt="woops"
-              className="h-[180px] object-cover">
-              </img>
-              <img
-              src="https://media.tenor.com/xHDZijXhng8AAAAM/shoko-heineken.gif"
-              alt="woops"
-              className="h-[180px] object-cover">
-              </img>
-              <img
-              src="https://pbs.twimg.com/media/Gx1Rac7XUAAvL92?format=png&name=small"
-              alt="woops"
-              className="h-[180px] object-cover">
-              </img>
-              <img
-              src="https://pbs.twimg.com/media/G2GnunmXcAA_aGX?format=png&name=360x360"
+              src="/randomimages/ado.png"
               alt="woops"
               className="h-[180px] object-cover">
               </img>

@@ -10,4 +10,4 @@ function requireAuth(req, res, next) {
   next();
 }
 
-export default router;
+export default requireAuth;

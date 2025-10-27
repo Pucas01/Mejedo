@@ -1,6 +1,7 @@
 import express from "express"
 import bcrypt from "bcryptjs"
 import {db} from "../dbHelper.js" // your sqlite3 db
+import requireAuth from "../authMiddleware.js"
 const router = express.Router();
 const SALT_ROUNDS = 10; // same as in db.js
 
@@ -37,7 +38,7 @@ router.post("/logout", (req, res) => {
 });
 
 // ------------------ GET USERS ------------------
-router.get("/", (req, res) => {
+router.get("/", requireAuth, (req, res) => {
   db.all("SELECT username, role FROM users", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ users: rows });
@@ -45,7 +46,7 @@ router.get("/", (req, res) => {
 });
 
 // ------------------ ADD USER ------------------ 
-router.post("/", async (req, res) => {
+router.post("/", requireAuth, async (req, res) => {
   const { username, password, role } = req.body;
   if (!username || !password) return res.status(400).json({ error: "Username and password required" });
 
@@ -62,7 +63,7 @@ router.post("/", async (req, res) => {
 });
 
 // ------------------ DELETE USER ------------------
-router.delete("/:username", (req, res) => {
+router.delete("/:username", requireAuth, (req, res) => {
   const { username } = req.params;
   db.run("DELETE FROM users WHERE username = ?", [username], function (err) {
     if (err) return res.status(500).json({ error: err.message });
@@ -72,7 +73,7 @@ router.delete("/:username", (req, res) => {
 });
 
 // ------------------ CHANGE PASSWORD ------------------
-router.put("/:username/password", async (req, res) => {
+router.put("/:username/password", requireAuth, async (req, res) => {
   const { username } = req.params;
   const { password } = req.body;
   if (!password) return res.status(400).json({ error: "Password is required" });
