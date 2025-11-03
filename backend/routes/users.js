@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs"
 import {db} from "../dbHelper.js" // your sqlite3 db
 import requireAuth from "../authMiddleware.js"
 const router = express.Router();
-const SALT_ROUNDS = 10;
+const SALT_ROUNDS = 10; 
 
 router.post("/login", (req, res) => {
   const { username, password } = req.body;

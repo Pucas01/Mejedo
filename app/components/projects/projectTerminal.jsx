@@ -7,31 +7,26 @@ export default function ProjectTerminal({ project }) {
 
   const command = `cd /${project.name}`;
 
-useEffect(() => {
-  const TOTAL_TIME = 1000;
-  const start = performance.now();
+  useEffect(() => {
+    const TOTAL_TIME = 1000;
+    const start = performance.now();
 
-  let frame;
-  const animate = (time) => {
-    const progress = Math.min((time - start) / TOTAL_TIME, 1);
-    const chars = Math.floor(progress * command.length);
+    let frame;
+    const animate = (time) => {
+      const progress = Math.min((time - start) / TOTAL_TIME, 1);
+      const chars = Math.floor(progress * command.length);
+      setTypingCmd(command.slice(0, chars));
 
-    setTypingCmd(command.slice(0, chars));
+      if (progress < 1) frame = requestAnimationFrame(animate);
+      else setDoneTyping(true);
+    };
 
-    if (progress < 1) {
-      frame = requestAnimationFrame(animate);
-    } else {
-      setDoneTyping(true);
-    }
-  };
-
-  frame = requestAnimationFrame(animate);
-  return () => cancelAnimationFrame(frame);
-}, [command]);
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [command]);
 
   return (
     <div className="flex-1 min-w-[550px] max-w-[550px] min-h-[410px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col m-2">
-      
       {!doneTyping && (
         <div className="p-4 font-jetbrains text-lg flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>
@@ -51,7 +46,7 @@ useEffect(() => {
             <img
               src={project.image}
               alt={project.name}
-              className="h-[180px] object-cover mb-4 rounded"
+              className="h-[180px] w-auto object-contain mb-4 rounded select-none"
             />
           )}
           <h3 className="text-[#39ff14] text-lg font-bold mb-2">{project.name}</h3>
@@ -63,6 +58,7 @@ useEffect(() => {
               href={project.link}
               className="text-white underline-offset-5 hover:underline decoration-[#39ff14] hover:decoration-wavy"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Visit Project
             </a>
