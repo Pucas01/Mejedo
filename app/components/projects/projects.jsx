@@ -44,7 +44,8 @@ export default function ProjectsPage() {
       await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newProject)
+        body: JSON.stringify(newProject),
+        credentials: "include"
       });
       fetchProjects();
     } catch (err) {
@@ -70,7 +71,8 @@ export default function ProjectsPage() {
       await fetch(`/api/projects/${encodeURIComponent(originalName)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedProject)
+        body: JSON.stringify(updatedProject),
+        credentials: "include"
       });
       setEditingProject(null);
       fetchProjects();
