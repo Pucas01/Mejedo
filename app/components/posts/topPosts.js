@@ -107,7 +107,7 @@ const topPosts = {
       id: "yt1",
       title: "Walter White VS MrBeast",
       url: "https://www.youtube.com/watch?v=LGzUHA9-E68",
-      thumbnail: "https://i.ytimg.com/an_webp/LGzUHA9-E68/mqdefault_6s.webp?du=3000&sqp=CJbN_scG&rs=AOn4CLB_Eq97Q20mMvrRV_MFknzhbW0PhQ",
+      thumbnail: "/randomimages/FUnny.png",
       meta: { views: 272593, likes: 8400 },
     },
   ],

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from 'next/image'
 
 const SourceBadge = ({ source }) => {
   switch (source) {
@@ -50,15 +51,17 @@ export default function TopCard({ post }) {
   const { title, thumbnail, url, source, meta } = post;
 
   return (
-    <div className="flex flex-col bg-[#121217] border border-[#39ff14] transition-shadow shadow-sm hover:shadow-lg  overflow-hidden  max-w-[320px]">
+    <div className="flex flex-col bg-[#121217] border border-[#39ff14] transition-shadow shadow-sm hover:shadow-lg overflow-hidden  max-w-[320px]">
       <div className="relative">
-        <img
+        <Image
           src={thumbnail}
           alt={title || `${source} thumbnail`}
-          className="w-full h-[400px] object-cover select-none"
+          className="object-cover w-auto select-none"
+          height={500}
+          width={500}
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = "/images/fallback-thumb.png";
+            e.currentTarget.src = "/projects/kysasa.webp";
           }}
         />
         <div className="absolute top-3 left-3">
@@ -66,9 +69,9 @@ export default function TopCard({ post }) {
         </div>
       </div>
 
-      <div className="p-3 flex-1 flex flex-col justify-between gap-2">
+      <div className="p-3 flex-1 flex flex-col max-h-[125]    justify-between gap-2">
         <div>
-          <h3 className="text-white text-sm font-medium leading-snug">{title || "Untitled"}</h3>
+          <h3 className="text-white text-sm  font-medium leading-snug">{title || "Untitled"}</h3>
           {meta && (
             <p className="text-xs text-gray-300 mt-1">
               {source === "youtube" && meta.views && `${meta.views.toLocaleString()} views • `}

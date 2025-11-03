@@ -77,7 +77,6 @@ export default function SpotifyTerminal() {
       ref={secondRef}
       className="flex-1 min-w-[400px] min-h-[200px] max-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex"
     >
-      {/* Typing */}
       {!doneSpotify && (
         <div className="p-8 font-jetbrains text-xl flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>
@@ -91,7 +90,6 @@ export default function SpotifyTerminal() {
         </div>
       )}
 
-      {/* Output */}
       {doneSpotify && track && (
         <div className="flex flex-row p-6 font-jetbrains overflow-auto">
           <div

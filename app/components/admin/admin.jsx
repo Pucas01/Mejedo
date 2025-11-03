@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from 'next/image'
 import User from "./user.jsx";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 
@@ -136,71 +137,97 @@ export default function AnimePage() {
           <>
           <header className="flex flex-col gap-4 mx-auto text-2xl pb-6">Random Images i like (Almost all of these are made by me)</header>
           <div className="flex flex-wrap justify-center gap-4">
-            <img
+            <Image
               src="/randomimages/AsaScaredBingBong.png"
               alt="BingBong"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={240}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/FutabaPull.jpg"
               alt="pullTheTrigger"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={300}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/ifyoulauch.jpg"
               alt="Lauch"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={250}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/junpei.gif"
               alt="Iyuri"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={230}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/Yoshizawa.gif"
               alt="KMS"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={200}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/TetoArch.png"
               alt="ArchBTW"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={200}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/InstallArch.png"
               alt="Arch BTW"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={200}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/DrStone.png"
               alt="Gay"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={210}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/FUnny.png"
               alt="woops"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={220}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/GersonGold.png"
               alt="woops"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={200}
+              className="object-cover">
+              </Image>
+              <Image
               src="/Wokoto.png"
               alt="woops"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={380}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/SoCool.webp"
               alt="woops"
-              className="h-[180px] object-cover">
-              </img>
-              <img
+              height={200}
+              width={210}
+              className="object-cover">
+              </Image>
+              <Image
               src="/randomimages/ado.png"
               alt="woops"
-              className="h-[180px] object-cover">
-              </img>
+              height={200}
+              width={210}
+              className="object-cover">
+              </Image>
             </div>
           </>
         )}
