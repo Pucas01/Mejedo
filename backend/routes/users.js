@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs"
 import {db} from "../dbHelper.js" // your sqlite3 db
 import requireAuth from "../authMiddleware.js"
 const router = express.Router();
-const SALT_ROUNDS = 10; // same as in db.js
+const SALT_ROUNDS = 10; 
 
 
 // ------------------ LOGIN ------------------ //

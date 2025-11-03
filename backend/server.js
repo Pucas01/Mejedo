@@ -4,6 +4,7 @@ import spotifyRoute from "./routes/spotify.js"
 import guestbook from "./routes/guestbook.js"
 import counter from "./routes/moeCounter.js"
 import users from "./routes/users.js"
+import projectsRouter from "./routes/projects.js";
 import requireAuth from "./authMiddleware.js"
 import session from "express-session"
 import cors from "cors";
@@ -37,6 +38,7 @@ app.use("/api/spotify-now-playing", spotifyRoute);
 app.use("/api/guestbook", guestbook);
 app.use("/api/counter", counter);
 app.use("/api/users", users);
+app.use("/api/projects", projectsRouter);
 
 // Start server
 app.listen(PORT, () => {
