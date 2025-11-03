@@ -5,6 +5,8 @@ import guestbook from "./routes/guestbook.js"
 import counter from "./routes/moeCounter.js"
 import users from "./routes/users.js"
 import projectsRouter from "./routes/projects.js";
+import shitpostsRouter from "./routes/shitposts.js";
+import uploadRouter from "./routes/imageUpload.js";
 import requireAuth from "./authMiddleware.js"
 import session from "express-session"
 import cors from "cors";
@@ -39,6 +41,9 @@ app.use("/api/guestbook", guestbook);
 app.use("/api/counter", counter);
 app.use("/api/users", users);
 app.use("/api/projects", projectsRouter);
+app.use("/api/shitposts", shitpostsRouter);
+app.use("/api/upload", uploadRouter);
+app.use("/uploads", express.static("public/uploads"));
 
 // Start server
 app.listen(PORT, () => {

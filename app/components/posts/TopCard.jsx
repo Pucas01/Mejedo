@@ -1,13 +1,13 @@
 "use client";
 
 import React from "react";
-import Image from 'next/image'
+import Image from "next/image";
 
 const SourceBadge = ({ source }) => {
   switch (source) {
-    case "tiktok":
+    case "tiktoks":
       return (
-        <span className="inline-flex items-center gap-2 px-2 py-0.5 text-xs font-medium  bg-black/40 border border-[#39ff14]">
+        <span className="inline-flex items-center gap-2 px-2 py-0.5 text-xs font-medium bg-black/40 border border-[#39ff14]">
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
             <path d="M12 2v8.5a3.5 3.5 0 1 0 3.5 3.5V6h-3.5z" />
           </svg>
@@ -16,7 +16,7 @@ const SourceBadge = ({ source }) => {
       );
     case "x":
       return (
-        <span className="inline-flex items-center gap-2 px-2 py-0.5 text-xs font-medium  bg-black/40 border border-[#39ff14]">
+        <span className="inline-flex items-center gap-2 px-2 py-0.5 text-xs font-medium bg-black/40 border border-[#39ff14]">
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
             <path d="M4 4l16 16M20 4L4 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -25,7 +25,7 @@ const SourceBadge = ({ source }) => {
       );
     case "youtube":
       return (
-        <span className="inline-flex items-center gap-2 px-2 py-0.5 text-xs font-medium  bg-black/40 border border-[#39ff14]">
+        <span className="inline-flex items-center gap-2 px-2 py-0.5 text-xs font-medium bg-black/40 border border-[#39ff14]">
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
             <path d="M10 8l6 4-6 4V8z" />
             <rect x="3" y="5" width="18" height="14" rx="3" />
@@ -35,7 +35,7 @@ const SourceBadge = ({ source }) => {
       );
     case "tenor":
       return (
-        <span className="inline-flex items-center gap-2 px-2 py-0.5 text-xs font-medium  bg-black/40 border border-[#39ff14]">
+        <span className="inline-flex items-center gap-2 px-2 py-0.5 text-xs font-medium bg-black/40 border border-[#39ff14]">
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
             <circle cx="12" cy="12" r="9" />
           </svg>
@@ -51,14 +51,15 @@ export default function TopCard({ post }) {
   const { title, thumbnail, url, source, meta } = post;
 
   return (
-    <div className="flex flex-col bg-[#121217] border border-[#39ff14] transition-shadow shadow-sm hover:shadow-lg overflow-hidden  max-w-[320px]">
-      <div className="relative">
+    <div className="flex flex-col bg-[#121217] border border-[#39ff14] transition-shadow shadow-sm hover:shadow-lg overflow-hidden max-w-[320px] h-full">
+      {/* Image */}
+      <div className="relative w-full flex-none">
         <Image
           src={thumbnail}
           alt={title || `${source} thumbnail`}
-          className="object-cover w-auto select-none"
-          height={500}
+          className="object-contain w-full"
           width={500}
+          height={500}
           onError={(e) => {
             e.currentTarget.onerror = null;
             e.currentTarget.src = "/projects/kysasa.webp";
@@ -69,16 +70,16 @@ export default function TopCard({ post }) {
         </div>
       </div>
 
-      <div className="p-3 flex-1 flex flex-col max-h-[125]    justify-between gap-2">
+      {/* Bottom content */}
+      <div className="p-3 flex-1 flex flex-col justify-between gap-2 min-h-[100px]">
         <div>
-          <h3 className="text-white text-sm  font-medium leading-snug">{title || "Untitled"}</h3>
+          <h3 className="text-white text-sm font-medium leading-snug">{title || "Untitled"}</h3>
           {meta && (
             <p className="text-xs text-gray-300 mt-1">
-              {source === "youtube" && meta.views && `${meta.views.toLocaleString()} views • `}
-              {source === "tiktok" && meta.views && `${meta.views.toLocaleString()} views • `}
-              {meta.likes && `${meta.likes.toLocaleString()} likes`}
-              {meta.retweets && ` • ${meta.retweets} RT`}
-              {meta.shares && ` • ${meta.shares} shares`}
+              {meta.views != null && `${meta.views.toLocaleString()} views`}
+              {meta.likes != null && ` • ${meta.likes.toLocaleString()} likes`}
+              {meta.retweets != null && ` • ${meta.retweets} RT`}
+              {meta.shares != null && ` • ${meta.shares} shares`}
             </p>
           )}
         </div>

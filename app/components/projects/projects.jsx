@@ -81,16 +81,8 @@ export default function ProjectsPage() {
     }
   };
 
-  if (loading) {
-    return <div className="text-[#39ff14] text-center font-jetbrains p-8">Loading projects...</div>;
-  }
-
-  if (!projects.length) {
-    return <div className="text-gray-400 text-center font-jetbrains p-8">No projects found.</div>;
-  }
-
   return (
-    <div className="flex flex-col items-center gap-4 p-4">
+    <div className="flex flex-col items-center gap-4">
       {isAdmin && (
         <button
           className="px-2 py-2  bg-[#1f8f0c] hover:bg-[#22a50b] cursor-pointer text-white"
@@ -100,7 +92,7 @@ export default function ProjectsPage() {
         </button>
       )}
 
-      <div className="flex flex-wrap justify-center items-start gap-4 p-4">
+      <div className="flex flex-wrap justify-center items-start gap-4 p-2">
         {projects.map((project) => (
           <div key={project.name} className="relative">
             <ProjectTerminal project={project} />
@@ -182,13 +174,13 @@ export default function ProjectsPage() {
 
             <div className="flex justify-end gap-2 mt-2">
               <button
-                className="bg-gray-500 text-black px-4 py-1 rounded hover:bg-gray-400 font-jetbrains"
+                className="bg-[#39ff14] text-black px-4 py-1 hover:bg-gray-400"
                 onClick={() => setEditingProject(null)}
               >
                 Cancel
               </button>
               <button
-                className="bg-[#39ff14] text-black px-4 py-1 rounded hover:bg-[#32cc12] font-jetbrains"
+                className="bg-[#39ff14] text-black px-4 py-1 hover:bg-[#32cc12]"
                 onClick={() => handleSaveProject(editingProject, editingProject.originalName)}
               >
                 Save
