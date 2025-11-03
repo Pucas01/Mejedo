@@ -18,7 +18,11 @@ services:
     ports:
       - 80:3000
     volumes:
-      - ./suitchi/config:/app/backend/config
+      - ./mejedo/config:/app/backend/config
+      - medjed_public:/app/public 
     environment:
       - NODE_ENV=production
     restart: unless-stopped
+
+volumes:
+  medjed_public:
