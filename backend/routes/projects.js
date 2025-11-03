@@ -77,19 +77,36 @@ router.put("/:name", requireAuth, (req, res) => {
 
 // DELETE 
 router.delete("/:name", requireAuth, (req, res) => {
-  try {
-    const projects = readProjects();
-    const { name } = req.params;
+  const { name } = req.params;
 
-    const newProjects = projects.filter(p => p.name !== name);
-    if (newProjects.length === projects.length) return res.status(404).json({ error: "Project not found" });
+  const projects = readProjects();
+  const projectToDelete = projects.find(p => p.name === name);
 
-    writeProjects(newProjects);
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Error deleting project:", err);
-    res.status(500).json({ error: "Failed to delete project" });
+  if (!projectToDelete) return res.status(404).json({ error: "Project not found" });
+
+  // Delete uploaded image if it exists
+  if (projectToDelete.image && projectToDelete.image.startsWith("/uploads/")) {
+    const relativePath = projectToDelete.image.replace(/^\/+/, ""); // remove leading slash
+    const filePath = path.join(process.cwd(), "..", "public", relativePath);
+
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        console.log("Deleted image:", filePath);
+      } else {
+        console.log("Image file not found:", filePath);
+      }
+    } catch (err) {
+      console.error("Failed to delete image:", err);
+    }
   }
+
+  // Remove project from JSON
+  const newProjects = projects.filter(p => p.name !== name);
+  writeProjects(newProjects);
+
+  res.json({ success: true });
 });
 
 export default router;
+
