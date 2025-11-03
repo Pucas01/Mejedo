@@ -108,8 +108,10 @@ export default function ProjectsPage() {
             {isAdmin && (
               <div className="absolute p-2 top-2 right-2 flex gap-2">
                 <button
-                  className="px-2 py-1  bg-[#1f8f0c] hover:bg-[#22a50b] cursor-pointer text-white"
-                  onClick={() => setEditingProject(project)}
+                  className="px-2 py-1 bg-[#1f8f0c] hover:bg-[#22a50b] cursor-pointer text-white"
+                  onClick={() =>
+                    setEditingProject({ ...project, originalName: project.name })
+                  }
                 >
                   Edit
                 </button>
@@ -187,7 +189,7 @@ export default function ProjectsPage() {
               </button>
               <button
                 className="bg-[#39ff14] text-black px-4 py-1 rounded hover:bg-[#32cc12] font-jetbrains"
-                onClick={() => handleSaveProject(editingProject, editingProject.name)}
+                onClick={() => handleSaveProject(editingProject, editingProject.originalName)}
               >
                 Save
               </button>
