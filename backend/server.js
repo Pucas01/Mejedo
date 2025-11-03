@@ -1,5 +1,4 @@
 import express from "express";
-import dotenv from "dotenv";
 import spotifyRoute from "./routes/spotify.js"
 import guestbook from "./routes/guestbook.js"
 import counter from "./routes/moeCounter.js"
@@ -35,7 +34,6 @@ app.use(session({
 }));
 
 
-app.use(express.json());
 app.use("/api/spotify-now-playing", spotifyRoute);
 app.use("/api/guestbook", guestbook);
 app.use("/api/counter", counter);
@@ -43,7 +41,6 @@ app.use("/api/users", users);
 app.use("/api/projects", projectsRouter);
 app.use("/api/shitposts", shitpostsRouter);
 app.use("/api/upload", uploadRouter);
-app.use("/uploads", express.static("public/uploads"));
 
 // Start server
 app.listen(PORT, () => {
