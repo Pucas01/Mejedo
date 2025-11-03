@@ -4,7 +4,7 @@ import path from "path";
 import bcrypt from "bcryptjs";
 
 const router = express.Router();
-const DB_FILE = path.join(process.cwd(), "medjed.db");
+const DB_FILE = path.join(process.cwd(), "config", "medjed.db");
 const db = new sqlite3.Database(DB_FILE);
 
 const DEFAULT_ADMIN = { username: "admin", password: "admin123" };
