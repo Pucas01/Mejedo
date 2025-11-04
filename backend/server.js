@@ -6,6 +6,7 @@ import users from "./routes/users.js"
 import projectsRouter from "./routes/projects.js";
 import shitpostsRouter from "./routes/shitposts.js";
 import uploadRouter from "./routes/imageUpload.js";
+import blogpostsRouter from "./routes/blogposts.js";
 import requireAuth from "./authMiddleware.js"
 import session from "express-session"
 import cors from "cors";
@@ -41,6 +42,7 @@ app.use("/api/users", users);
 app.use("/api/projects", projectsRouter);
 app.use("/api/shitposts", shitpostsRouter);
 app.use("/api/upload", uploadRouter);
+app.use("/api/blogposts", blogpostsRouter);
 
 // Start server
 app.listen(PORT, () => {

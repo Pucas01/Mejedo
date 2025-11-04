@@ -63,7 +63,6 @@ export default function ShitPosts() {
 
   const handleSavePost = async (category, updatedPost) => {
     try {
-      // Delete old version, then re-add (since no PUT)
       await fetch(`/api/shitposts/${category}/${updatedPost.id}`, {
         method: "DELETE",
         credentials: "include",
@@ -95,7 +94,7 @@ export default function ShitPosts() {
         credentials: "include",
       });
       const data = await res.json();
-      return data.url; // expects { url: "/uploads/filename.png" }
+      return data.url;
     } catch (err) {
       console.error("Image upload failed:", err);
       alert("Image upload failed");
@@ -122,17 +121,14 @@ export default function ShitPosts() {
   return (
     <div className="min-h-screen p-4 text-white">
       <div className="mx-auto flex flex-col gap-6">
-        {/* Header */}
         <div className="bg-[#121217] border-2 border-[#39ff14] p-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Shitposts</h1>
             <p className="text-xl text-gray-400 mt-1">
-              A collection of my finest unholy posts from across the internet
+              A collection of some of my stupid posts i guess (why why why)
             </p>
           </div>
         </div>
-
-        {/* Sections */}
         {["tiktoks", "tweets", "tenor", "youtube"].map((section) => (
           <section
             key={section}
@@ -186,7 +182,6 @@ export default function ShitPosts() {
         ))}
       </div>
 
-      {/* Edit Modal */}
       {editingPost && (
         <div className="fixed inset-0 max-h-full bg-black/60 flex justify-center items-center z-50">
           <div className="bg-[#121217] border-2 border-[#39ff14] max-h-full p-6 shadow-lg w-[400px] flex flex-col gap-2">
@@ -212,7 +207,6 @@ export default function ShitPosts() {
               className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
             />
 
-            {/* Upload Thumbnail */}
             <label className="text-sm text-gray-400 mt-2">Custom Thumbnail URL:</label>
             <input
               type="text"
@@ -224,7 +218,6 @@ export default function ShitPosts() {
               className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full"
             />
 
-            {/* Or Upload Thumbnail */}
             <label className="text-sm text-gray-400 mt-2">Upload Thumbnail:</label>
             <input
               type="file"
@@ -239,7 +232,6 @@ export default function ShitPosts() {
               className="text-gray-300 text-sm"
             />
 
-            {/* Preview */}
             {editingPost.thumbnail && (
               <img
                 src={editingPost.thumbnail}
@@ -249,7 +241,6 @@ export default function ShitPosts() {
             )}
 
 
-            {/* Editable meta fields */}
             <div className="flex flex-col gap-1 mt-2">
               <label className="text-sm text-gray-400">Meta:</label>
               {Object.entries(editingPost.meta || {}).map(([key, value]) => (

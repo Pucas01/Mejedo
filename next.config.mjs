@@ -1,3 +1,4 @@
+import withMDX from '@next/mdx' 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async rewrites() {
@@ -29,6 +30,8 @@ const nextConfig = {
       },
     ],
   },
+
+  
 };
 
 export default nextConfig;

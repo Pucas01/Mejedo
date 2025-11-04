@@ -111,7 +111,7 @@ export default function AnimePage() {
             <ul className="list-disc list-inside text-white space-y-1">
               <li>- Make the codebase not ass</li>
               <li>- Collection page with consoles and manga</li>
-              <li>- Host this shi on a Wii U</li>
+              <li>- Make it usable on phone</li>
               <li>- Some other cool stuff I guess</li>
             </ul>
           </>

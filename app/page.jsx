@@ -7,6 +7,7 @@ import About from "./components/about/about.jsx";
 import Projects from "./components/projects/projects.jsx";
 import GuestBook from "./components/guestbook/guestbook.jsx";
 import FutabaOverlay from "./components/easteregg/futaba.jsx";
+import BlogPosts from "./components/blog/blog.jsx";
 import ShitPosts from "./components/posts/posts.jsx";
 import Admin from "./components/admin/admin.jsx";
 import { useCurrentUser } from "./hooks/CurrentUser.js";
@@ -74,7 +75,7 @@ export default function Page() {
 
       <nav className="flex justify-center gap-6 bg-[#090909] border-b-2 border-[#39ff14] py-3">
         <div className="inline-flex gap-6 custom-dash pb-2">
-          {["/about", "/projects", "/shitposts", "/guestbook", "/admin"].map(
+          {["/about", "/projects", "/blog", "/shitposts", "/guestbook", "/admin"].map(
             (page) => (
               <button
                 key={page}
@@ -111,6 +112,7 @@ export default function Page() {
         {active === "/shitposts" && <ShitPosts />}
         {active === "/guestbook" && <GuestBook />}
         {active === "/admin" && <Admin />}
+        {active === "/blog" && <BlogPosts />}
 
         <FutabaOverlay
           show={open}

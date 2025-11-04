@@ -2,7 +2,6 @@
   "name": "mejedo",
   "version": "0.1.0",
   "private": true,
-
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "next dev --turbopack",
@@ -11,6 +10,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "@mdx-js/loader": "^3.1.1",
+    "@next/mdx": "^16.0.1",
+    "@tailwindcss/typography": "^0.5.19",
     "ansi-to-html": "^0.7.2",
     "asciify-image": "^0.1.1",
     "bcryptjs": "^3.0.2",
@@ -20,9 +22,12 @@
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "fs": "^0.0.1-security",
+    "isomorphic-dompurify": "^2.31.0",
     "lucide-react": "^0.546.0",
+    "marked": "^16.4.1",
     "multer": "^2.0.2",
     "next": "15.5.6",
+    "next-mdx-remote": "^5.0.0",
     "node-fetch": "^3.3.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
