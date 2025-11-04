@@ -125,11 +125,10 @@ export default function ShitPosts() {
           <div>
             <h1 className="text-2xl font-bold">Shitposts</h1>
             <p className="text-xl text-gray-400 mt-1">
-              A collection of my finest unholy posts from across the internet
+              A collection of some of my stupid posts i guess (why why why)
             </p>
           </div>
         </div>
-
         {["tiktoks", "tweets", "tenor", "youtube"].map((section) => (
           <section
             key={section}
