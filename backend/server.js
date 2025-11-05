@@ -11,6 +11,7 @@ import requireAuth from "./authMiddleware.js"
 import session from "express-session"
 import cors from "cors";
 import * as crypto from 'crypto';
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
