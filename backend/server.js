@@ -44,6 +44,8 @@ app.use("/api/shitposts", shitpostsRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/api/blogposts", blogpostsRouter);
 
+app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
