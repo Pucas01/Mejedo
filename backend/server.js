@@ -12,6 +12,8 @@ import session from "express-session"
 import cors from "cors";
 import * as crypto from 'crypto';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const SESSION_SECRET = crypto.randomBytes(64).toString("hex");
 const PORT = 4000
