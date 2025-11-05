@@ -2,6 +2,11 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import requireAuth from "../authMiddleware.js";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 const router = express.Router();
 
@@ -52,7 +57,7 @@ router.delete("/:id", requireAuth, (req, res) => {
   if (Array.isArray(post.images)) {
     post.images.forEach((img) => {
       if (img.startsWith("/uploads/")) {
-        const imgPath = path.join(process.cwd(), "..", "public", img);
+        const imgPath = path.join(__dirname, "../../public", img);
         if (fs.existsSync(imgPath)) {
           try {
             fs.unlinkSync(imgPath);

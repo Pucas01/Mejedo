@@ -1,6 +1,10 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 const CONFIG_DIR = path.join(process.cwd(), "config");
@@ -123,7 +127,7 @@ router.delete("/:category/:id", (req, res) => {
 
   // Delete associated image if exists and is inside uploads folder
   if (postToDelete.thumbnail && postToDelete.thumbnail.startsWith("/uploads/")) {
-    const filePath = path.join(process.cwd(), "..", "public", postToDelete.thumbnail);
+    const filePath = path.join(__dirname, "../../public", postToDelete.thumbnail);
     if (fs.existsSync(filePath)) {
       fs.unlink(filePath, (err) => {
         if (err) console.error("Failed to delete image:", err);
