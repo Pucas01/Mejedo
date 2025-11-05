@@ -2,6 +2,10 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import requireAuth from "../authMiddleware.js"
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 const CONFIG_DIR = path.join(process.cwd(), "config");
@@ -81,7 +85,7 @@ router.delete("/:name", requireAuth, (req, res) => {
 
   if (projectToDelete.image && projectToDelete.image.startsWith("/uploads/")) {
     const relativePath = projectToDelete.image.replace(/^\/+/, "");
-    const filePath = path.join(process.cwd(), "..", "public", relativePath);
+    const filePath = path.join(__dirname, "../../public", relativePath);
 
     try {
       if (fs.existsSync(filePath)) {
