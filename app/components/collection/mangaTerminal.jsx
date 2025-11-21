@@ -6,8 +6,14 @@ export default function MangaTerminal({ mangaData }) {
   return (
     <div className="bg-[#121217] border-2 border-[#39ff14] p-4 w-48 flex flex-col items-center cursor-pointer">
       {mangaData.cover && (
-        <div className="w-full h-full mb-2 border border-[#39ff14] relative aspect-[3/4]">
-          <Image src={mangaData.cover} alt={mangaData.title} fill className="object-contain" />
+        <div className="w-full mb-2 relative">
+          <Image
+            src={mangaData.cover}
+            alt={mangaData.title}
+            width={180} 
+            height={240}
+            className="border-2 border-[#39ff14] object-contain"
+          />
         </div>
       )}
       <h2 className="font-bold text-lg text-center">{mangaData.title}</h2>
