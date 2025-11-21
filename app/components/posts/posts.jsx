@@ -102,14 +102,6 @@ export default function ShitPosts() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="text-[#39ff14] text-center  p-8">
-        Loading shitposts...
-      </div>
-    );
-  }
-
   if (!posts) {
     return (
       <div className="text-gray-400 text-center  p-8">

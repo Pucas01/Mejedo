@@ -106,7 +106,6 @@ export default function BlogList({ onSelectPost }) {
     return urls;
   };
 
-  if (loading) return <div className="text-[#39ff14] text-center p-8">Loading posts...</div>;
 
   return (
     <div className="min-h-screen p-4 text-white">

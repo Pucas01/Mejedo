@@ -1,0 +1,149 @@
+import express from "express";
+import fs from "fs";
+import path from "path";
+import requireAuth from "../authMiddleware.js";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const router = express.Router();
+
+const CONFIG_DIR = path.join(process.cwd(), "config");
+const CONFIG_FILE = path.join(CONFIG_DIR, "consoles.json");
+
+// Default structure for a console entry
+const DEFAULT_CONSOLE = {
+  id: "",
+  name: "",
+  manufacturer: "",
+  releaseYear: "",
+  image: "",
+  games: [] // [{ title: "", cover: "" }]
+};
+
+if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR);
+if (!fs.existsSync(CONFIG_FILE))
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify([DEFAULT_CONSOLE], null, 2));
+
+const readConsoles = () => {
+  const data = fs.readFileSync(CONFIG_FILE, "utf-8");
+  const parsed = JSON.parse(data);
+  return Array.isArray(parsed) ? parsed : [parsed];
+};
+
+const writeConsoles = (consoles) => {
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(consoles, null, 2));
+};
+
+//
+// ------------------------------------------------------------
+// GET → /api/consoles
+// ------------------------------------------------------------
+router.get("/", (req, res) => {
+  try {
+    const consoles = readConsoles();
+
+    // Filter out blank template
+    const filtered = consoles.filter((c) => c.name);
+
+    res.json(filtered);
+  } catch (err) {
+    console.error("Error reading consoles.json:", err);
+    res.status(500).json({ error: "Failed to load consoles" });
+  }
+});
+
+//
+// ------------------------------------------------------------
+// POST → /api/consoles
+// ------------------------------------------------------------
+router.post("/", requireAuth, (req, res) => {
+  try {
+    const consoles = readConsoles();
+    const newConsole = req.body || DEFAULT_CONSOLE;
+
+    consoles.push(newConsole);
+    writeConsoles(consoles);
+
+    res.json({ success: true, console: newConsole });
+  } catch (err) {
+    console.error("Error saving console:", err);
+    res.status(500).json({ error: "Failed to save console" });
+  }
+});
+
+//
+// ------------------------------------------------------------
+// PUT → /api/consoles/:id
+// ------------------------------------------------------------
+router.put("/:id", requireAuth, (req, res) => {
+  try {
+    const consoles = readConsoles();
+    const { id } = req.params;
+    const updatedData = req.body;
+
+    const index = consoles.findIndex((c) => c.id === id);
+    if (index === -1)
+      return res.status(404).json({ error: "Console not found" });
+
+    // Merge update
+    consoles[index] = { ...consoles[index], ...updatedData };
+    writeConsoles(consoles);
+
+    res.json({ success: true, console: consoles[index] });
+  } catch (err) {
+    console.error("Error updating console:", err);
+    res.status(500).json({ error: "Failed to update console" });
+  }
+});
+
+//
+// ------------------------------------------------------------
+// DELETE → /api/consoles/:id
+// ------------------------------------------------------------
+router.delete("/:id", requireAuth, (req, res) => {
+  const { id } = req.params;
+
+  const consoles = readConsoles();
+  const consoleToDelete = consoles.find((c) => c.id === id);
+
+  if (!consoleToDelete)
+    return res.status(404).json({ error: "Console not found" });
+
+  // Delete main image
+  if (consoleToDelete.image && consoleToDelete.image.startsWith("/uploads/")) {
+    const relativePath = consoleToDelete.image.replace(/^\/+/, "");
+    const filePath = path.join(__dirname, "../../public", relativePath);
+
+    try {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch (err) {
+      console.error("Failed to delete console image:", err);
+    }
+  }
+
+  // Delete game cover images
+  if (Array.isArray(consoleToDelete.games)) {
+    consoleToDelete.games.forEach((game) => {
+      if (game.cover && game.cover.startsWith("/uploads/")) {
+        const relative = game.cover.replace(/^\/+/, "");
+        const gamePath = path.join(__dirname, "../../public", relative);
+
+        try {
+          if (fs.existsSync(gamePath)) fs.unlinkSync(gamePath);
+        } catch (err) {
+          console.error("Failed to delete game cover:", err);
+        }
+      }
+    });
+  }
+
+  // Remove console from JSON
+  const updated = consoles.filter((c) => c.id !== id);
+  writeConsoles(updated);
+
+  res.json({ success: true });
+});
+
+export default router;

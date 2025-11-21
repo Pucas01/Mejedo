@@ -27,7 +27,7 @@ export default function BlogPost({ post, onBack }) {
   }, [post.body]);
 
   return (
-    <div className="pt-4 pb-4">
+    <div className="p-4">
     <div className="min-h-screen p-6 border-2 border-[#39ff14] text-white bg-[#121217]">
       <button
         onClick={onBack}
