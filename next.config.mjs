@@ -1,5 +1,13 @@
-import withMDX from '@next/mdx' 
+import fs from 'fs';
+
+const packageJson = fs.readFileSync('./package.json', 'utf8');
+const { version } = JSON.parse(packageJson);
+
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: version,
+  },
+  
   async rewrites() {
     return [
       {
@@ -17,7 +25,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "*",
+        hostname: "**", 
       },
       {
         protocol: "https",
@@ -33,7 +41,6 @@ const nextConfig = {
       },
     ],
   },
-
 };
 
 export default nextConfig;
