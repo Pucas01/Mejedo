@@ -4,14 +4,15 @@ import Image from "next/image";
 
 export default function ConsolesTerminal({ consoleData }) {
   return (
-    <div className="bg-[#121217] border-2 border-[#39ff14] p-4 w-48 flex flex-col items-center cursor-pointer">
+    <div className="bg-[#121217] border-2 border-[#39ff14] p-4 w-60 flex flex-col items-center cursor-pointer">
       {consoleData.image && (
-        <div className="w-full h-full mb-2 border border-[#39ff14] relative aspect-square">
+        <div className="w-full mb-2 relative">
           <Image
             src={consoleData.image}
             alt={consoleData.name}
-            fill
-            className="object-contain"
+            width={240} // fixed width
+            height={160} // adjust height to match console aspect
+            className="border-2 border-[#39ff14] object-contain"
           />
         </div>
       )}

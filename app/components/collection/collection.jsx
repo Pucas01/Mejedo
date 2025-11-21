@@ -204,13 +204,13 @@ export default function ConsolesPage() {
                 alt={selectedConsole.name}
                 width={600}
                 height={400}
-                className="max-h-[300px] object-contain border-2 border-[#39ff14] mb-6"
+                className="max-w-[300px] object-contain border-2 border-[#39ff14] mb-6"
               />
             )}
 
             <h2 className="text-2xl font-semibold mb-4">Owned Games</h2>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="flex gap-4">
               {selectedConsole.games.map((game, idx) => (
                 <div key={idx} className="bg-[#121217] w-60 border border-[#39ff14] p-3">
                   {game.cover && (
@@ -418,13 +418,13 @@ export default function ConsolesPage() {
                 alt={selectedManga.title}
                 width={600}
                 height={400}
-                className="max-h-[300px] object-contain border-2 border-[#39ff14] mb-6"
+                className="max-w-[300px] object-contain border-2 border-[#39ff14] mb-6"
               />
             )}
 
             <h2 className="text-2xl font-semibold mb-4">Owned Volumes</h2>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="flex gap-4">
               {selectedManga.volumes.map((vol, idx) => (
                 <div key={idx} className="bg-[#121217] w-48 border border-[#39ff14] p-3">
                   {vol.cover && (
