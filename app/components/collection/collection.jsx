@@ -210,7 +210,7 @@ export default function ConsolesPage() {
 
             <h2 className="text-2xl font-semibold mb-4">Owned Games</h2>
 
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               {selectedConsole.games.map((game, idx) => (
                 <div key={idx} className="bg-[#121217] w-60 border border-[#39ff14] p-3">
                   {game.cover && (
@@ -454,7 +454,7 @@ export default function ConsolesPage() {
 
             <h2 className="text-2xl font-semibold mb-4">Owned Volumes</h2>
 
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               {selectedManga.volumes.map((vol, idx) => (
                 <div key={idx} className="bg-[#121217] w-48 border border-[#39ff14] p-3">
                   {vol.cover && (
