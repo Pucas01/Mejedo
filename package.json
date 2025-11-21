@@ -31,7 +31,9 @@
     "node-fetch": "^3.3.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "uuid": "^13.0.0",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

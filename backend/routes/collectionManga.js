@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import requireAuth from "../authMiddleware.js";
 import { fileURLToPath } from "url";
+import { v4 as uuidv4 } from "uuid";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,9 +39,7 @@ const writeManga = (manga) => {
 router.get("/", (req, res) => {
   try {
     const manga = readManga();
-
     const filtered = manga.filter((m) => m.title);
-
     res.json(filtered);
   } catch (err) {
     console.error("Error reading manga.json:", err);
@@ -50,11 +49,30 @@ router.get("/", (req, res) => {
 
 router.post("/", requireAuth, (req, res) => {
   try {
-    const manga = readManga();
-    const newManga = req.body || DEFAULT_MANGA;
+    const mangaList = readManga();
+    const body = req.body;
 
-    manga.push(newManga);
-    writeManga(manga);
+    if (!body || !body.title) {
+      return res.status(400).json({ error: "Invalid manga data" });
+    }
+
+    const newManga = {
+      id: uuidv4(),
+      title: body.title || "",
+      author: body.author || "",
+      releaseYear: body.releaseYear || "",
+      cover: body.cover || "",
+      volumes: Array.isArray(body.volumes)
+        ? body.volumes.map(v => ({
+            number: v.number || "",
+            title: v.title || "",
+            cover: v.cover || ""
+          }))
+        : []
+    };
+
+    mangaList.push(newManga);
+    writeManga(mangaList);
 
     res.json({ success: true, manga: newManga });
   } catch (err) {
@@ -65,18 +83,27 @@ router.post("/", requireAuth, (req, res) => {
 
 router.put("/:id", requireAuth, (req, res) => {
   try {
-    const manga = readManga();
+    const mangaList = readManga();
     const { id } = req.params;
     const updatedData = req.body;
 
-    const index = manga.findIndex((m) => m.id === id);
-    if (index === -1)
-      return res.status(404).json({ error: "Manga entry not found" });
+    const index = mangaList.findIndex((m) => m.id === id);
+    if (index === -1) return res.status(404).json({ error: "Manga entry not found" });
 
-    manga[index] = { ...manga[index], ...updatedData };
-    writeManga(manga);
+    mangaList[index] = {
+      ...mangaList[index],
+      ...updatedData,
+      volumes: Array.isArray(updatedData.volumes)
+        ? updatedData.volumes.map(v => ({
+            number: v.number || "",
+            title: v.title || "",
+            cover: v.cover || ""
+          }))
+        : mangaList[index].volumes
+    };
 
-    res.json({ success: true, manga: manga[index] });
+    writeManga(mangaList);
+    res.json({ success: true, manga: mangaList[index] });
   } catch (err) {
     console.error("Error updating manga:", err);
     res.status(500).json({ error: "Failed to update manga" });
@@ -86,16 +113,14 @@ router.put("/:id", requireAuth, (req, res) => {
 router.delete("/:id", requireAuth, (req, res) => {
   const { id } = req.params;
 
-  const manga = readManga();
-  const toDelete = manga.find((m) => m.id === id);
+  const mangaList = readManga();
+  const toDelete = mangaList.find((m) => m.id === id);
 
-  if (!toDelete)
-    return res.status(404).json({ error: "Manga entry not found" });
+  if (!toDelete) return res.status(404).json({ error: "Manga entry not found" });
 
   if (toDelete.cover && toDelete.cover.startsWith("/uploads/")) {
     const relative = toDelete.cover.replace(/^\/+/, "");
     const filePath = path.join(__dirname, "../../public", relative);
-
     try {
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     } catch (err) {
@@ -108,7 +133,6 @@ router.delete("/:id", requireAuth, (req, res) => {
       if (volume.cover && volume.cover.startsWith("/uploads/")) {
         const relative = volume.cover.replace(/^\/+/, "");
         const filePath = path.join(__dirname, "../../public", relative);
-
         try {
           if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         } catch (err) {
@@ -118,7 +142,7 @@ router.delete("/:id", requireAuth, (req, res) => {
     });
   }
 
-  const updated = manga.filter((m) => m.id !== id);
+  const updated = mangaList.filter((m) => m.id !== id);
   writeManga(updated);
 
   res.json({ success: true });
