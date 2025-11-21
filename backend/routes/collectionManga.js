@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import requireAuth from "../authMiddleware.js";
 import { fileURLToPath } from "url";
+import { v4 as uuidv4 } from "uuid"; // make sure you have 'uuid' installed
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,7 +20,7 @@ const DEFAULT_MANGA = {
   author: "",
   releaseYear: "",
   cover: "",
-  volumes: [] // [{ title: "", cover: "" }]
+  volumes: [] // [{ number: "", title: "", cover: "" }]
 };
 
 if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR);
@@ -36,17 +37,13 @@ const writeManga = (manga) => {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(manga, null, 2));
 };
 
-//
 // ------------------------------------------------------------
 // GET → /api/manga
 // ------------------------------------------------------------
 router.get("/", (req, res) => {
   try {
     const manga = readManga();
-
-    // Filter blank template
     const filtered = manga.filter((m) => m.title);
-
     res.json(filtered);
   } catch (err) {
     console.error("Error reading manga.json:", err);
@@ -54,17 +51,35 @@ router.get("/", (req, res) => {
   }
 });
 
-//
 // ------------------------------------------------------------
 // POST → /api/manga
 // ------------------------------------------------------------
 router.post("/", requireAuth, (req, res) => {
   try {
-    const manga = readManga();
-    const newManga = req.body || DEFAULT_MANGA;
+    const mangaList = readManga();
+    const body = req.body;
 
-    manga.push(newManga);
-    writeManga(manga);
+    if (!body || !body.title) {
+      return res.status(400).json({ error: "Invalid manga data" });
+    }
+
+    const newManga = {
+      id: uuidv4(), // generate unique ID
+      title: body.title || "",
+      author: body.author || "",
+      releaseYear: body.releaseYear || "",
+      cover: body.cover || "",
+      volumes: Array.isArray(body.volumes)
+        ? body.volumes.map(v => ({
+            number: v.number || "",
+            title: v.title || "",
+            cover: v.cover || ""
+          }))
+        : []
+    };
+
+    mangaList.push(newManga);
+    writeManga(mangaList);
 
     res.json({ success: true, manga: newManga });
   } catch (err) {
@@ -73,48 +88,53 @@ router.post("/", requireAuth, (req, res) => {
   }
 });
 
-//
 // ------------------------------------------------------------
 // PUT → /api/manga/:id
 // ------------------------------------------------------------
 router.put("/:id", requireAuth, (req, res) => {
   try {
-    const manga = readManga();
+    const mangaList = readManga();
     const { id } = req.params;
     const updatedData = req.body;
 
-    const index = manga.findIndex((m) => m.id === id);
-    if (index === -1)
-      return res.status(404).json({ error: "Manga entry not found" });
+    const index = mangaList.findIndex((m) => m.id === id);
+    if (index === -1) return res.status(404).json({ error: "Manga entry not found" });
 
-    manga[index] = { ...manga[index], ...updatedData };
-    writeManga(manga);
+    mangaList[index] = {
+      ...mangaList[index],
+      ...updatedData,
+      volumes: Array.isArray(updatedData.volumes)
+        ? updatedData.volumes.map(v => ({
+            number: v.number || "",
+            title: v.title || "",
+            cover: v.cover || ""
+          }))
+        : mangaList[index].volumes
+    };
 
-    res.json({ success: true, manga: manga[index] });
+    writeManga(mangaList);
+    res.json({ success: true, manga: mangaList[index] });
   } catch (err) {
     console.error("Error updating manga:", err);
     res.status(500).json({ error: "Failed to update manga" });
   }
 });
 
-//
 // ------------------------------------------------------------
 // DELETE → /api/manga/:id
 // ------------------------------------------------------------
 router.delete("/:id", requireAuth, (req, res) => {
   const { id } = req.params;
 
-  const manga = readManga();
-  const toDelete = manga.find((m) => m.id === id);
+  const mangaList = readManga();
+  const toDelete = mangaList.find((m) => m.id === id);
 
-  if (!toDelete)
-    return res.status(404).json({ error: "Manga entry not found" });
+  if (!toDelete) return res.status(404).json({ error: "Manga entry not found" });
 
   // Delete main cover
   if (toDelete.cover && toDelete.cover.startsWith("/uploads/")) {
     const relative = toDelete.cover.replace(/^\/+/, "");
     const filePath = path.join(__dirname, "../../public", relative);
-
     try {
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     } catch (err) {
@@ -128,7 +148,6 @@ router.delete("/:id", requireAuth, (req, res) => {
       if (volume.cover && volume.cover.startsWith("/uploads/")) {
         const relative = volume.cover.replace(/^\/+/, "");
         const filePath = path.join(__dirname, "../../public", relative);
-
         try {
           if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         } catch (err) {
@@ -138,8 +157,7 @@ router.delete("/:id", requireAuth, (req, res) => {
     });
   }
 
-  // Save updated manga.json
-  const updated = manga.filter((m) => m.id !== id);
+  const updated = mangaList.filter((m) => m.id !== id);
   writeManga(updated);
 
   res.json({ success: true });

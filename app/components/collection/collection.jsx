@@ -370,6 +370,36 @@ export default function ConsolesPage() {
               <button className="px-4 py-2 bg-gray-500 text-white" onClick={() => setConsoleEditMode(false)}>
                 Cancel
               </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-800"
+                onClick={async () => {
+                  if (!consoleEditData?.id) return;
+
+                  const confirmed = confirm("Are you sure you want to delete this console?");
+                  if (!confirmed) return;
+
+                  try {
+                    const res = await fetch(`/api/consoles/${consoleEditData.id}`, {
+                      method: "DELETE",
+                      credentials: "include",
+                    });
+
+                    const result = await res.json();
+                    if (result.success) {
+                      setConsoleEditMode(false);
+                      setSelectedConsole(null);
+                      fetchConsoles(); // refresh list
+                    } else {
+                      alert("Failed to delete console.");
+                    }
+                  } catch (err) {
+                    console.error("Delete failed:", err);
+                    alert("Delete failed!");
+                  }
+                }}
+              >
+                Delete
+              </button>
             </div>
           </div>
         )}
@@ -597,6 +627,36 @@ export default function ConsolesPage() {
               <button className="px-4 py-2 bg-gray-500 text-white" onClick={() => setMangaEditMode(false)}>
                 Cancel
               </button>
+                <button
+                  className="px-4 py-2 bg-red-600 text-white hover:bg-red-800"
+                  onClick={async () => {
+                    if (!mangaEditData?.id) return;
+
+                    const confirmed = confirm("Are you sure you want to delete this manga?");
+                    if (!confirmed) return;
+
+                    try {
+                      const res = await fetch(`/api/manga/${mangaEditData.id}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                      });
+
+                      const result = await res.json();
+                      if (result.success) {
+                        setMangaEditMode(false);
+                        setSelectedManga(null);
+                        fetchManga(); // refresh list
+                      } else {
+                        alert("Failed to delete manga.");
+                      }
+                    } catch (err) {
+                      console.error("Delete failed:", err);
+                      alert("Delete failed!");
+                    }
+                  }}
+                >
+                  Delete
+                </button>
             </div>
           </div>
         )}
@@ -621,10 +681,11 @@ export default function ConsolesPage() {
           <button
             className="px-4 py-2 bg-[#39ff14] text-black hover:bg-white mb-4"
             onClick={() => {
-              setConsoleEditData(emptyConsoleTemplate);
+              const newConsole = { ...emptyConsoleTemplate, id: "new" };
+              setConsoleEditData(newConsole);
               setConsoleEditMode(true);
-              setSelectedConsole({ ...emptyConsoleTemplate, id: "new" });
-            }}
+              setSelectedConsole(newConsole);
+              }}
           >
             + Add Console
           </button>
@@ -649,9 +710,10 @@ export default function ConsolesPage() {
           <button
             className="px-4 py-2 bg-[#39ff14] text-black hover:bg-white mb-4"
             onClick={() => {
-              setMangaEditData(emptyMangaTemplate);
-              setMangaEditMode(true);
-              setSelectedManga({ ...emptyMangaTemplate, id: "new" });
+              const newManga = { ...emptyMangaTemplate, id: "new" }; // mark as new
+              setMangaEditData(newManga);     // fill the form with empty data
+              setMangaEditMode(true);         // enter edit mode
+              setSelectedManga(newManga);     // make detail view render the form
             }}
           >
             + Add Manga Series
