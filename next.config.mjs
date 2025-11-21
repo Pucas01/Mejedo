@@ -1,6 +1,17 @@
-import withMDX from '@next/mdx' 
+import fs from 'fs';
+
+// 1. Read the version from package.json using ES Module syntax
+const packageJson = fs.readFileSync('./package.json', 'utf8');
+const { version } = JSON.parse(packageJson);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 2. Add the version to the public environment variables
+  env: {
+    NEXT_PUBLIC_APP_VERSION: version,
+  },
+  
+  // Your existing configuration
   async rewrites() {
     return [
       {
@@ -18,7 +29,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "*",
+        hostname: "**", 
       },
       {
         protocol: "https",
@@ -34,8 +45,6 @@ const nextConfig = {
       },
     ],
   },
-
-  
 };
 
 export default nextConfig;

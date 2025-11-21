@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 export default function Footer() {
     const date = new Date();
     const year = date.getFullYear();
+    const appVersion = process.env.NEXT_PUBLIC_APP_VERSION;
 
     const [counterName, setCounterName] = useState("test");
 
@@ -35,6 +36,7 @@ export default function Footer() {
         />
       </div>
       <p className="text-gray-400 mt-1">© {year} pucas01 — all rights reserved</p>
+      <small>Version: {appVersion}</small>
     </footer>
   );
 }
