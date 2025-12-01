@@ -149,4 +149,82 @@ router.delete("/:id", requireAuth, (req, res) => {
   }
 });
 
+// ------------------------------------------------------------
+// DELETE → /api/consoles/:consoleId/games/:gameIndex
+// ------------------------------------------------------------
+router.delete("/:consoleId/games/:gameIndex", requireAuth, (req, res) => {
+  try {
+    const { consoleId, gameIndex } = req.params;
+    const consoles = readConsoles();
+    const cIndex = consoles.findIndex(c => c.id === consoleId);
+
+    if (cIndex === -1) return res.status(404).json({ error: "Console not found" });
+
+    const idx = parseInt(gameIndex, 10);
+    if (isNaN(idx) || idx < 0 || idx >= consoles[cIndex].games.length) {
+      return res.status(400).json({ error: "Invalid game index" });
+    }
+
+    const gameToDelete = consoles[cIndex].games[idx];
+
+    // Delete game cover image
+    if (gameToDelete.cover && gameToDelete.cover.startsWith("/uploads/")) {
+      const relative = gameToDelete.cover.replace(/^\/+/, "");
+      const gamePath = path.join(__dirname, "../../public", relative);
+      if (fs.existsSync(gamePath)) fs.unlinkSync(gamePath);
+    }
+
+    // Remove game
+    consoles[cIndex].games.splice(idx, 1);
+
+    writeConsoles(consoles);
+    res.json({ success: true, console: consoles[cIndex] });
+
+  } catch (err) {
+    console.error("Error deleting game:", err);
+    res.status(500).json({ error: "Failed to delete game" });
+  }
+});
+
+// ------------------------------------------------------------
+// PUT → /api/consoles/:consoleId/games/:gameIndex/move
+// body: { direction: "up" | "down" }
+// ------------------------------------------------------------
+router.put("/:consoleId/games/:gameIndex/move", requireAuth, (req, res) => {
+  try {
+    const { consoleId, gameIndex } = req.params;
+    const { direction } = req.body;
+
+    const consoles = readConsoles();
+    const cIndex = consoles.findIndex(c => c.id === consoleId);
+    if (cIndex === -1) return res.status(404).json({ error: "Console not found" });
+
+    const idx = parseInt(gameIndex, 10);
+    if (isNaN(idx) || idx < 0 || idx >= consoles[cIndex].games.length) {
+      return res.status(400).json({ error: "Invalid game index" });
+    }
+
+    if (!["up", "down"].includes(direction)) {
+      return res.status(400).json({ error: "Direction must be 'up' or 'down'" });
+    }
+
+    const games = consoles[cIndex].games;
+    const swapWith = direction === "up" ? idx - 1 : idx + 1;
+
+    if (swapWith < 0 || swapWith >= games.length) {
+      return res.status(400).json({ error: "Cannot move game further in that direction" });
+    }
+
+    // Swap games
+    [games[idx], games[swapWith]] = [games[swapWith], games[idx]];
+
+    writeConsoles(consoles);
+    res.json({ success: true, console: consoles[cIndex] });
+
+  } catch (err) {
+    console.error("Error moving game:", err);
+    res.status(500).json({ error: "Failed to move game" });
+  }
+});
+
 export default router;

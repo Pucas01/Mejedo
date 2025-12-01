@@ -121,6 +121,88 @@ router.put("/:id", requireAuth, (req, res) => {
 });
 
 // ------------------------------------------------------------
+// DELETE → /api/manga/:id/volume/:index
+// ------------------------------------------------------------
+router.delete("/:id/volume/:index", requireAuth, (req, res) => {
+  try {
+    const { id, index } = req.params;
+    const mangaList = readManga();
+
+    const manga = mangaList.find(m => m.id === id);
+    if (!manga) return res.status(404).json({ error: "Manga not found" });
+
+    const volIndex = parseInt(index);
+    if (isNaN(volIndex) || volIndex < 0 || volIndex >= manga.volumes.length) {
+      return res.status(400).json({ error: "Invalid volume index" });
+    }
+
+    const volume = manga.volumes[volIndex];
+
+    // Delete volume cover if stored locally
+    if (volume.cover && volume.cover.startsWith("/uploads/")) {
+      const relative = volume.cover.replace(/^\/+/, "");
+      const filePath = path.join(__dirname, "../../public", relative);
+
+      try {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      } catch (err) {
+        console.error("Failed to delete volume cover:", err);
+      }
+    }
+
+    // Remove the volume from list
+    manga.volumes.splice(volIndex, 1);
+
+    writeManga(mangaList);
+
+    res.json({ success: true, manga });
+  } catch (err) {
+    console.error("Error deleting volume:", err);
+    res.status(500).json({ error: "Failed to delete volume" });
+  }
+});
+
+// ------------------------------------------------------------
+// PUT → /api/manga/:id/volume/move
+// Move a volume from one index to another
+// ------------------------------------------------------------
+router.put("/:id/volume/move", requireAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { from, to } = req.body;
+
+    const mangaList = readManga();
+    const manga = mangaList.find(m => m.id === id);
+
+    if (!manga) return res.status(404).json({ error: "Manga not found" });
+
+    const fromIndex = parseInt(from);
+    const toIndex = parseInt(to);
+
+    if (
+      isNaN(fromIndex) || isNaN(toIndex) ||
+      fromIndex < 0 || toIndex < 0 ||
+      fromIndex >= manga.volumes.length ||
+      toIndex >= manga.volumes.length
+    ) {
+      return res.status(400).json({ error: "Invalid from/to index" });
+    }
+
+    // Move volume in array
+    const [moved] = manga.volumes.splice(fromIndex, 1);
+    manga.volumes.splice(toIndex, 0, moved);
+
+    writeManga(mangaList);
+
+    res.json({ success: true, manga });
+  } catch (err) {
+    console.error("Error moving volume:", err);
+    res.status(500).json({ error: "Failed to reorder volumes" });
+  }
+});
+
+
+// ------------------------------------------------------------
 // DELETE → /api/manga/:id
 // ------------------------------------------------------------
 router.delete("/:id", requireAuth, (req, res) => {
