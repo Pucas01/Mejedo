@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 
-import About from "./components/about/about.jsx";
-import Projects from "./components/projects/projects.jsx";
-import GuestBook from "./components/guestbook/guestbook.jsx";
-import FutabaOverlay from "./components/easteregg/futaba.jsx";
-import BlogPosts from "./components/blog/blog.jsx";
-import ShitPosts from "./components/posts/posts.jsx";
-import Admin from "./components/admin/admin.jsx";
-import Collection from "./components/collection/collection.jsx";
+const About = dynamic(() => import("./components/about/about.jsx"));
+const Projects = dynamic(() => import("./components/projects/projects.jsx"));
+const GuestBook = dynamic(() => import("./components/guestbook/guestbook.jsx"));
+const FutabaOverlay = dynamic(() => import("./components/easteregg/futaba.jsx"));
+const BlogPosts = dynamic(() => import("./components/blog/blog.jsx"));
+const ShitPosts = dynamic(() => import("./components/posts/posts.jsx"));
+const Admin = dynamic(() => import("./components/admin/admin.jsx"));
+const Collection = dynamic(() => import("./components/collection/collection.jsx"));
 import { useCurrentUser } from "./hooks/CurrentUser.js";
 
 export default function Page() {
@@ -28,17 +29,21 @@ export default function Page() {
     }
   }, []);
 
-  const NavClick = (page) => {
-    if (page === active) return;
-    setPopping(page);
-    setTransitioning(true);
+  const NavClick = async (page) => {
+  if (page === active) return;
 
-    setTimeout(() => {
-      setActive(page);
-      setTransitioning(false);
-      setPopping(null);
-    }, 1000);
-  };
+  setPopping(page);
+  setTransitioning(true);
+
+  // wait for 300ms minimum to show animation
+  const randomDelay = 500 + Math.random() * 200;
+  await new Promise((res) => setTimeout(res, randomDelay));
+
+  setActive(page);
+  setTransitioning(false);
+  setPopping(null);
+};
+
 
   if (isMobile) {
     return (
