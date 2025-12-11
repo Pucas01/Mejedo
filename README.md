@@ -8,21 +8,22 @@ Mejedo is my personal website inspired by the character futaba persona 5.
 - View some info about me
 - Look at my projects and shitposts
 - Guestbook :D
+- projects :0
+- Spotify status ...
+- Collections thing
+- idk man im not locked in
 ## Docker Compose
 
 ```yaml
-services:
-  mejedo:
+mejedo:
     image: ghcr.io/pucas01/mejedo:latest
     container_name: mejedo
     ports:
-      - 80:3000
+      - 3030:3000 
+
     volumes:
-      - ./mejedo/config:/app/backend/config
-      - medjed_public:/app/public 
+      - /your/path/medjed/config:/app/config 
+      - /your/path/medjed/uploads:/app/public/uploads
     environment:
       - NODE_ENV=production
     restart: unless-stopped
-
-volumes:
-  medjed_public:
