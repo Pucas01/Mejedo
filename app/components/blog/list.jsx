@@ -23,11 +23,11 @@ export default function BlogList({ onSelectPost }) {
   if (!markdown) return "";
 
   const plainText = markdown
-    .replace(/!\[.*?\]\(.*?\)(\{.*?\})?/g, "")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/(```[\s\S]*?```|`.*?`)/g, "")
-    .replace(/[#>*_~\-]/g, "")
-    .replace(/\n/g, " ");
+    .replace(/!\[.*?\]\(.*?\)(\{.*?\})?/g, "") 
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")   
+    .replace(/(```[\s\S]*?```|`.*?`)/g, "")    
+    .replace(/[#>*_~\-]/g, "")                
+    .replace(/\n/g, " ");                     
 
   const words = plainText.split(" ");
   return words.slice(0, wordCount).join(" ") + (words.length > wordCount ? "..." : "");

@@ -35,7 +35,7 @@ export default function LoginPage() {
       }
 
       setLoading(false);
-      router.push("/");
+      router.push("/"); 
     } catch (err) {
       console.error(err);
       setError("Something went wrong");
@@ -64,6 +64,7 @@ export default function LoginPage() {
     }, 120);
     return () => clearInterval(interval);
   }, []);
+
   return (
     <div className="flex flex-col gap-4 p-4 min-h-screen text-white justify-start bg-[#0D0D0F]">
 

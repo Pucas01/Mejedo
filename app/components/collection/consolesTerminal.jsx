@@ -10,8 +10,8 @@ export default function ConsolesTerminal({ consoleData }) {
           <Image
             src={consoleData.image}
             alt={consoleData.name}
-            width={240}
-            height={160}
+            width={240} 
+            height={160} 
             className="border-2 border-[#39ff14] object-contain"
           />
         </div>
