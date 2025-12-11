@@ -31,7 +31,7 @@ export default function ConsolesSection({
     }
   }, [selectedConsole]);
 
-  // Upload helper
+  // Upload 
   const upload = async (file) => {
     if (!file) return "";
     const form = new FormData();
@@ -139,11 +139,6 @@ export default function ConsolesSection({
     }
   };
 
-  
-
-  // =============================================================
-  // DETAIL VIEW
-  // =============================================================
   if (selectedConsole && !editMode) {
     const c = selectedConsole;
 
@@ -211,9 +206,6 @@ export default function ConsolesSection({
     );
   }
 
-  // =============================================================
-  // EDIT VIEW
-  // =============================================================
   if (editMode) {
     const c = editData || { ...emptyConsoleTemplate, id: "new" };
 
@@ -386,7 +378,6 @@ export default function ConsolesSection({
             + Add Game
           </button>
 
-          {/* Buttons */}
           <div className="flex gap-3">
             <button
               className="px-4 py-2 bg-[#39ff14] text-black hover:bg-white"

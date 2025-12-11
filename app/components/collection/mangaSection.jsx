@@ -138,9 +138,6 @@ export default function MangaSection({
     }
   };
 
-  // =============================================================
-  // DETAIL VIEW
-  // =============================================================
   if (selectedManga && !editMode) {
     const m = selectedManga;
 
@@ -208,9 +205,6 @@ export default function MangaSection({
     );
   }
 
-  // =============================================================
-  // EDIT VIEW
-  // =============================================================
   if (editMode) {
     const m = editData || { ...emptyMangaTemplate, id: "new" };
 
@@ -291,13 +285,11 @@ export default function MangaSection({
             />
           )}
 
-{/* VOLUMES */}
 <h2 className="text-xl font-semibold mt-4 mb-2">Volumes</h2>
 
 {Array.isArray(m.volumes) && m.volumes.map((vol, i) => (
   <div key={i} className="relative border border-[#39ff14] p-3 mb-3">
 
-    {/* DELETE VOLUME (calls backend if editing existing manga) */}
     <button
       onClick={async () => {
         if (m.id !== "new") {
@@ -312,7 +304,6 @@ export default function MangaSection({
       ✖
     </button>
 
-    {/* MOVE UP/DOWN BUTTONS */}
     <div className="absolute top-2 left-2 flex flex-col gap-1">
       {i > 0 && (
         <button
@@ -353,7 +344,6 @@ export default function MangaSection({
       )}
     </div>
 
-    {/* TITLE */}
     <input
       className="w-full p-2 mb-2 bg-black border border-[#39ff14]"
       placeholder="Volume Title"
@@ -365,7 +355,6 @@ export default function MangaSection({
       }}
     />
 
-    {/* COVER URL */}
     <input
       className="w-full p-2 bg-black border border-[#39ff14]"
       placeholder="/uploads/volume-cover.png"
@@ -377,7 +366,6 @@ export default function MangaSection({
       }}
     />
 
-    {/* COVER UPLOAD */}
     <label className="text-xs text-gray-400 mt-2 block">Upload Volume Cover</label>
     <input
       type="file"
@@ -419,7 +407,6 @@ export default function MangaSection({
             + Add Volume
           </button>
 
-          {/* Buttons */}
           <div className="flex gap-3">
             <button
               className="px-4 py-2 bg-[#39ff14] text-black hover:bg-white"
@@ -454,9 +441,6 @@ export default function MangaSection({
     );
   }
 
-  // =============================================================
-  // MAIN LIST + Add Button
-  // =============================================================
   return (
     <div className="flex flex-col items-center bg-[#121217] border-2 border-[#39ff14] m-4 gap-4 p-4">
       <h1 className="text-3xl font-bold">Manga Collection</h1>

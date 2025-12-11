@@ -33,11 +33,10 @@ const writeProjects = (projects) => {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(projects, null, 2));
 };
 
-// GET
+// GET some stuff
 router.get("/", (req, res) => {
   try {
     const projects = readProjects();
-    // filter out blank template
     const filtered = projects.filter(p => p.name);
     res.json(filtered);
   } catch (err) {
@@ -46,7 +45,7 @@ router.get("/", (req, res) => {
   }
 });
 
-// POST 
+// POST :)
 router.post("/", requireAuth, (req, res) => {
   try {
     const projects = readProjects();
@@ -60,7 +59,7 @@ router.post("/", requireAuth, (req, res) => {
   }
 });
 
-// PUT
+// PUT some stuff i guess
 router.put("/:name", requireAuth, (req, res) => {
   try {
     const projects = readProjects();
@@ -79,7 +78,7 @@ router.put("/:name", requireAuth, (req, res) => {
   }
 });
 
-// DELETE 
+// DELETE a project
 router.delete("/:name", requireAuth, (req, res) => {
   const { name } = req.params;
 

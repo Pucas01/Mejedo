@@ -9,8 +9,8 @@ export default function Terminal() {
   const scrollRef = useRef(null);
 
   const [currentInput, setCurrentInput] = useState("");
-  const [outputs, setOutputs] = useState([]); // { cmd: string, result: string | JSX }
-  const [history, setHistory] = useState([]); // previous commands
+  const [outputs, setOutputs] = useState([]);
+  const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [focused, setFocused] = useState(false);
 
@@ -97,7 +97,7 @@ export default function Terminal() {
     }
 
     // show the command immediately
-    pushOutput(cmd, "…"); // temporary spinner
+    pushOutput(cmd, "…");
     setHistory((h) => [...h, cmd]);
     setHistoryIndex(-1);
     setCurrentInput("");
@@ -258,7 +258,6 @@ passwd <u> <p>       Reset user password
       role="application"
       aria-label="Terminal"
     >
-      {/* scroll area */}
       <div ref={scrollRef} className="overflow-auto max-h-[480px] pr-2">
         {outputs.map((o, idx) => (
           <div key={idx} className="mb-3">
@@ -270,13 +269,11 @@ passwd <u> <p>       Reset user password
           </div>
         ))}
 
-        {/* Current prompt / input */}
         <div className="flex items-center">
           <span className="text-[#39ff14] mr-2">{PROMPT}</span>
           <div
             aria-live="polite"
             className="text-white min-h-[1.25rem]"
-            // show current input and blinking cursor
           >
             <span>{currentInput}<span className="animate-blink">|</span></span>
           </div>

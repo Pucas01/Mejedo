@@ -81,13 +81,13 @@ const saveData = (data) => {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
 };
 
-// ✅ GET all shitposts
+// GET all shitposts
 router.get("/", (req, res) => {
   const data = loadData();
   res.json(data);
 });
 
-// ✅ POST: add new shitpost to a specific category
+// POST add new shitpost to a specific category
 router.post("/:category", (req, res) => {
   const { category } = req.params;
   const data = loadData();
@@ -110,7 +110,7 @@ router.post("/:category", (req, res) => {
   res.json({ success: true, post: newPost });
 });
 
-// ✅ DELETE: remove post by ID from category
+// DELETE remove post by ID from category
 router.delete("/:category/:id", (req, res) => {
   const { category, id } = req.params;
   const data = loadData();
@@ -119,13 +119,11 @@ router.delete("/:category/:id", (req, res) => {
     return res.status(400).json({ error: "Invalid category" });
   }
 
-  // Find post to delete
   const postToDelete = data[category].find((p) => p.id === id);
   if (!postToDelete) {
     return res.status(404).json({ error: "Post not found" });
   }
 
-  // Delete associated image if exists and is inside uploads folder
   if (postToDelete.thumbnail && postToDelete.thumbnail.startsWith("/uploads/")) {
     const filePath = path.join(__dirname, "../../public", postToDelete.thumbnail);
     if (fs.existsSync(filePath)) {
@@ -135,7 +133,6 @@ router.delete("/:category/:id", (req, res) => {
     }
   }
 
-  // Remove post from data
   data[category] = data[category].filter((p) => p.id !== id);
   saveData(data);
 

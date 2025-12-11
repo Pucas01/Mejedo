@@ -5,8 +5,8 @@ import requireAuth from "../authMiddleware.js"
 const router = express.Router();
 const SALT_ROUNDS = 10; 
 
+// This is some reused user code from another project
 
-// ------------------ LOGIN ------------------ //
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
   if (!username || !password)
@@ -24,20 +24,17 @@ router.post("/login", (req, res) => {
   });
 });
 
-// ------------------ CHECK LOGGED IN ------------------ 
 router.get("/me", (req, res) => {
   if (!req.session?.user) return res.status(401).json({ error: "Not logged in" });
   res.json({ user: req.session.user });
 });
 
-// ------------------ LOGOUT ------------------ 
 router.post("/logout", (req, res) => {
   req.session.destroy(() => {
     res.json({ success: true });
   });
 });
 
-// ------------------ GET USERS ------------------
 router.get("/", requireAuth, (req, res) => {
   db.all("SELECT username, role FROM users", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -45,7 +42,6 @@ router.get("/", requireAuth, (req, res) => {
   });
 });
 
-// ------------------ ADD USER ------------------ 
 router.post("/", requireAuth, async (req, res) => {
   const { username, password, role } = req.body;
   if (!username || !password) return res.status(400).json({ error: "Username and password required" });
@@ -62,7 +58,6 @@ router.post("/", requireAuth, async (req, res) => {
   );
 });
 
-// ------------------ DELETE USER ------------------
 router.delete("/:username", requireAuth, (req, res) => {
   const { username } = req.params;
   db.run("DELETE FROM users WHERE username = ?", [username], function (err) {
@@ -72,7 +67,6 @@ router.delete("/:username", requireAuth, (req, res) => {
   });
 });
 
-// ------------------ CHANGE PASSWORD ------------------
 router.put("/:username/password", requireAuth, async (req, res) => {
   const { username } = req.params;
   const { password } = req.body;

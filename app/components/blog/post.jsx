@@ -13,8 +13,7 @@ export default function BlogPost({ post, onBack }) {
   const parsedHTML = useMemo(() => {
     if (!post.body) return "";
 
-    // Convert custom markdown image syntax to HTML
-    // Example: ![alt](url){width=400 height=200}
+
     const processedMarkdown = post.body.replace(
       /!\[(.*?)\]\((.*?)\)\{width=(\d+)(?:\s*height=(\d+))?\}/g,
       (_, alt, src, width, height) => {

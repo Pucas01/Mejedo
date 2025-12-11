@@ -52,7 +52,6 @@ export default function TopCard({ post }) {
 
   return (
     <div className="flex flex-col bg-[#121217] border border-[#39ff14] transition-shadow shadow-sm hover:shadow-lg overflow-hidden max-w-[320px] h-full">
-      {/* Image */}
       <div className="relative w-full flex-none">
         <Image
           src={thumbnail}
@@ -70,7 +69,6 @@ export default function TopCard({ post }) {
         </div>
       </div>
 
-      {/* Bottom content */}
       <div className="p-3 flex-1 flex flex-col justify-between gap-2 min-h-[100px]">
         <div>
           <h3 className="text-white text-sm font-medium leading-snug">{title || "Untitled"}</h3>

@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [doneTyping, setDoneTyping] = useState(false);
   const command = "login";
 
-  // ---------------- Login Logic ----------------
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -36,7 +36,7 @@ export default function LoginPage() {
       }
 
       setLoading(false);
-      router.push("/"); // redirect to main page
+      router.push("/"); 
     } catch (err) {
       console.error(err);
       setError("Something went wrong");
@@ -53,7 +53,6 @@ export default function LoginPage() {
     }, 1000);
   };
 
-  // Typing animation for "login"
   useEffect(() => {
     let i = 0;
     const interval = setInterval(() => {
@@ -66,14 +65,12 @@ export default function LoginPage() {
     }, 120);
     return () => clearInterval(interval);
   }, []);
-// ---------------- Render ----------------
+
   return (
     <div className="flex flex-col gap-4 p-4 min-h-screen text-white justify-start bg-[#0D0D0F]">
 
-      {/* LOGIN TERMINAL */}
       <div className="flex-1 min-w-[500px] min-h-[450px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col font-jetbrains">
 
-        {/* Typing animation */}
         {!doneTyping && (
           <div className="p-8 text-xl flex flex-wrap">
             <span className="text-[#39ff14]">pucas01</span>
@@ -87,13 +84,11 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Login form */}
         {doneTyping && (
           <div className="flex-1 p-8 flex flex-col justify-center">
             <header className="flex flex-col gap-4 max-w-sm mx-auto text-5xl pb-6"> Mejedo </header>
             <form onSubmit={handleLogin} className="flex flex-col gap-4 max-w-sm mx-auto">
 
-              {/* Username */}
               <div>
                 <label className="block text-[#39ff14] text-sm mb-1">Username</label>
                 <input
@@ -105,7 +100,6 @@ export default function LoginPage() {
                 />
               </div>
 
-              {/* Password */}
               <div>
                 <label className="block text-[#39ff14] text-sm mb-1">Password</label>
                 <input
@@ -119,7 +113,6 @@ export default function LoginPage() {
 
               {error && <p className="text-red-400 text-sm">{error}</p>}
 
-              {/* Submit button */}
               <button
                 type="submit"
                 disabled={loading}

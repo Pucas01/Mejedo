@@ -127,10 +127,8 @@ export default function About() {
   return (
     <div className="flex flex-col gap-4 p-4 min-h-screen text-white justify-start">
 
-      {/* FIRST TERMINAL */}
       <div className="flex-1 min-w-[400px] min-h-[725px] max-h-[725px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col">
 
-        {/* Typing intro 1 */}
         {!doneFastfetch && (
           <div className="p-8 font-jetbrains text-xl flex flex-wrap">
             <span className="text-[#39ff14]">pucas01</span>
@@ -144,7 +142,6 @@ export default function About() {
           </div>
         )}
 
-        {/* Fastfetch output */}
         {doneFastfetch && (
           <div className="flex-1 p-8 overflow-auto text-gray-400 text-sm flex">
             <pre className="ascii-font text-green-400 mr-4 select-none">

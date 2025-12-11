@@ -62,7 +62,6 @@ export default function GuestBook() {
   return (
     <div className="flex flex-col p-4 gap-4 text-xl font-jetbrains">
 
-      {/* Input Terminal */}
       <div className="flex-1 min-w-[400px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col p-4">
         <p>┌─ Guestbook ───────────────────────────────</p>
         <p>│ Woah, a guestbook! That's pretty wild!</p>
@@ -78,7 +77,6 @@ export default function GuestBook() {
         </form>
       </div>
 
-      {/* Messages Terminal */}
       <div className="flex-1 min-w-[400px] min-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col overflow-auto p-4 space-y-2">
         {messages.length === 0 && <p className="text-gray-500">No messages yet!</p>}
         {messages.map(msg => (
@@ -92,7 +90,6 @@ export default function GuestBook() {
             <p className="text-white" dangerouslySetInnerHTML={{ __html: msg.message }} />
             {msg.reply && <p className="text-[#32cc12]">Pucas01 Reply: {msg.reply}</p>}
 
-            {/* Admin controls */}
             {isAdmin && (
               <div className="flex gap-2 mt-2">
                 {!msg.approved && (

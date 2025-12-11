@@ -8,7 +8,6 @@ if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR);
 
 let accessToken = "";
 
-// Ensure JSON file exists
 if (!fs.existsSync(DATA_FILE)) {
   fs.writeFileSync(
     DATA_FILE,

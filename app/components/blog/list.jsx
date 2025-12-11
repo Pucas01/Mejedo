@@ -22,13 +22,13 @@ export default function BlogList({ onSelectPost }) {
   const getPreviewText = (markdown, wordCount = 20) => {
   if (!markdown) return "";
 
-  // Remove images but keep Markdown text clean, ignore width/height attributes
+
   const plainText = markdown
-    .replace(/!\[.*?\]\(.*?\)(\{.*?\})?/g, "") // remove images with optional {width=.. height=..}
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")   // remove links but keep text
-    .replace(/(```[\s\S]*?```|`.*?`)/g, "")    // remove code blocks
-    .replace(/[#>*_~\-]/g, "")                 // remove headings, emphasis, blockquote chars
-    .replace(/\n/g, " ");                      // replace newlines with space
+    .replace(/!\[.*?\]\(.*?\)(\{.*?\})?/g, "") 
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")   
+    .replace(/(```[\s\S]*?```|`.*?`)/g, "")    
+    .replace(/[#>*_~\-]/g, "")                
+    .replace(/\n/g, " ");                     
 
   const words = plainText.split(" ");
   return words.slice(0, wordCount).join(" ") + (words.length > wordCount ? "..." : "");

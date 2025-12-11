@@ -62,7 +62,6 @@ export default function AnimePage() {
   return (
     <div className="flex flex-col gap-4 p-4 text-xl min-h-screen text-white justify-start">
 
-      {/* Terminal Header */}
       <div className="bg-[#121217] min-h-[200px] p-8 border-2 border-[#39ff14] shadow-lg ">
         {!doneLogin && (
           <div className=" text-xl flex flex-wrap">
@@ -91,7 +90,6 @@ export default function AnimePage() {
         )}
       </div>
 
-      {/* To-Do List */}
       <div className="bg-[#121217] border-2 p-8 border-[#39ff14] shadow-lg">
         {!doneList && (
           <div className=" text-xl flex flex-wrap">
@@ -109,10 +107,10 @@ export default function AnimePage() {
           <>
             <p className="text-[#39ff14] mb-2">To-Do List:</p>
             <ul className="list-disc list-inside text-white space-y-1">
-              <li>- Make the codebase not ass</li>
-              <li>- Collection page with consoles and manga</li>
-              <li>- Make it usable on phone</li>
-              <li>- Some other cool stuff I guess</li>
+              <li>- Make the codebase not ass (its even worse now)</li>
+              <li>- Webring stuff </li>
+              <li>- Make it usable on phone (never happening)</li>
+              <li>- uhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh</li>
             </ul>
           </>
         )}

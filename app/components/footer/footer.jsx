@@ -9,7 +9,6 @@ export default function Footer() {
   const [counterName, setCounterName] = useState("test");
   const [pageSize, setPageSize] = useState(null);
 
-  // Load counter config
   useEffect(() => {
     async function fetchConfig() {
       try {
@@ -23,17 +22,14 @@ export default function Footer() {
     fetchConfig();
   }, []);
 
-  // Calculate page size after load
   useEffect(() => {
     const calculateSize = () => {
       let total = 0;
 
-      // Include HTML size
       if (document && document.documentElement) {
         total += new TextEncoder().encode(document.documentElement.outerHTML).length;
       }
 
-      // Include all fetched resources
       const resources = performance.getEntriesByType("resource");
       resources.forEach((res) => {
         if (res.transferSize) total += res.transferSize;
@@ -64,7 +60,6 @@ export default function Footer() {
       </div>
 
       <p className="text-gray-400 mt-1">© {year} pucas01 — all rights reserved</p>
-      {/* Page size info */}
       <p className="text-gray-400 mt-1 text-xs">Page size: {formatSize(pageSize)}</p>
       <small>Version: {appVersion}</small>
     </footer>

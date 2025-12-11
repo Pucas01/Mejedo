@@ -11,11 +11,11 @@ if (!fs.existsSync(DATA_FILE)) {
   fs.writeFileSync(DATA_FILE, JSON.stringify([]));
 }
 
-// Helper: read/write messages
+// read/write messages
 const readMessages = () => JSON.parse(fs.readFileSync(DATA_FILE));
 const writeMessages = (msgs) => fs.writeFileSync(DATA_FILE, JSON.stringify(msgs, null, 2));
 
-// GET all approved messages (for public)
+// GET all approved messages (for public users)
 router.get("/", (req, res) => {
   try {
     const messages = readMessages().filter((m) => m.approved);
@@ -48,7 +48,7 @@ router.post("/", (req, res) => {
       message,
       website: website || "",
       timestamp: new Date().toISOString(),
-      approved: false, // pending by default
+      approved: false,
       reply: "",
     };
 

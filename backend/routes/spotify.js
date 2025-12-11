@@ -17,7 +17,6 @@ router.get("/", async (req, res) => {
     let trackInfo = null;
 
     if (response.status === 204) {
-      // Nothing is actively playing
       isPlaying = false;
     } else {
       const data = await response.json();
@@ -45,7 +44,6 @@ router.get("/", async (req, res) => {
         played_at: new Date().toISOString(),
       };
 
-      // Always update last played track if it exists
       lastPlayedTrack = trackInfo;
     }
 
