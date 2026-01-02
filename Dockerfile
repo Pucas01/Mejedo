@@ -28,8 +28,15 @@ FROM node:24.9.0 AS runtime
 
 WORKDIR /app
 
-# Install canvas runtime dependencies for asciify-image color support
+# Install canvas dependencies (both build and runtime) then rebuild canvas
 RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3 \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
     libcairo2 \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
@@ -40,6 +47,19 @@ RUN apt-get update && apt-get install -y \
 
 # Copy everything from builder
 COPY --from=builder /app ./
+
+# Rebuild canvas native bindings for runtime environment
+RUN npm rebuild canvas --build-from-source \
+    && apt-get update && apt-get remove -y \
+    build-essential \
+    python3 \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 # Expose ports
 EXPOSE 3000
