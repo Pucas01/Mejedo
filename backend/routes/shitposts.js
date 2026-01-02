@@ -2,6 +2,7 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import requireAuth from "../authMiddleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -83,7 +84,7 @@ router.get("/", (req, res) => {
   res.json(data);
 });
 
-router.post("/:category", (req, res) => {
+router.post("/:category", requireAuth, (req, res) => {
   const { category } = req.params;
   const data = loadData();
 
@@ -105,7 +106,7 @@ router.post("/:category", (req, res) => {
   res.json({ success: true, post: newPost });
 });
 
-router.delete("/:category/:id", (req, res) => {
+router.delete("/:category/:id", requireAuth, (req, res) => {
   const { category, id } = req.params;
   const data = loadData();
 

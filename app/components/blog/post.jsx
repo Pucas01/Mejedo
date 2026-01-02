@@ -1,6 +1,7 @@
 "use client";
 import { useMemo } from "react";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 export default function BlogPost({ post, onBack }) {
   if (!post) return null;
@@ -21,7 +22,11 @@ export default function BlogPost({ post, onBack }) {
       }
     );
 
-    return marked.parse(processedMarkdown);
+    const rawHTML = marked.parse(processedMarkdown);
+    return DOMPurify.sanitize(rawHTML, {
+      ADD_TAGS: ["img"],
+      ADD_ATTR: ["width", "height", "class", "alt", "src"],
+    });
   }, [post.body]);
 
   return (
