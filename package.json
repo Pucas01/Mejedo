@@ -16,6 +16,7 @@
     "ansi-to-html": "^0.7.2",
     "asciify-image": "^0.1.1",
     "bcryptjs": "^3.0.2",
+    "canvas": "^3.1.0",
     "cors": "^2.8.5",
     "dompurify": "^3.3.0",
     "dotenv": "^17.2.3",
