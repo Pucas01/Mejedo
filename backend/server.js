@@ -10,6 +10,7 @@ import uploadRouter from "./routes/imageUpload.js";
 import blogpostsRouter from "./routes/blogposts.js";
 import collections from "./routes/collection.js";
 import collectionsManga from "./routes/collectionManga.js"
+import versionsRoute from "./routes/versions.js"
 import requireAuth from "./authMiddleware.js"
 import session from "express-session"
 import cors from "cors";
@@ -53,6 +54,7 @@ app.use("/api/upload", uploadRouter);
 app.use("/api/blogposts", blogpostsRouter);
 app.use("/api/consoles", collections);
 app.use("/api/manga", collectionsManga);
+app.use("/api/versions", versionsRoute);
 
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 

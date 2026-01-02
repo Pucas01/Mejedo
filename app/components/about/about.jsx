@@ -14,6 +14,11 @@ export default function About() {
   const [uptime, setUptime] = useState("");
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [indicatorVisible, setIndicatorVisible] = useState(false);
+  const [versions, setVersions] = useState({
+    kitty: "0.44",
+    fish: "4.2.1",
+    hyprland: "0.53",
+  });
   const birthday = new Date("2006-10-11");
 
   const command1 = "fastfetch";
@@ -127,6 +132,22 @@ export default function About() {
     return () => clearInterval(interval);
   }, []);
 
+  // Fetch latest software versions
+  useEffect(() => {
+    async function fetchVersions() {
+      try {
+        const res = await fetch("/api/versions");
+        const data = await res.json();
+        if (data.kitty && data.fish && data.hyprland) {
+          setVersions(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch versions:", err);
+      }
+    }
+    fetchVersions();
+  }, []);
+
   // Hide scroll indicator when user scrolls
   useEffect(() => {
     // Only show indicator after fastfetch animation completes
@@ -217,9 +238,9 @@ export default function About() {
                 <p><span className="text-[#39ff14]">Likes:</span> Linux, Music, Anime / Manga, Games, Retro Consoles</p>
                 <p>-----------------</p>
                 <p><span className="text-[#39ff14]">OS:</span> Arch Linux x86_64</p>
-                <p><span className="text-[#39ff14]">Terminal:</span> kitty 0.44</p>
-                <p><span className="text-[#39ff14]">Shell:</span> fish 4.2.1</p>
-                <p><span className="text-[#39ff14]">WM:</span> Hyprland 0.53 (Wayland)</p>
+                <p><span className="text-[#39ff14]">Terminal:</span> kitty {versions.kitty}</p>
+                <p><span className="text-[#39ff14]">Shell:</span> fish {versions.fish}</p>
+                <p><span className="text-[#39ff14]">WM:</span> Hyprland {versions.hyprland} (Wayland)</p>
                 <p>
                   <span className="text-[#39ff14]">Dots: </span>
                   <a href="https://github.com/end-4/dots-hyprland?tab=readme-ov-file#illogical-impulsequickshell" className="decoration-[#39ff14] underline-offset-5 hover:underline decoration-wavy">
