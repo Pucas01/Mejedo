@@ -12,7 +12,9 @@ export default function About() {
   const [doneLinks, setDoneLinks] = useState(false);
   const [startLinks, setStartLinks] = useState(false);
   const [uptime, setUptime] = useState("");
-  const birthday = new Date("2006-10-11"); 
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [indicatorVisible, setIndicatorVisible] = useState(false);
+  const birthday = new Date("2006-10-11");
 
   const command1 = "fastfetch";
   const command2 = "find . -maxdepth 1 -type l -ls";
@@ -125,8 +127,61 @@ export default function About() {
     return () => clearInterval(interval);
   }, []);
 
+  // Hide scroll indicator when user scrolls
+  useEffect(() => {
+    // Only show indicator after fastfetch animation completes
+    if (!doneFastfetch) {
+      setShowScrollIndicator(false);
+      setIndicatorVisible(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      // Hide after scrolling more than 100px
+      if (scrollTop >= 100) {
+        setIndicatorVisible(false);
+        // Remove from DOM after fade animation completes
+        setTimeout(() => setShowScrollIndicator(false), 300);
+      }
+    };
+
+    // Show indicator once animation is done
+    setShowScrollIndicator(true);
+    // Small delay to trigger CSS transition
+    setTimeout(() => setIndicatorVisible(true), 50);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [doneFastfetch]);
+
   return (
-    <div className="flex flex-col gap-4 p-4 min-h-screen text-white justify-start">
+    <div className="relative flex flex-col gap-4 p-4 min-h-screen text-white justify-start">
+      {/* Scroll Indicator */}
+      {showScrollIndicator && (
+        <div
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1 animate-bounce transition-opacity duration-300 ${
+            indicatorVisible ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <span className="text-[#39ff14] text-sm font-jetbrains">Scroll for more</span>
+          <svg
+            className="w-6 h-6 text-[#39ff14]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            />
+          </svg>
+        </div>
+      )}
 
       <div className="flex-1 min-w-[400px] min-h-[725px] max-h-[725px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col">
 
@@ -162,9 +217,9 @@ export default function About() {
                 <p><span className="text-[#39ff14]">Likes:</span> Linux, Music, Anime / Manga, Games, Retro Consoles</p>
                 <p>-----------------</p>
                 <p><span className="text-[#39ff14]">OS:</span> Arch Linux x86_64</p>
-                <p><span className="text-[#39ff14]">Terminal:</span> kitty 0.43.1</p>
-                <p><span className="text-[#39ff14]">Shell:</span> fish 4.1.2</p>
-                <p><span className="text-[#39ff14]">WM:</span> Hyprland 0.51.1 (Wayland)</p>
+                <p><span className="text-[#39ff14]">Terminal:</span> kitty 0.44</p>
+                <p><span className="text-[#39ff14]">Shell:</span> fish 4.2.1</p>
+                <p><span className="text-[#39ff14]">WM:</span> Hyprland 0.53 (Wayland)</p>
                 <p>
                   <span className="text-[#39ff14]">Dots: </span>
                   <a href="https://github.com/end-4/dots-hyprland?tab=readme-ov-file#illogical-impulsequickshell" className="decoration-[#39ff14] underline-offset-5 hover:underline decoration-wavy">

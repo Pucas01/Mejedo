@@ -3,6 +3,16 @@ FROM node:24.9.0 AS builder
 
 WORKDIR /app
 
+# Install canvas dependencies for asciify-image color support
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy root package files and install dependencies
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
@@ -17,6 +27,16 @@ RUN npm run build
 FROM node:24.9.0 AS runtime
 
 WORKDIR /app
+
+# Install canvas runtime dependencies for asciify-image color support
+RUN apt-get update && apt-get install -y \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libjpeg62-turbo \
+    libgif7 \
+    librsvg2-2 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy everything from builder
 COPY --from=builder /app ./

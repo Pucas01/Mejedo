@@ -1,45 +1,19 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import AnsiToHtml from "ansi-to-html";
+import useTypingAnimation from "../../hooks/useTypingAnimation";
 
 export default function SpotifyTerminal() {
-  const [spotifyCmd, setSpotifyCmd] = useState("");
-  const [doneSpotify, setDoneSpotify] = useState(false);
   const [track, setTrack] = useState(null);
-  const [startSpotify, setStartSpotify] = useState(false);
-  const secondRef = useRef(null);
 
   const ansiConverter = new AnsiToHtml();
   const siteUrl = typeof window !== "undefined" ? window.location.origin : "";
   const command = `curl ${siteUrl}/api/spotify-now-playing`;
 
-  // Intersection Observer: Start only when visible
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => entries[0].isIntersecting && setStartSpotify(true),
-      { threshold: 0.3 }
-    );
-    if (secondRef.current) observer.observe(secondRef.current);
-    return () => secondRef.current && observer.unobserve(secondRef.current);
-  }, []);
-
-  // Typing animation
-  useEffect(() => {
-    if (!startSpotify) return;
-    let i = 0;
-    const interval = setInterval(() => {
-      setSpotifyCmd(command.slice(0, i));
-      i++;
-      if (i > command.length) {
-        clearInterval(interval);
-        setTimeout(() => setDoneSpotify(true), 200);
-      }
-    }, 40);
-    return () => clearInterval(interval);
-  }, [startSpotify]);
+  const { ref, typedText, isDone, hasStarted } = useTypingAnimation(command);
 
   useEffect(() => {
-    if (!startSpotify) return;
+    if (!hasStarted) return;
 
     async function fetchTrack() {
       try {
@@ -70,14 +44,14 @@ export default function SpotifyTerminal() {
     fetchTrack();
     const interval = setInterval(fetchTrack, 2000);
     return () => clearInterval(interval);
-  }, [startSpotify]);
+  }, [hasStarted]);
 
   return (
     <div
-      ref={secondRef}
+      ref={ref}
       className="flex-1 min-w-[400px] min-h-[200px] max-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex"
     >
-      {!doneSpotify && (
+      {!isDone && (
         <div className="p-8 font-jetbrains text-xl flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>
           <span className="text-white">@</span>
@@ -85,12 +59,12 @@ export default function SpotifyTerminal() {
           <span className="text-white">:</span>
           <span className="text-[#FF5555]">~</span>
           <span className="text-white">$</span>
-          <span className="text-white">&nbsp;{spotifyCmd}</span>
+          <span className="text-white">&nbsp;{typedText}</span>
           <span className="cursor animate-blink">|</span>
         </div>
       )}
 
-      {doneSpotify && track && (
+      {isDone && track && (
         <div className="flex flex-row p-6 font-jetbrains overflow-auto">
           <div
             className="mr-6 select-none"
