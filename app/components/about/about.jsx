@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import SpotifyTerminal from "./SpotifyTerminal";
+import NintendoSwitchTerminal from "./NintendoSwitchTerminal";
 import Whoami from "./whoami";
 
 export default function About() {
@@ -210,6 +211,9 @@ export default function About() {
       </div>
       <div>
         <SpotifyTerminal />
+      </div>
+      <div>
+        <NintendoSwitchTerminal />
       </div>
     </div>
   );

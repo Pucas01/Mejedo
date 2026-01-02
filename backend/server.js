@@ -1,5 +1,6 @@
 import express from "express";
 import spotifyRoute from "./routes/spotify.js"
+import nintendoRoute from "./routes/nintendo.js"
 import guestbook from "./routes/guestbook.js"
 import counter from "./routes/moeCounter.js"
 import users from "./routes/users.js"
@@ -42,6 +43,7 @@ app.use(session({
 
 
 app.use("/api/spotify-now-playing", spotifyRoute);
+app.use("/api/nintendo-presence", nintendoRoute);
 app.use("/api/guestbook", guestbook);
 app.use("/api/counter", counter);
 app.use("/api/users", users);
