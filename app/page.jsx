@@ -1,18 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-
-const About = dynamic(() => import("./components/about/about.jsx"));
-const Projects = dynamic(() => import("./components/projects/projects.jsx"));
-const GuestBook = dynamic(() => import("./components/guestbook/guestbook.jsx"));
-const FutabaOverlay = dynamic(() => import("./components/easteregg/futaba.jsx"));
-const BlogPosts = dynamic(() => import("./components/blog/blog.jsx"));
-const ShitPosts = dynamic(() => import("./components/posts/posts.jsx"));
-const Admin = dynamic(() => import("./components/admin/admin.jsx"));
-const Collection = dynamic(() => import("./components/collection/collection.jsx"));
 import { useCurrentUser } from "./hooks/CurrentUser.js";
+
+const pageComponents = {
+  "/about": dynamic(() => import("./components/about/about.jsx")),
+  "/projects": dynamic(() => import("./components/projects/projects.jsx")),
+  "/guestbook": dynamic(() => import("./components/guestbook/guestbook.jsx")),
+  "/blog": dynamic(() => import("./components/blog/blog.jsx")),
+  "/shitposts": dynamic(() => import("./components/posts/posts.jsx")),
+  "/admin": dynamic(() => import("./components/admin/admin.jsx")),
+  "/collection": dynamic(() => import("./components/collection/collection.jsx")),
+};
+
+const pageImports = {
+  "/about": () => import("./components/about/about.jsx"),
+  "/projects": () => import("./components/projects/projects.jsx"),
+  "/guestbook": () => import("./components/guestbook/guestbook.jsx"),
+  "/blog": () => import("./components/blog/blog.jsx"),
+  "/shitposts": () => import("./components/posts/posts.jsx"),
+  "/admin": () => import("./components/admin/admin.jsx"),
+  "/collection": () => import("./components/collection/collection.jsx"),
+};
+
+const FutabaOverlay = dynamic(() => import("./components/easteregg/futaba.jsx"));
 
 export default function Page() {
   const [active, setActive] = useState("/about");
@@ -20,6 +33,7 @@ export default function Page() {
   const [popping, setPopping] = useState(null);
   const [open, setEgg] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
   const { currentUser, isAdmin } = useCurrentUser();
 
   useEffect(() => {
@@ -29,19 +43,39 @@ export default function Page() {
     }
   }, []);
 
+  const preloadPage = useCallback(async (page) => {
+    if (preloadedPages.has(page) || !pageImports[page]) return;
+
+    try {
+      await pageImports[page]();
+      setPreloadedPages((prev) => new Set([...prev, page]));
+    } catch (err) {
+      console.error(`Failed to preload ${page}:`, err);
+    }
+  }, [preloadedPages]);
+
+  const handleMouseEnter = (page) => {
+    if (page !== active) {
+      preloadPage(page);
+    }
+  };
+
   const NavClick = async (page) => {
-  if (page === active) return;
+    if (page === active) return;
 
-  setPopping(page);
-  setTransitioning(true);
+    setPopping(page);
+    setTransitioning(true);
 
-  const randomDelay = 500 + Math.random() * 200;
-  await new Promise((res) => setTimeout(res, randomDelay));
+    const preloadPromise = preloadPage(page);
 
-  setActive(page);
-  setTransitioning(false);
-  setPopping(null);
-};
+    const minDelay = new Promise((res) => setTimeout(res, 400));
+
+    await Promise.all([preloadPromise, minDelay]);
+
+    setActive(page);
+    setTransitioning(false);
+    setPopping(null);
+  };
 
   if (isMobile) {
     return (
@@ -65,6 +99,8 @@ export default function Page() {
     );
   }
 
+  const ActiveComponent = pageComponents[active];
+
   return (
     <div className="flex flex-col min-h-screen bg-[url(/LaptopSHQ.png)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
       <header className="p-4 text-center bg-[#090909] text-[#39ff14]">
@@ -84,6 +120,7 @@ export default function Page() {
               <button
                 key={page}
                 onClick={() => NavClick(page)}
+                onMouseEnter={() => handleMouseEnter(page)}
                 className={`tracking-wide text-2xl px-2 cursor-pointer ${
                   active === page
                     ? "text-[#39ff14] border-b-1 border-[#39ff14]"
@@ -111,13 +148,7 @@ export default function Page() {
       )}
 
       <main className="flex-1 pr-16 pl-16">
-        {active === "/about" && <About />}
-        {active === "/projects" && <Projects />}
-        {active === "/shitposts" && <ShitPosts />}
-        {active === "/guestbook" && <GuestBook />}
-        {active === "/admin" && <Admin />}
-        {active === "/blog" && <BlogPosts />}
-        {active === "/collection" && <Collection/>}
+        {ActiveComponent && <ActiveComponent />}
 
         <FutabaOverlay
           show={open}
