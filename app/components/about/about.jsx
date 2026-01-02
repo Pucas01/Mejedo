@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import SpotifyTerminal from "./SpotifyTerminal";
 import NintendoSwitchTerminal from "./NintendoSwitchTerminal";
+import DiscordTerminal from "./DiscordTerminal";
 import Whoami from "./whoami";
 
 export default function About() {
@@ -285,11 +286,10 @@ export default function About() {
         <div className="flex-1">
         </div>
       </div>
-      <div>
+      <div className="flex flex-row gap-4 flex-wrap">
         <SpotifyTerminal />
-      </div>
-      <div>
         <NintendoSwitchTerminal />
+        <DiscordTerminal />
       </div>
     </div>
   );
