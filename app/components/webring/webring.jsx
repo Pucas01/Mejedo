@@ -8,6 +8,18 @@ const WEBRING_SCRIPTS = [
   },
 ];
 
+const COMPLEX_WEBRINGS = [
+  {
+    name: "Vocaring",
+    containerId: "vocaring",
+    css: "https://electric-tenshi.nekoweb.org/vocaring/vocaring.css",
+    scripts: [
+      "https://electric-tenshi.nekoweb.org/vocaring/vocaring-variables.js",
+      "https://electric-tenshi.nekoweb.org/vocaring/vocaring-widget.js",
+    ],
+  },
+];
+
 function WebringWidget({ src, name }) {
   const containerRef = useRef(null);
 
@@ -31,6 +43,77 @@ function WebringWidget({ src, name }) {
     <div className="border border-[#39ff14] p-4">
       <h3 className="text-[#39ff14] font-bold mb-3">{name}</h3>
       <div ref={containerRef} />
+    </div>
+  );
+}
+
+function ComplexWebringWidget({ name, containerId, css, scripts }) {
+  const containerRef = useRef(null);
+  const scriptsRef = useRef([]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    if (containerRef.current.querySelector(`#${containerId}`)) return;
+
+    let link = document.querySelector(`link[href="${css}"]`);
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = css;
+      document.head.appendChild(link);
+    }
+
+    const styleId = `${containerId}-override`;
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `#${containerId} { margin-left: 0 !important; margin-right: auto !important; }`;
+      document.head.appendChild(style);
+    }
+
+    const widgetContainer = document.createElement("div");
+    widgetContainer.id = containerId;
+    containerRef.current.appendChild(widgetContainer);
+
+    scripts.forEach((src) => {
+      const existingScript = document.querySelector(`script[src="${src}"]`);
+      if (existingScript) {
+        existingScript.remove();
+      }
+    });
+
+    const loadedScripts = [];
+    const loadScripts = async () => {
+      for (const src of scripts) {
+        await new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.onload = resolve;
+          script.onerror = resolve;
+          document.body.appendChild(script);
+          loadedScripts.push(script);
+        });
+      }
+    };
+
+    loadScripts();
+    scriptsRef.current = loadedScripts;
+
+    return () => {
+      scriptsRef.current.forEach((script) => {
+        if (script && script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      });
+      scriptsRef.current = [];
+    };
+  }, [containerId, css, scripts]);
+
+  return (
+    <div className="border border-[#39ff14] p-4">
+      <h3 className="text-[#39ff14] font-bold mb-3">{name}</h3>
+      <div ref={containerRef} className="[&>*]:ml-0 [&>*]:mr-auto" />
     </div>
   );
 }
@@ -112,15 +195,18 @@ export default function Webring() {
           <>
             <p className="text-2xl mb-4">Webrings I'm part of:</p>
             <div className="space-y-6">
-              {WEBRING_SCRIPTS.length === 0 ? (
-                <div className="text-gray-400">
-                  <p>No webrings yet... coming soon!</p>
-                </div>
-              ) : (
-                WEBRING_SCRIPTS.map((ring, index) => (
-                  <WebringWidget key={index} src={ring.src} name={ring.name} />
-                ))
-              )}
+              {WEBRING_SCRIPTS.map((ring, index) => (
+                <WebringWidget key={`simple-${index}`} src={ring.src} name={ring.name} />
+              ))}
+              {COMPLEX_WEBRINGS.map((ring, index) => (
+                <ComplexWebringWidget
+                  key={`complex-${index}`}
+                  name={ring.name}
+                  containerId={ring.containerId}
+                  css={ring.css}
+                  scripts={ring.scripts}
+                />
+              ))}
             </div>
           </>
         )}
