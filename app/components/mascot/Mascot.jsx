@@ -15,6 +15,18 @@ const tips = [
   "FIST OF JUSTICE! oh wait wrong character.",
   "Bona-fide Monafied",
   "What the flip flop. I'm outta here!!!!",
+  "Teammates!? Friends!? To hell with that!",
+  "gay people? in my persona 5? not again!",
+  "An octagon is a shape with eight sides, right? ",
+  "I thought I heard something about delicious pancakes",
+  "Mukuro Ikusaba, the 16th Student, lying hidden somewhere in this school… the one they call the Ultimate Despair, Watch out for her.",
+  "Hajime, now's not the time for you to be pitching a tent!",
+  "“Belief without doubt is simply a lie.“ - Chiaki Nanami",
+  "NO THATS WRONG",
+  "Im a bit occupied, so do youre goddamn JOB! -Goro Akechi ",
+  "how about a sneak attack?",
+  "fun fact, onions fly in australia",
+  "Goopie megpoid"
 ];
 
 // Shuffle array using Fisher-Yates algorithm

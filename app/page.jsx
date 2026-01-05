@@ -176,10 +176,10 @@ function PageContent() {
     // Track page visits for achievements
     updateStats("visitedPages", page);
 
-    // Only wait for images on pages with dynamic content
+    // Only wait for images on pages with dynamic content (short timeout to avoid blocking)
     if (needsImageWait) {
       const imageWait = waitForImages(mainRef.current, true);
-      const maxTimeout = new Promise((resolve) => setTimeout(resolve, 5000));
+      const maxTimeout = new Promise((resolve) => setTimeout(resolve, 1500));
       await Promise.race([imageWait, maxTimeout]);
     }
 

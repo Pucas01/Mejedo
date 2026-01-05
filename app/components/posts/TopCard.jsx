@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 
 const SourceBadge = ({ source }) => {
@@ -49,20 +49,25 @@ const SourceBadge = ({ source }) => {
 
 export default function TopCard({ post }) {
   const { title, thumbnail, url, source, meta } = post;
+  const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
     <div className="flex flex-col bg-[#121217] border border-[#39ff14] transition-shadow shadow-sm hover:shadow-lg overflow-hidden max-w-[320px] h-full">
       <div className="relative w-full flex-none">
+        {!imgLoaded && !imgError && (
+          <div className="absolute inset-0 bg-[#1a1a1f] animate-pulse flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-[#39ff14] border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
         <Image
-          src={thumbnail}
+          src={imgError ? "/projects/kysasa.webp" : thumbnail}
           alt={title || `${source} thumbnail`}
-          className="object-contain w-full"
+          className={`object-contain w-full transition-opacity ${imgLoaded || imgError ? "opacity-100" : "opacity-0"}`}
           width={500}
           height={500}
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = "/projects/kysasa.webp";
-          }}
+          onLoad={() => setImgLoaded(true)}
+          onError={() => setImgError(true)}
         />
         <div className="absolute top-3 left-3">
           <SourceBadge source={source} />
