@@ -30,13 +30,14 @@ const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 
 export default function Page() {
   const [active, setActive] = useState("/about");
-  const [transitioning, setTransitioning] = useState(false);
+  const [transitioning, setTransitioning] = useState(true);
   const [popping, setPopping] = useState(null);
   const [open, setEgg] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
   const { currentUser, isAdmin } = useCurrentUser();
   const mainRef = useRef(null);
+  const initialLoadDone = useRef(false);
 
   useEffect(() => {
     const ua = navigator.userAgent || window.opera;
@@ -62,23 +63,70 @@ export default function Page() {
     }
   };
 
-  const waitForImages = useCallback((container) => {
+  const waitForImages = useCallback((container, waitForNewImages = false) => {
     if (!container) return Promise.resolve();
 
-    const images = container.querySelectorAll("img");
-    if (images.length === 0) return Promise.resolve();
+    const waitForExistingImages = () => {
+      const images = container.querySelectorAll("img");
+      if (images.length === 0) return Promise.resolve();
 
-    const imagePromises = Array.from(images).map((img) => {
-      if (img.complete) return Promise.resolve();
-      return new Promise((resolve) => {
-        img.onload = resolve;
-        img.onerror = resolve;
+      const imagePromises = Array.from(images).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
       });
-    });
+
+      return Promise.all(imagePromises);
+    };
+
+    if (waitForNewImages) {
+      return new Promise((resolve) => {
+        let imageCount = container.querySelectorAll("img").length;
+        let stableCount = 0;
+        const checkInterval = 100;
+        const stableThreshold = 3;
+
+        const checkForImages = async () => {
+          const currentCount = container.querySelectorAll("img").length;
+
+          if (currentCount === imageCount && currentCount > 0) {
+            stableCount++;
+            if (stableCount >= stableThreshold) {
+              await waitForExistingImages();
+              resolve();
+              return;
+            }
+          } else {
+            imageCount = currentCount;
+            stableCount = 0;
+          }
+
+          setTimeout(checkForImages, checkInterval);
+        };
+
+        setTimeout(checkForImages, checkInterval);
+      });
+    }
 
     const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
-    return Promise.race([Promise.all(imagePromises), timeout]);
+    return Promise.race([waitForExistingImages(), timeout]);
   }, []);
+
+  useEffect(() => {
+    if (initialLoadDone.current || isMobile) return;
+    initialLoadDone.current = true;
+
+    const waitForInitialImages = async () => {
+      const imageWait = waitForImages(mainRef.current, true);
+      const maxTimeout = new Promise((resolve) => setTimeout(resolve, 5000));
+      await Promise.race([imageWait, maxTimeout]);
+      setTransitioning(false);
+    };
+
+    waitForInitialImages();
+  }, [waitForImages, isMobile]);
 
   const NavClick = async (page) => {
     if (page === active) return;
@@ -94,8 +142,9 @@ export default function Page() {
 
     setActive(page);
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    await waitForImages(mainRef.current);
+    const imageWait = waitForImages(mainRef.current, true);
+    const maxTimeout = new Promise((resolve) => setTimeout(resolve, 5000));
+    await Promise.race([imageWait, maxTimeout]);
 
     setTransitioning(false);
     setPopping(null);
