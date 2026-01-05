@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useAchievements } from "../../hooks/useAchievements";
 
 const tips = [
   "Try clicking the header title!",
   "Try imputing the konami code!",
+  "Did you really try logging in? o no wait that was me.",
   "Did you know? This site runs on hopes and prayers.",
   "Check out the manga collection! Spoiler, theres chainsawman.",
   "Futaba is the goat. Fight me.",
@@ -35,6 +37,19 @@ export default function Mascot() {
   const hideTimeoutRef = useRef(null);
   const tipQueueRef = useRef([]);
   const animationSpeedRef = useRef(500);
+
+  let achievements = null;
+  try {
+    achievements = useAchievements();
+  } catch {
+  }
+
+  useEffect(() => {
+    if (achievements?.pendingAchievement) {
+      const achievement = achievements.pendingAchievement;
+      showRandomTip(`${achievement.icon} Achievement unlocked: ${achievement.name}!`);
+    }
+  }, [achievements?.pendingAchievement]);
 
   useEffect(() => {
     const updateSize = () => {
@@ -93,12 +108,12 @@ export default function Mascot() {
     return tipQueueRef.current.pop();
   };
 
-  const showRandomTip = () => {
+  const showRandomTip = (customMessage = null) => {
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
     }
 
-    const nextTip = getNextTip();
+    const nextTip = customMessage || getNextTip();
     setCurrentTip(nextTip);
     setBubbleState("entering");
 
@@ -173,7 +188,12 @@ export default function Mascot() {
 
       <div
         className={`transition-transform duration-200 cursor-pointer ${isHovered ? "scale-110" : ""}`}
-        onClick={showRandomTip}
+        onClick={() => {
+          if (achievements?.updateStats) {
+            achievements.updateStats("mascotClicks", 1);
+          }
+          showRandomTip();
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

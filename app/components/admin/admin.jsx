@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from 'next/image'
 import User from "./user.jsx";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
+import { useAchievements } from "../../hooks/useAchievements.js";
 
 export default function AnimePage() {
   const [login, setLogin] = useState("");
@@ -18,7 +19,17 @@ export default function AnimePage() {
   const imgCommand = "cd /funnyimgs";
 
   const terminalRef = useRef(null);
+  const mikuAudioRef = useRef(null);
   const { currentUser, isAdmin } = useCurrentUser();
+  const { unlock } = useAchievements();
+
+  const handleJunpeiClick = () => {
+    if (mikuAudioRef.current) {
+      mikuAudioRef.current.currentTime = 0;
+      mikuAudioRef.current.play();
+    }
+    unlock("junpei_clicker");
+  };
 
   useEffect(() => {
     let i = 0;
@@ -161,8 +172,10 @@ export default function AnimePage() {
               alt="Iyuri"
               height={200}
               width={230}
-              className="object-cover">
-              </Image>
+              className="object-cover cursor-pointer hover:scale-105 transition-transform"
+              onClick={handleJunpeiClick}
+              />
+              <audio ref={mikuAudioRef} src="/sounds/miku-british.mp3" preload="auto" />
               <Image
               src="/randomimages/Yoshizawa.gif"
               alt="KMS"

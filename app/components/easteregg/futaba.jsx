@@ -31,6 +31,7 @@ export default function FutabaOverlay({ show, onClose, imgSrc, audioSrc }) {
 
   useEffect(() => {
     if (loadedSrc && audioRef.current) {
+      audioRef.current.volume = 0.1;
       audioRef.current.play();
       audioRef.current.onended = onClose;
     }
