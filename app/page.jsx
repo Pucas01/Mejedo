@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useCurrentUser } from "./hooks/CurrentUser.js";
@@ -35,6 +35,7 @@ export default function Page() {
   const [isMobile, setIsMobile] = useState(false);
   const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
   const { currentUser, isAdmin } = useCurrentUser();
+  const mainRef = useRef(null);
 
   useEffect(() => {
     const ua = navigator.userAgent || window.opera;
@@ -60,6 +61,24 @@ export default function Page() {
     }
   };
 
+  const waitForImages = useCallback((container) => {
+    if (!container) return Promise.resolve();
+
+    const images = container.querySelectorAll("img");
+    if (images.length === 0) return Promise.resolve();
+
+    const imagePromises = Array.from(images).map((img) => {
+      if (img.complete) return Promise.resolve();
+      return new Promise((resolve) => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+    });
+
+    const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
+    return Promise.race([Promise.all(imagePromises), timeout]);
+  }, []);
+
   const NavClick = async (page) => {
     if (page === active) return;
 
@@ -73,6 +92,10 @@ export default function Page() {
     await Promise.all([preloadPromise, minDelay]);
 
     setActive(page);
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    await waitForImages(mainRef.current);
+
     setTransitioning(false);
     setPopping(null);
   };
@@ -135,7 +158,7 @@ export default function Page() {
       </nav>
 
       {transitioning && (
-        <div className="fixed inset-0 flex items-center justify-center z-20 pointer-events-none">
+        <div className="fixed inset-0 flex items-center justify-center z-20 pointer-events-none bg-black/80">
           <Image
             src="/projects/medjed.png"
             alt="Loading..."
@@ -147,7 +170,7 @@ export default function Page() {
         </div>
       )}
 
-      <main className="flex-1 pr-16 pl-16">
+      <main ref={mainRef} className={`flex-1 pr-16 pl-16 ${transitioning ? "invisible" : "visible"}`}>
         {ActiveComponent && <ActiveComponent />}
 
         <FutabaOverlay
