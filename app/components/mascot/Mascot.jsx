@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 
 const tips = [
   "Try clicking the header title!",
+  "Try imputing the konami code!",
   "Did you know? This site runs on hopes and prayers.",
   "Check out the manga collection! Spoiler, theres chainsawman.",
   "Futaba is the goat. Fight me.",

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useCurrentUser } from "./hooks/CurrentUser.js";
+import { useKonamiCode } from "./hooks/useKonamiCode.js";
 
 const pageComponents = {
   "/about": dynamic(() => import("./components/about/about.jsx")),
@@ -26,6 +27,7 @@ const pageImports = {
 };
 
 const FutabaOverlay = dynamic(() => import("./components/easteregg/futaba.jsx"));
+const RhythmGame = dynamic(() => import("./components/easteregg/RhythmGame.jsx"));
 const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 
 export default function Page() {
@@ -33,10 +35,13 @@ export default function Page() {
   const [transitioning, setTransitioning] = useState(false);
   const [popping, setPopping] = useState(null);
   const [open, setEgg] = useState(false);
+  const [rhythmGameOpen, setRhythmGameOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
   const { currentUser, isAdmin } = useCurrentUser();
   const mainRef = useRef(null);
+
+  useKonamiCode(() => setRhythmGameOpen(true));
 
   useEffect(() => {
     const ua = navigator.userAgent || window.opera;
@@ -221,6 +226,11 @@ export default function Page() {
           imgSrc="/futaba/FutabaEasterEgg.webp"
           audioSrc="/futaba/FutabaEasterEgg.mp3"
           onClose={() => setEgg(false)}
+        />
+
+        <RhythmGame
+          show={rhythmGameOpen}
+          onClose={() => setRhythmGameOpen(false)}
         />
       </main>
 
