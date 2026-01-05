@@ -32,14 +32,13 @@ const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 
 export default function Page() {
   const [active, setActive] = useState("/about");
-  const [transitioning, setTransitioning] = useState(true); // Start with loading state
+  const [transitioning, setTransitioning] = useState(false); // About page doesn't need loading
   const [popping, setPopping] = useState(null);
   const [open, setEgg] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
   const { currentUser, isAdmin } = useCurrentUser();
   const mainRef = useRef(null);
-  const initialLoadDone = useRef(false);
 
   useEffect(() => {
     const ua = navigator.userAgent || window.opera;
@@ -123,33 +122,25 @@ export default function Page() {
     return Promise.race([waitForExistingImages(), timeout]);
   }, []);
 
-  // Handle initial page load - wait for images before showing content
-  useEffect(() => {
-    if (initialLoadDone.current || isMobile) return;
-    initialLoadDone.current = true;
-
-    const waitForInitialImages = async () => {
-      // Wait for images including dynamically loaded ones
-      const imageWait = waitForImages(mainRef.current, true);
-      const maxTimeout = new Promise((resolve) => setTimeout(resolve, 5000));
-      await Promise.race([imageWait, maxTimeout]);
-      setTransitioning(false);
-    };
-
-    waitForInitialImages();
-  }, [waitForImages, isMobile]);
+  
+  // Pages that fetch dynamic data and need image loading wait
+  const pagesWithDynamicImages = ["/shitposts", "/collection"];
 
   const NavClick = async (page) => {
     if (page === active) return;
 
+    const needsImageWait = pagesWithDynamicImages.includes(page);
+
     setPopping(page);
-    setTransitioning(true);
+    setTransitioning(needsImageWait);
 
     // Start preloading immediately
     const preloadPromise = preloadPage(page);
 
-    // Minimum animation time for visual feedback
-    const minDelay = new Promise((res) => setTimeout(res, 400));
+    // Minimum animation time for visual feedback (only if showing loader)
+    const minDelay = needsImageWait
+      ? new Promise((res) => setTimeout(res, 400))
+      : Promise.resolve();
 
     // Wait for JS preload and minimum animation
     await Promise.all([preloadPromise, minDelay]);
@@ -157,11 +148,12 @@ export default function Page() {
     // Render the new page
     setActive(page);
 
-    // Wait for images - use waitForNewImages for pages that fetch data
-    // Add a max timeout of 5 seconds
-    const imageWait = waitForImages(mainRef.current, true);
-    const maxTimeout = new Promise((resolve) => setTimeout(resolve, 5000));
-    await Promise.race([imageWait, maxTimeout]);
+    // Only wait for images on pages with dynamic content
+    if (needsImageWait) {
+      const imageWait = waitForImages(mainRef.current, true);
+      const maxTimeout = new Promise((resolve) => setTimeout(resolve, 5000));
+      await Promise.race([imageWait, maxTimeout]);
+    }
 
     setTransitioning(false);
     setPopping(null);
