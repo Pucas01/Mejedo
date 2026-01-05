@@ -3,7 +3,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 const LANES = ["d", "f", "j", "k"];
 const LANE_COLORS = ["#c24b99", "#00ffff", "#12fa05", "#f9393f"];
-const NOTE_SPEED = 8;
 const HIT_ZONE_Y = 50;
 const GAME_HEIGHT = 400;
 const GAME_WIDTH = 300;
@@ -12,17 +11,11 @@ const NOTE_HEIGHT = 14;
 const NOTE_WIDTH = 54;
 const PERFECT_WINDOW = 30;
 const GOOD_WINDOW = 60;
+const NOTE_TRAVEL_TIME_MS = 800;
 
 const ARROW_ROTATIONS = [270, 180, 0, 90];
 
 const SONGS = {
-  random: {
-    name: "Random Mode",
-    artist: "Procedural",
-    duration: 30000,
-    audioSrc: null,
-    chartSrc: null,
-  },
   "2hot": {
     name: "2hot",
     artist: "Kawai Sprite",
@@ -99,40 +92,22 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
   const [gameState, setGameState] = useState("menu");
   const [timeLeft, setTimeLeft] = useState(30000);
   const [hitEffects, setHitEffects] = useState([]);
-  const [selectedSong, setSelectedSong] = useState("random");
+  const [selectedSong, setSelectedSong] = useState("2hot");
   const [chartData, setChartData] = useState(null);
 
   const gameLoopRef = useRef(null);
-  const noteIdRef = useRef(0);
   const startTimeRef = useRef(null);
-  const lastNoteTimeRef = useRef({});
+  const lastFrameTimeRef = useRef(null);
   const effectIdRef = useRef(0);
   const scoreRef = useRef(0);
   const audioRef = useRef(null);
   const voiceRef = useRef(null);
   const chartNotesRef = useRef([]);
   const nextNoteIndexRef = useRef(0);
+  const audioStartedRef = useRef(false);
 
-  const SPAWN_AHEAD_MS = (GAME_HEIGHT - HIT_ZONE_Y) / NOTE_SPEED * (1000 / 60);
-  const AUDIO_OFFSET_MS = 625;
-
-  const generateRandomNote = useCallback(() => {
-    const now = Date.now();
-    const lane = Math.floor(Math.random() * 4);
-
-    if (lastNoteTimeRef.current[lane] && now - lastNoteTimeRef.current[lane] < 350) {
-      return null;
-    }
-
-    lastNoteTimeRef.current[lane] = now;
-
-    return {
-      id: noteIdRef.current++,
-      lane,
-      y: GAME_HEIGHT + NOTE_HEIGHT,
-      hit: false,
-    };
-  }, []);
+  const NOTE_TRAVEL_DISTANCE = GAME_HEIGHT - HIT_ZONE_Y + NOTE_HEIGHT;
+  const NOTE_SPEED_PER_MS = NOTE_TRAVEL_DISTANCE / NOTE_TRAVEL_TIME_MS;
 
   const addHitEffect = useCallback((lane, type) => {
     const id = effectIdRef.current++;
@@ -160,13 +135,11 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
     setGameState("loading");
     const song = SONGS[songKey];
 
-    if (song.chartSrc) {
-      const chart = await loadChart(songKey);
-      if (chart) {
-        setChartData(chart);
-        chartNotesRef.current = chart.notes.map((n, i) => ({ ...n, id: i }));
-        setTimeLeft(chart.duration);
-      }
+    const chart = await loadChart(songKey);
+    if (chart) {
+      setChartData(chart);
+      chartNotesRef.current = chart.notes.map((n, i) => ({ ...n, id: i }));
+      setTimeLeft(chart.duration);
     } else {
       setChartData(null);
       chartNotesRef.current = [];
@@ -181,9 +154,7 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
     setFeedback(null);
     setPressedLanes({});
     setHitEffects([]);
-    noteIdRef.current = 0;
     nextNoteIndexRef.current = 0;
-    lastNoteTimeRef.current = {};
 
     setGameState("playing");
   };
@@ -191,102 +162,138 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
   useEffect(() => {
     if (!show || gameState !== "playing") return;
 
-    startTimeRef.current = Date.now();
+    audioStartedRef.current = false;
+    lastFrameTimeRef.current = null;
 
     const song = SONGS[selectedSong];
-    if (song.audioSrc && audioRef.current) {
+    const hasAudio = song.audioSrc && audioRef.current;
+
+    const startGame = () => {
+      startTimeRef.current = Date.now();
+      lastFrameTimeRef.current = Date.now();
+      audioStartedRef.current = true;
+      runLoop();
+    };
+
+    if (hasAudio) {
       audioRef.current.currentTime = 0;
       audioRef.current.volume = 0.3;
-      audioRef.current.play().catch(() => {});
+
+      if (song.voiceSrc && voiceRef.current) {
+        voiceRef.current.currentTime = 0;
+        voiceRef.current.volume = 0.4;
+      }
+
+      const onCanPlay = () => {
+        audioRef.current.removeEventListener("canplaythrough", onCanPlay);
+        audioRef.current.play().then(() => {
+          if (song.voiceSrc && voiceRef.current) {
+            voiceRef.current.play().catch(() => {});
+          }
+          startGame();
+        }).catch(() => {
+          startGame();
+        });
+      };
+
+      if (audioRef.current.readyState >= 4) {
+        audioRef.current.play().then(() => {
+          if (song.voiceSrc && voiceRef.current) {
+            voiceRef.current.play().catch(() => {});
+          }
+          startGame();
+        }).catch(() => startGame());
+      } else {
+        audioRef.current.addEventListener("canplaythrough", onCanPlay);
+      }
+    } else {
+      startGame();
     }
-    if (song.voiceSrc && voiceRef.current) {
-      voiceRef.current.currentTime = 0;
-      voiceRef.current.volume = 0.4;
-      voiceRef.current.play().catch(() => {});
-    }
 
-    const loop = () => {
-      const elapsed = Date.now() - startTimeRef.current;
-      const song = SONGS[selectedSong];
-      const duration = chartData?.duration || song.duration;
-      const remaining = duration - elapsed;
+    const runLoop = () => {
+      const loop = () => {
+        if (!audioStartedRef.current) return;
 
-      setTimeLeft(Math.max(0, remaining));
+        const now = Date.now();
+        const deltaMs = lastFrameTimeRef.current ? now - lastFrameTimeRef.current : 16;
+        lastFrameTimeRef.current = now;
 
-      if (remaining <= 0) {
-        setGameState("ended");
-        if (audioRef.current) {
-          audioRef.current.pause();
+        const elapsed = now - startTimeRef.current;
+        const song = SONGS[selectedSong];
+        const duration = chartData?.duration || song.duration;
+        const remaining = duration - elapsed;
+
+        setTimeLeft(Math.max(0, remaining));
+
+        if (remaining <= 0) {
+          setGameState("ended");
+          if (audioRef.current) {
+            audioRef.current.pause();
+          }
+          if (voiceRef.current) {
+            voiceRef.current.pause();
+          }
+          if (onGameEnd) {
+            onGameEnd(scoreRef.current);
+          }
+          return;
         }
-        if (voiceRef.current) {
-          voiceRef.current.pause();
+
+        if (chartNotesRef.current.length > 0) {
+          while (
+            nextNoteIndexRef.current < chartNotesRef.current.length &&
+            chartNotesRef.current[nextNoteIndexRef.current].t <= elapsed + NOTE_TRAVEL_TIME_MS
+          ) {
+            const chartNote = chartNotesRef.current[nextNoteIndexRef.current];
+            const timeUntilHit = chartNote.t - elapsed;
+            const startY = HIT_ZONE_Y + (timeUntilHit * NOTE_SPEED_PER_MS);
+
+            setNotes((prev) => [
+              ...prev,
+              {
+                id: chartNote.id,
+                lane: chartNote.lane,
+                y: startY,
+                hit: false,
+                targetTime: chartNote.t,
+              },
+            ]);
+            nextNoteIndexRef.current++;
+          }
         }
-        if (onGameEnd) {
-          onGameEnd(scoreRef.current);
-        }
-        return;
-      }
 
-      if (chartNotesRef.current.length > 0) {
-        const currentTime = elapsed;
-        const adjustedTime = currentTime + AUDIO_OFFSET_MS;
-        while (
-          nextNoteIndexRef.current < chartNotesRef.current.length &&
-          chartNotesRef.current[nextNoteIndexRef.current].t <= adjustedTime + SPAWN_AHEAD_MS
-        ) {
-          const chartNote = chartNotesRef.current[nextNoteIndexRef.current];
-          const timeUntilHit = chartNote.t - adjustedTime;
-          const startY = GAME_HEIGHT + NOTE_HEIGHT + (timeUntilHit / SPAWN_AHEAD_MS) * (GAME_HEIGHT - HIT_ZONE_Y);
+        const pixelsToMove = deltaMs * NOTE_SPEED_PER_MS;
 
-          setNotes((prev) => [
-            ...prev,
-            {
-              id: chartNote.id,
-              lane: chartNote.lane,
-              y: startY,
-              hit: false,
-              targetTime: chartNote.t,
-            },
-          ]);
-          nextNoteIndexRef.current++;
-        }
-      }
+        setNotes((prev) => {
+          const updated = prev
+            .map((note) => ({
+              ...note,
+              y: note.y - pixelsToMove,
+            }))
+            .filter((note) => {
+              if (!note.hit && note.y < HIT_ZONE_Y - GOOD_WINDOW) {
+                setCombo(0);
+                setFeedback({ type: "miss", lane: note.lane });
+                setTimeout(() => setFeedback(null), 300);
+                return false;
+              }
+              if (note.hit && note.y < -NOTE_HEIGHT) {
+                return false;
+              }
+              return note.y > -NOTE_HEIGHT;
+            });
 
-      setNotes((prev) => {
-        const updated = prev
-          .map((note) => ({
-            ...note,
-            y: note.y - NOTE_SPEED,
-          }))
-          .filter((note) => {
-            if (!note.hit && note.y < HIT_ZONE_Y - GOOD_WINDOW) {
-              setCombo(0);
-              setFeedback({ type: "miss", lane: note.lane });
-              setTimeout(() => setFeedback(null), 300);
-              return false;
-            }
-            if (note.hit && note.y < -NOTE_HEIGHT) {
-              return false;
-            }
-            return note.y > -NOTE_HEIGHT;
-          });
+          return updated;
+        });
 
-        return updated;
-      });
-
-      if (!chartData && Math.random() < 0.04) {
-        const newNote = generateRandomNote();
-        if (newNote) {
-          setNotes((prev) => [...prev, newNote]);
-        }
-      }
+        gameLoopRef.current = requestAnimationFrame(loop);
+      };
 
       gameLoopRef.current = requestAnimationFrame(loop);
     };
 
-    gameLoopRef.current = requestAnimationFrame(loop);
-
     return () => {
+      audioStartedRef.current = false;
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
       }
@@ -297,7 +304,7 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
         voiceRef.current.pause();
       }
     };
-  }, [show, gameState, generateRandomNote, selectedSong, chartData, onGameEnd, SPAWN_AHEAD_MS]);
+  }, [show, gameState, selectedSong, chartData, onGameEnd, NOTE_SPEED_PER_MS]);
 
   useEffect(() => {
     if (!show || gameState !== "playing") return;

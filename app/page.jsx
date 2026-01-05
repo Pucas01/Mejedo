@@ -159,7 +159,7 @@ function PageContent() {
 
     if (needsImageWait) {
       const imageWait = waitForImages(mainRef.current, true);
-      const maxTimeout = new Promise((resolve) => setTimeout(resolve, 5000));
+      const maxTimeout = new Promise((resolve) => setTimeout(resolve, 1500));
       await Promise.race([imageWait, maxTimeout]);
     }
 
