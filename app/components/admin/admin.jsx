@@ -226,6 +226,13 @@ export default function AnimePage() {
               width={210}
               className="object-cover">
               </Image>
+              <Image
+              src="/randomimages/Aketchi.webp"
+              alt="woops"
+              height={200}
+              width={350}
+              className="object-cover">
+              </Image>
             </div>
           </>
         )}

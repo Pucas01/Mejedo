@@ -26,6 +26,7 @@ const pageImports = {
 };
 
 const FutabaOverlay = dynamic(() => import("./components/easteregg/futaba.jsx"));
+const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 
 export default function Page() {
   const [active, setActive] = useState("/about");
@@ -180,6 +181,8 @@ export default function Page() {
           onClose={() => setEgg(false)}
         />
       </main>
+
+      <Mascot />
     </div>
   );
 }
