@@ -64,6 +64,12 @@ export default function GuestBook() {
     fetchMessages();
   };
 
+  const deleteMessage = async (id) => {
+    if (!confirm("Are you sure you want to delete this message?")) return;
+    await fetch(`/api/guestbook/${id}`, { method: "DELETE" });
+    fetchMessages();
+  };
+
   return (
     <div className="flex flex-col p-4 gap-4 text-xl font-jetbrains">
 
@@ -100,6 +106,7 @@ export default function GuestBook() {
                 {!msg.approved && (
                   <button onClick={() => approveMessage(msg.id)} className="bg-[#39ff14] px-2 py-1 text-black hover:bg-[#32cc12]">Approve</button>
                 )}
+                <button onClick={() => deleteMessage(msg.id)} className="bg-red-600 px-2 py-1 text-white hover:bg-red-700">Delete</button>
                 <input
                   type="text"
                   placeholder="Reply..."

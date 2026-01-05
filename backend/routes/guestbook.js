@@ -93,4 +93,19 @@ router.patch("/reply/:id", (req, res) => {
   }
 });
 
+// DELETE a message
+router.delete("/:id", (req, res) => {
+  try {
+    const messages = readMessages();
+    const msgIndex = messages.findIndex((m) => m.id == req.params.id);
+    if (msgIndex === -1) return res.status(404).json({ error: "Message not found" });
+
+    messages.splice(msgIndex, 1);
+    writeMessages(messages);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
