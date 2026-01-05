@@ -30,14 +30,13 @@ const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 
 export default function Page() {
   const [active, setActive] = useState("/about");
-  const [transitioning, setTransitioning] = useState(true);
+  const [transitioning, setTransitioning] = useState(false);
   const [popping, setPopping] = useState(null);
   const [open, setEgg] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
   const { currentUser, isAdmin } = useCurrentUser();
   const mainRef = useRef(null);
-  const initialLoadDone = useRef(false);
 
   useEffect(() => {
     const ua = navigator.userAgent || window.opera;
@@ -114,37 +113,31 @@ export default function Page() {
     return Promise.race([waitForExistingImages(), timeout]);
   }, []);
 
-  useEffect(() => {
-    if (initialLoadDone.current || isMobile) return;
-    initialLoadDone.current = true;
-
-    const waitForInitialImages = async () => {
-      const imageWait = waitForImages(mainRef.current, true);
-      const maxTimeout = new Promise((resolve) => setTimeout(resolve, 5000));
-      await Promise.race([imageWait, maxTimeout]);
-      setTransitioning(false);
-    };
-
-    waitForInitialImages();
-  }, [waitForImages, isMobile]);
+  const pagesWithDynamicImages = ["/shitposts", "/collection"];
 
   const NavClick = async (page) => {
     if (page === active) return;
 
+    const needsImageWait = pagesWithDynamicImages.includes(page);
+
     setPopping(page);
-    setTransitioning(true);
+    setTransitioning(needsImageWait);
 
     const preloadPromise = preloadPage(page);
 
-    const minDelay = new Promise((res) => setTimeout(res, 400));
+    const minDelay = needsImageWait
+      ? new Promise((res) => setTimeout(res, 400))
+      : Promise.resolve();
 
     await Promise.all([preloadPromise, minDelay]);
 
     setActive(page);
 
-    const imageWait = waitForImages(mainRef.current, true);
-    const maxTimeout = new Promise((resolve) => setTimeout(resolve, 5000));
-    await Promise.race([imageWait, maxTimeout]);
+    if (needsImageWait) {
+      const imageWait = waitForImages(mainRef.current, true);
+      const maxTimeout = new Promise((resolve) => setTimeout(resolve, 5000));
+      await Promise.race([imageWait, maxTimeout]);
+    }
 
     setTransitioning(false);
     setPopping(null);
