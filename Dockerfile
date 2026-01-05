@@ -24,12 +24,8 @@ COPY . .
 # Build Next.js frontend
 RUN npm run build
 
-# Clean up build dependencies but keep runtime libs
-RUN apt-get update && apt-get remove -y \
-    build-essential \
-    python3 \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+# Note: We keep all dependencies installed because autoremove
+# incorrectly removes runtime libraries that canvas needs for colors
 
 # Expose ports
 EXPOSE 3000
