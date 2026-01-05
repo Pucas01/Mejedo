@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import { AchievementProvider, useAchievements } from "../../hooks/useAchievements.js";
 
-export default function LoginPage() {
+const AchievementToast = dynamic(() => import("../../components/achievements/AchievementToast.jsx"));
+
+function LoginContent() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -12,12 +16,14 @@ export default function LoginPage() {
   const [typedCmd, setTypedCmd] = useState("");
   const [doneTyping, setDoneTyping] = useState(false);
   const command = "login";
+  const { unlock } = useAchievements();
 
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+    unlock("not_him");
 
     try {
       const res = await fetch("/api/users/login", {
@@ -125,6 +131,15 @@ export default function LoginPage() {
         )}
 
       </div>
+      <AchievementToast />
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <AchievementProvider>
+      <LoginContent />
+    </AchievementProvider>
   );
 }

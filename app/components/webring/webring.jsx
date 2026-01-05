@@ -93,8 +93,8 @@ export default function Webring() {
         )}
         {doneInfo && (
           <div className="space-y-2 mt-2">
-            <header className="text-2xl text-[#39ff14]">Webrings</header>
-            <p>
+            <header className="text-2xl text-[#FFFFFF]">Webrings</header>
+            <p className="text-gray-400">
               This is where i place all my webrings, cool right? yeah i know.
             </p>
           </div>
@@ -117,7 +117,7 @@ export default function Webring() {
         )}
         {doneList && (
           <>
-            <p className="text-[#39ff14] mb-4">Webrings I'm part of:</p>
+            <p className="text-2xl mb-4">Webrings I'm part of:</p>
             <div className="space-y-6">
               {WEBRING_SCRIPTS.length === 0 ? (
                 <div className="text-gray-400">

@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import DOMPurify from "dompurify";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
+import { useAchievements } from "../../hooks/useAchievements.js";
 
 export default function GuestBook() {
   const { currentUser, isAdmin } = useCurrentUser();
+  const { unlock } = useAchievements();
 
   const [messages, setMessages] = useState([]);
   const [name, setName] = useState("");
@@ -36,6 +38,9 @@ export default function GuestBook() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: sanitizedName, message: sanitizedMessage, website: sanitizedWebsite }),
     });
+
+    // Unlock guestbook achievement
+    unlock("guestbook_signer");
 
     setName("");
     setMessage("");

@@ -1,10 +1,12 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useAchievements } from "../../hooks/useAchievements";
 
 // Tips and easter eggs the mascot can say
 const tips = [
   "Try clicking the header title!",
   "Try imputing the konami code!",
+  "Did you really try logging in? o no wait that was me.",
   "Did you know? This site runs on hopes and prayers.",
   "Check out the manga collection! Spoiler, theres chainsawman.",
   "Futaba is the goat. Fight me.",
@@ -37,6 +39,22 @@ export default function Mascot() {
   const hideTimeoutRef = useRef(null);
   const tipQueueRef = useRef([]);
   const animationSpeedRef = useRef(500);
+
+  // Achievement integration
+  let achievements = null;
+  try {
+    achievements = useAchievements();
+  } catch {
+    // Not wrapped in AchievementProvider yet
+  }
+
+  // React to achievement unlocks
+  useEffect(() => {
+    if (achievements?.pendingAchievement) {
+      const achievement = achievements.pendingAchievement;
+      showRandomTip(`${achievement.icon} Achievement unlocked: ${achievement.name}!`);
+    }
+  }, [achievements?.pendingAchievement]);
 
   // Responsive sizing based on screen width
   useEffect(() => {
@@ -101,13 +119,13 @@ export default function Mascot() {
   };
 
   // Show a random tip periodically or on click
-  const showRandomTip = () => {
+  const showRandomTip = (customMessage = null) => {
     // Clear any existing timeout
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
     }
 
-    const nextTip = getNextTip();
+    const nextTip = customMessage || getNextTip();
     setCurrentTip(nextTip);
     setBubbleState("entering");
 
@@ -194,7 +212,13 @@ export default function Mascot() {
       {/* Mascot box */}
       <div
         className={`transition-transform duration-200 cursor-pointer ${isHovered ? "scale-110" : ""}`}
-        onClick={showRandomTip}
+        onClick={() => {
+          // Track mascot clicks for achievement
+          if (achievements?.updateStats) {
+            achievements.updateStats("mascotClicks", 1);
+          }
+          showRandomTip();
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

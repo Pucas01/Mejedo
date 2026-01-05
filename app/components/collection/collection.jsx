@@ -1,11 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
+import { useAchievements } from "../../hooks/useAchievements.js";
 import ConsolesSection from "./consolesSection.jsx";
 import MangaSection from "./mangaSection.jsx";
 
 export default function CollectionPage() {
   const { isAdmin } = useCurrentUser();
+  const { updateStats } = useAchievements();
 
   // Data
   const [consoles, setConsoles] = useState([]);
@@ -18,6 +20,21 @@ export default function CollectionPage() {
   // Selected items (detail view triggers)
   const [selectedConsole, setSelectedConsole] = useState(null);
   const [selectedManga, setSelectedManga] = useState(null);
+
+  // Wrap setters to track views for achievements
+  const handleSelectConsole = (c) => {
+    setSelectedConsole(c);
+    if (c && c.id !== "new") {
+      updateStats("viewedConsole", true);
+    }
+  };
+
+  const handleSelectManga = (m) => {
+    setSelectedManga(m);
+    if (m && m.id !== "new") {
+      updateStats("viewedManga", true);
+    }
+  };
 
   // Fetch consoles
   const fetchConsoles = async () => {
@@ -54,7 +71,7 @@ export default function CollectionPage() {
         consoles={consoles}
         loading={loadingConsoles}
         selectedConsole={selectedConsole}
-        setSelectedConsole={setSelectedConsole}
+        setSelectedConsole={handleSelectConsole}
         refresh={fetchConsoles}
       />
 
@@ -63,7 +80,7 @@ export default function CollectionPage() {
         manga={manga}
         loading={loadingManga}
         selectedManga={selectedManga}
-        setSelectedManga={setSelectedManga}
+        setSelectedManga={handleSelectManga}
         refresh={fetchManga}
       />
     </div>

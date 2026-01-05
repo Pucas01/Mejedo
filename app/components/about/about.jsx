@@ -5,6 +5,7 @@ import SpotifyTerminal from "./SpotifyTerminal";
 import NintendoSwitchTerminal from "./NintendoSwitchTerminal";
 import DiscordTerminal from "./DiscordTerminal";
 import Whoami from "./whoami";
+import { useAchievements } from "../../hooks/useAchievements.js";
 
 export default function About() {
   const [fastfetch, setFastfetch] = useState("");
@@ -26,6 +27,25 @@ export default function About() {
   const command2 = "find . -maxdepth 1 -type l -ls";
 
   const secondRef = useRef(null);
+  const { unlock, unlockedAchievements } = useAchievements();
+
+  const handleSocialClick = (e, url) => {
+    // If already unlocked, just open normally
+    if (unlockedAchievements.stalker) {
+      return;
+    }
+
+    // Prevent default link behavior
+    e.preventDefault();
+
+    // Unlock achievement first
+    unlock("stalker");
+
+    // Wait for achievement toast to show, then open link
+    setTimeout(() => {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }, 2000);
+  };
 
   // First typing (fastfetch)
   useEffect(() => {
@@ -273,13 +293,13 @@ export default function About() {
 
           {doneLinks && (
             <div className="p-8 text-xl space-y-2 text-[#39ff14] font-jetbrains">
-              <p> Twitter  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://x.com/Pucas02">x.com/Pucas02</a></p>
-              <p> GitHub  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://github.com/pucas01">github.com/pucas01</a></p>
+              <p> Twitter  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://x.com/Pucas02" target="_blank" rel="noopener noreferrer" onClick={(e) => handleSocialClick(e, "https://x.com/Pucas02")}>x.com/Pucas02</a></p>
+              <p> GitHub  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://github.com/pucas01" target="_blank" rel="noopener noreferrer" onClick={(e) => handleSocialClick(e, "https://github.com/pucas01")}>github.com/pucas01</a></p>
               <p> Discord  <a className="text-white">pucas01</a></p>
-              <p> Tiktok  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://www.tiktok.com/@pucas02">tiktok.com/@pucas02</a></p>
-              <p> Spotify  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://open.spotify.com/user/lucas_v2006">spotify.com/user/pucas01</a></p>
-              <p>󰲿 stats.fm  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://stats.fm/pucas01">stats.fm/pucas01</a></p>
-              <p> AniList  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://anilist.co/user/pucas01/">anilist.co/user/pucas01/</a></p>
+              <p> Tiktok  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://www.tiktok.com/@pucas02" target="_blank" rel="noopener noreferrer" onClick={(e) => handleSocialClick(e, "https://www.tiktok.com/@pucas02")}>tiktok.com/@pucas02</a></p>
+              <p> Spotify  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://open.spotify.com/user/lucas_v2006" target="_blank" rel="noopener noreferrer" onClick={(e) => handleSocialClick(e, "https://open.spotify.com/user/lucas_v2006")}>spotify.com/user/pucas01</a></p>
+              <p>󰲿 stats.fm  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://stats.fm/pucas01" target="_blank" rel="noopener noreferrer" onClick={(e) => handleSocialClick(e, "https://stats.fm/pucas01")}>stats.fm/pucas01</a></p>
+              <p> AniList  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://anilist.co/user/pucas01/" target="_blank" rel="noopener noreferrer" onClick={(e) => handleSocialClick(e, "https://anilist.co/user/pucas01/")}>anilist.co/user/pucas01/</a></p>
             </div>
           )}
       </div>

@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const LANES = ["d", "f", "j", "k"];
-const LANE_COLORS = ["#ff5555", "#39ff14", "#ffd700", "#D73DA3"];
-const NOTE_SPEED = 5;
+const LANE_COLORS = ["#c24b99", "#00ffff", "#12fa05", "#f9393f"]; // FNF colors: purple, cyan, green, red
+const NOTE_SPEED = 8;
 const HIT_ZONE_Y = 50;
 const GAME_HEIGHT = 400;
 const GAME_WIDTH = 300;
@@ -12,59 +12,117 @@ const NOTE_HEIGHT = 14;
 const NOTE_WIDTH = 54;
 const PERFECT_WINDOW = 30;
 const GOOD_WINDOW = 60;
-const GAME_DURATION = 30000;
 
-// Note component - simple terminal style
-const PixelNote = ({ color, hit }) => (
+// Arrow directions for each lane (left, down, up, right)
+const ARROW_ROTATIONS = [270, 180, 0, 90];
+
+// Available songs
+const SONGS = {
+  random: {
+    name: "Random Mode",
+    artist: "Procedural",
+    duration: 30000,
+    audioSrc: null,
+    chartSrc: null,
+  },
+  "2hot": {
+    name: "2hot",
+    artist: "Kawai Sprite",
+    duration: 120000,
+    audioSrc: "/songs/2hot.ogg",
+    voiceSrc: "/songs/2hot-voices.ogg",
+    chartSrc: "/songs/2hot-chart.json",
+  },
+};
+
+// Note component - FNF-style arrow
+const PixelNote = ({ color, hit, lane }) => (
   <div
     className={`transition-opacity duration-75 ${hit ? "opacity-0" : "opacity-100"}`}
     style={{
       width: NOTE_WIDTH,
-      height: NOTE_HEIGHT,
-      background: color,
-      border: "2px solid #39ff14",
-    }}
-  />
-);
-
-// Receptor - terminal key style
-const PixelReceptor = ({ keyLabel, color, pressed }) => (
-  <div
-    className="flex items-center justify-center font-mono"
-    style={{
-      width: NOTE_WIDTH,
-      height: 26,
-      background: pressed ? color : "#121217",
-      border: `2px solid ${pressed ? "#fff" : "#39ff14"}`,
+      height: NOTE_WIDTH,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
     }}
   >
-    <span
-      className="font-bold text-sm"
-      style={{ color: pressed ? "#000" : color }}
+    <svg
+      width={NOTE_WIDTH - 4}
+      height={NOTE_WIDTH - 4}
+      viewBox="0 0 32 32"
+      style={{
+        transform: `rotate(${ARROW_ROTATIONS[lane]}deg)`,
+      }}
     >
-      {keyLabel}
-    </span>
+      <polygon
+        points="16,2 30,16 22,16 22,30 10,30 10,16 2,16"
+        fill={color}
+        stroke="#fff"
+        strokeWidth="1.5"
+      />
+    </svg>
   </div>
 );
 
-export default function RhythmGame({ show, onClose }) {
+// Receptor - FNF-style arrow outline
+const PixelReceptor = ({ keyLabel, color, pressed, lane }) => (
+  <div
+    className="flex items-center justify-center"
+    style={{
+      width: NOTE_WIDTH,
+      height: NOTE_WIDTH,
+    }}
+  >
+    <svg
+      width={NOTE_WIDTH - 4}
+      height={NOTE_WIDTH - 4}
+      viewBox="0 0 32 32"
+      style={{
+        transform: `rotate(${ARROW_ROTATIONS[lane]}deg)`,
+        opacity: pressed ? 1 : 0.5,
+      }}
+    >
+      <polygon
+        points="16,2 30,16 22,16 22,30 10,30 10,16 2,16"
+        fill={pressed ? color : "transparent"}
+        stroke={color}
+        strokeWidth="2"
+      />
+    </svg>
+  </div>
+);
+
+export default function RhythmGame({ show, onClose, onGameEnd }) {
   const [notes, setNotes] = useState([]);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
   const [feedback, setFeedback] = useState(null);
   const [pressedLanes, setPressedLanes] = useState({});
-  const [gameState, setGameState] = useState("playing");
-  const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
+  const [gameState, setGameState] = useState("menu"); // "menu" | "loading" | "playing" | "ended"
+  const [timeLeft, setTimeLeft] = useState(30000);
   const [hitEffects, setHitEffects] = useState([]);
+  const [selectedSong, setSelectedSong] = useState("random");
+  const [chartData, setChartData] = useState(null);
 
   const gameLoopRef = useRef(null);
   const noteIdRef = useRef(0);
   const startTimeRef = useRef(null);
   const lastNoteTimeRef = useRef({});
   const effectIdRef = useRef(0);
+  const scoreRef = useRef(0);
+  const audioRef = useRef(null);
+  const voiceRef = useRef(null);
+  const chartNotesRef = useRef([]);
+  const nextNoteIndexRef = useRef(0);
 
-  const generateNote = useCallback(() => {
+  // Calculate how far ahead to spawn notes (in ms) based on note travel time
+  const SPAWN_AHEAD_MS = (GAME_HEIGHT - HIT_ZONE_Y) / NOTE_SPEED * (1000 / 60);
+  // Audio offset to sync notes with the music (positive = notes come earlier)
+  const AUDIO_OFFSET_MS = 625;
+
+  const generateRandomNote = useCallback(() => {
     const now = Date.now();
     const lane = Math.floor(Math.random() * 4);
 
@@ -90,23 +148,121 @@ export default function RhythmGame({ show, onClose }) {
     }, 200);
   }, []);
 
+  // Load chart data
+  const loadChart = async (songKey) => {
+    const song = SONGS[songKey];
+    if (!song.chartSrc) return null;
+
+    try {
+      const res = await fetch(song.chartSrc);
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.error("Failed to load chart:", err);
+      return null;
+    }
+  };
+
+  // Start a song
+  const startSong = async (songKey) => {
+    setGameState("loading");
+    const song = SONGS[songKey];
+
+    if (song.chartSrc) {
+      const chart = await loadChart(songKey);
+      if (chart) {
+        setChartData(chart);
+        chartNotesRef.current = chart.notes.map((n, i) => ({ ...n, id: i }));
+        setTimeLeft(chart.duration);
+      }
+    } else {
+      setChartData(null);
+      chartNotesRef.current = [];
+      setTimeLeft(song.duration);
+    }
+
+    // Reset game state
+    setNotes([]);
+    setScore(0);
+    scoreRef.current = 0;
+    setCombo(0);
+    setMaxCombo(0);
+    setFeedback(null);
+    setPressedLanes({});
+    setHitEffects([]);
+    noteIdRef.current = 0;
+    nextNoteIndexRef.current = 0;
+    lastNoteTimeRef.current = {};
+
+    setGameState("playing");
+  };
+
   // Game loop
   useEffect(() => {
     if (!show || gameState !== "playing") return;
 
     startTimeRef.current = Date.now();
-    noteIdRef.current = 0;
-    lastNoteTimeRef.current = {};
+
+    // Start audio if available
+    const song = SONGS[selectedSong];
+    if (song.audioSrc && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.volume = 0.3;
+      audioRef.current.play().catch(() => {});
+    }
+    if (song.voiceSrc && voiceRef.current) {
+      voiceRef.current.currentTime = 0;
+      voiceRef.current.volume = 0.4;
+      voiceRef.current.play().catch(() => {});
+    }
 
     const loop = () => {
       const elapsed = Date.now() - startTimeRef.current;
-      const remaining = GAME_DURATION - elapsed;
+      const song = SONGS[selectedSong];
+      const duration = chartData?.duration || song.duration;
+      const remaining = duration - elapsed;
 
       setTimeLeft(Math.max(0, remaining));
 
       if (remaining <= 0) {
         setGameState("ended");
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+        if (voiceRef.current) {
+          voiceRef.current.pause();
+        }
+        if (onGameEnd) {
+          onGameEnd(scoreRef.current);
+        }
         return;
+      }
+
+      // Spawn charted notes
+      if (chartNotesRef.current.length > 0) {
+        const currentTime = elapsed;
+        // Apply offset: spawn notes earlier so they arrive when the audio plays
+        const adjustedTime = currentTime + AUDIO_OFFSET_MS;
+        while (
+          nextNoteIndexRef.current < chartNotesRef.current.length &&
+          chartNotesRef.current[nextNoteIndexRef.current].t <= adjustedTime + SPAWN_AHEAD_MS
+        ) {
+          const chartNote = chartNotesRef.current[nextNoteIndexRef.current];
+          const timeUntilHit = chartNote.t - adjustedTime;
+          const startY = GAME_HEIGHT + NOTE_HEIGHT + (timeUntilHit / SPAWN_AHEAD_MS) * (GAME_HEIGHT - HIT_ZONE_Y);
+
+          setNotes((prev) => [
+            ...prev,
+            {
+              id: chartNote.id,
+              lane: chartNote.lane,
+              y: startY,
+              hit: false,
+              targetTime: chartNote.t,
+            },
+          ]);
+          nextNoteIndexRef.current++;
+        }
       }
 
       setNotes((prev) => {
@@ -131,8 +287,9 @@ export default function RhythmGame({ show, onClose }) {
         return updated;
       });
 
-      if (Math.random() < 0.04) {
-        const newNote = generateNote();
+      // Random note generation (only for random mode)
+      if (!chartData && Math.random() < 0.04) {
+        const newNote = generateRandomNote();
         if (newNote) {
           setNotes((prev) => [...prev, newNote]);
         }
@@ -147,8 +304,14 @@ export default function RhythmGame({ show, onClose }) {
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
       }
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      if (voiceRef.current) {
+        voiceRef.current.pause();
+      }
     };
-  }, [show, gameState, generateNote]);
+  }, [show, gameState, generateRandomNote, selectedSong, chartData, onGameEnd, SPAWN_AHEAD_MS]);
 
   // Key handling
   useEffect(() => {
@@ -158,7 +321,13 @@ export default function RhythmGame({ show, onClose }) {
       const lane = LANES.indexOf(e.key.toLowerCase());
       if (lane === -1) {
         if (e.key === "Escape") {
-          onClose();
+          if (audioRef.current) {
+            audioRef.current.pause();
+          }
+          if (voiceRef.current) {
+            voiceRef.current.pause();
+          }
+          setGameState("menu");
         }
         return;
       }
@@ -185,7 +354,11 @@ export default function RhythmGame({ show, onClose }) {
         if (hitNote) {
           const points = hitType === "perfect" ? 100 : 50;
           const multiplier = 1 + Math.floor(combo / 10) * 0.1;
-          setScore((s) => s + Math.floor(points * multiplier));
+          const newPoints = Math.floor(points * multiplier);
+          setScore((s) => {
+            scoreRef.current = s + newPoints;
+            return s + newPoints;
+          });
           setCombo((c) => {
             const newCombo = c + 1;
             setMaxCombo((m) => Math.max(m, newCombo));
@@ -218,35 +391,126 @@ export default function RhythmGame({ show, onClose }) {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [show, gameState, combo, onClose, addHitEffect]);
+  }, [show, gameState, combo, addHitEffect]);
 
-  // Reset on open
+  // Reset to menu on open
   useEffect(() => {
     if (show) {
+      setGameState("menu");
       setNotes([]);
       setScore(0);
+      scoreRef.current = 0;
       setCombo(0);
       setMaxCombo(0);
       setFeedback(null);
       setPressedLanes({});
-      setGameState("playing");
-      setTimeLeft(GAME_DURATION);
       setHitEffects([]);
+      setChartData(null);
     }
   }, [show]);
+
+  // Handle escape in menu
+  useEffect(() => {
+    if (!show || gameState !== "menu") return;
+
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [show, gameState, onClose]);
 
   if (!show) return null;
 
   const formatTime = (ms) => Math.ceil(ms / 1000);
   const laneStartX = (GAME_WIDTH - LANE_WIDTH * 4) / 2;
+  const currentSong = SONGS[selectedSong];
+
+  // Song selection menu
+  if (gameState === "menu") {
+    return (
+      <div
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+      >
+        <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg p-6 min-w-[320px]">
+          <div className="flex justify-between items-center mb-4 border-b border-[#39ff14] pb-2">
+            <h2 className="text-[#39ff14] text-xl font-mono font-bold">SELECT SONG</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-[#39ff14] font-mono transition-colors"
+            >
+              [X]
+            </button>
+          </div>
+
+          <div className="space-y-2 mb-4">
+            {Object.entries(SONGS).map(([key, song]) => (
+              <button
+                key={key}
+                onClick={() => setSelectedSong(key)}
+                className={`w-full p-3 text-left font-mono border-2 transition-colors ${
+                  selectedSong === key
+                    ? "border-[#39ff14] bg-[#39ff14]/10 text-[#39ff14]"
+                    : "border-gray-600 hover:border-[#39ff14] text-gray-300 hover:text-[#39ff14]"
+                }`}
+              >
+                <div className="font-bold">{song.name}</div>
+                <div className="text-sm text-gray-500">{song.artist}</div>
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => startSong(selectedSong)}
+            className="w-full py-3 font-mono font-bold bg-[#39ff14] text-black border-2 border-[#39ff14] hover:bg-[#121217] hover:text-[#39ff14] transition-colors"
+          >
+            [START]
+          </button>
+
+          <div className="mt-4 text-center text-gray-500 text-xs font-mono">
+            ESC = EXIT
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (gameState === "loading") {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80">
+        <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg p-8">
+          <div className="text-[#39ff14] font-mono animate-pulse">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) {
+          if (audioRef.current) audioRef.current.pause();
+          if (voiceRef.current) voiceRef.current.pause();
+          setGameState("menu");
+        }
       }}
     >
+      {/* Audio elements */}
+      {currentSong.audioSrc && (
+        <audio ref={audioRef} src={currentSong.audioSrc} />
+      )}
+      {currentSong.voiceSrc && (
+        <audio ref={voiceRef} src={currentSong.voiceSrc} />
+      )}
+
       {/* Terminal window */}
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg">
         {/* Terminal header */}
@@ -254,14 +518,18 @@ export default function RhythmGame({ show, onClose }) {
           <div className="font-mono text-sm flex items-center gap-2">
             <span className="text-[#39ff14]">pucas01</span>
             <span className="text-white">@</span>
-            <span className="text-[#D73DA3]">RhythmGame</span>
+            <span className="text-[#D73DA3]">PucasArch</span>
             <span className="text-white">:</span>
             <span className="text-[#FF5555]">~</span>
             <span className="text-white">$</span>
-            <span className="text-gray-400 ml-1">./futabalishous</span>
+            <span className="text-gray-400 ml-1">./{currentSong.name.toLowerCase().replace(/\s/g, "_")}</span>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              if (audioRef.current) audioRef.current.pause();
+              if (voiceRef.current) voiceRef.current.pause();
+              setGameState("menu");
+            }}
             className="text-gray-500 hover:text-[#39ff14] font-mono transition-colors"
           >
             [X]
@@ -304,29 +572,10 @@ export default function RhythmGame({ show, onClose }) {
             />
           ))}
 
-          {/* Lane dividers */}
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="absolute top-0 bottom-0"
-              style={{
-                left: laneStartX + i * LANE_WIDTH,
-                width: 1,
-                background: "#39ff1420",
-              }}
-            />
-          ))}
-
-          {/* Hit zone line */}
-          <div
-            className="absolute left-0 right-0 h-[2px] bg-[#39ff14]"
-            style={{ top: HIT_ZONE_Y }}
-          />
-
           {/* Receptors */}
           <div
             className="absolute flex gap-[14px]"
-            style={{ top: HIT_ZONE_Y - 13, left: laneStartX + 7 }}
+            style={{ top: HIT_ZONE_Y - NOTE_WIDTH / 2, left: laneStartX + 7 }}
           >
             {LANES.map((key, i) => (
               <PixelReceptor
@@ -334,6 +583,7 @@ export default function RhythmGame({ show, onClose }) {
                 keyLabel={key.toUpperCase()}
                 color={LANE_COLORS[i]}
                 pressed={pressedLanes[i]}
+                lane={i}
               />
             ))}
           </div>
@@ -345,12 +595,12 @@ export default function RhythmGame({ show, onClose }) {
               className="absolute animate-pulse"
               style={{
                 left: laneStartX + effect.lane * LANE_WIDTH + 7,
-                top: HIT_ZONE_Y - 13,
+                top: HIT_ZONE_Y - NOTE_WIDTH / 2,
                 width: NOTE_WIDTH,
-                height: 26,
+                height: NOTE_WIDTH,
                 background: effect.type === "perfect" ? "#39ff14" : "#ffd700",
-                opacity: 0.4,
-                border: "2px solid #fff",
+                opacity: 0.3,
+                borderRadius: "50%",
               }}
             />
           ))}
@@ -365,7 +615,7 @@ export default function RhythmGame({ show, onClose }) {
                 top: note.y,
               }}
             >
-              <PixelNote color={LANE_COLORS[note.lane]} hit={note.hit} />
+              <PixelNote color={LANE_COLORS[note.lane]} hit={note.hit} lane={note.lane} />
             </div>
           ))}
 
@@ -400,7 +650,10 @@ export default function RhythmGame({ show, onClose }) {
           {gameState === "ended" && (
             <div className="absolute inset-0 bg-[#121217]/95 flex flex-col items-center justify-center">
               <div className="text-[#39ff14] text-xl font-mono font-bold mb-4 border-b border-[#39ff14] pb-2 px-4">
-                GAME_OVER
+                SONG_COMPLETE
+              </div>
+              <div className="text-gray-400 font-mono text-sm mb-2">
+                {currentSong.name}
               </div>
               <div className="text-white font-mono mb-1">
                 FINAL SCORE: <span className="text-[#39ff14]">{Math.floor(score)}</span>
@@ -408,21 +661,20 @@ export default function RhythmGame({ show, onClose }) {
               <div className="text-gray-400 font-mono text-sm mb-4">
                 MAX COMBO: <span className="text-[#ffd700]">{maxCombo}</span>
               </div>
-              <button
-                onClick={() => {
-                  setGameState("playing");
-                  setNotes([]);
-                  setScore(0);
-                  setCombo(0);
-                  setMaxCombo(0);
-                  setTimeLeft(GAME_DURATION);
-                  setHitEffects([]);
-                  startTimeRef.current = Date.now();
-                }}
-                className="px-6 py-2 font-mono font-bold bg-[#39ff14] text-black border-2 border-[#39ff14] hover:bg-[#121217] hover:text-[#39ff14] transition-colors"
-              >
-                [RETRY]
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => startSong(selectedSong)}
+                  className="px-4 py-2 font-mono font-bold bg-[#39ff14] text-black border-2 border-[#39ff14] hover:bg-[#121217] hover:text-[#39ff14] transition-colors"
+                >
+                  [RETRY]
+                </button>
+                <button
+                  onClick={() => setGameState("menu")}
+                  className="px-4 py-2 font-mono font-bold bg-[#121217] text-[#39ff14] border-2 border-[#39ff14] hover:bg-[#39ff14] hover:text-black transition-colors"
+                >
+                  [MENU]
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -435,7 +687,7 @@ export default function RhythmGame({ show, onClose }) {
           <span className="text-[#D73DA3]"> K</span>
           <span className="text-gray-500"> = HIT</span>
           <span className="mx-2">|</span>
-          <span>ESC = EXIT</span>
+          <span>ESC = MENU</span>
         </div>
       </div>
     </div>

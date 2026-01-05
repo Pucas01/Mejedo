@@ -5,6 +5,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useCurrentUser } from "./hooks/CurrentUser.js";
 import { useKonamiCode } from "./hooks/useKonamiCode.js";
+import { AchievementProvider, useAchievements } from "./hooks/useAchievements.js";
 
 // Dynamic imports with preload capability
 const pageComponents = {
@@ -32,21 +33,37 @@ const pageImports = {
 
 const FutabaOverlay = dynamic(() => import("./components/easteregg/futaba.jsx"));
 const RhythmGame = dynamic(() => import("./components/easteregg/RhythmGame.jsx"));
+const ArrowHint = dynamic(() => import("./components/easteregg/ArrowHint.jsx"));
 const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
+const AchievementToast = dynamic(() => import("./components/achievements/AchievementToast.jsx"));
+const AchievementsModal = dynamic(() => import("./components/achievements/AchievementsModal.jsx"));
 
-export default function Page() {
+// Inner component that uses achievements
+function PageContent() {
   const [active, setActive] = useState("/about");
-  const [transitioning, setTransitioning] = useState(false); // About page doesn't need loading
+  const [transitioning, setTransitioning] = useState(false);
   const [popping, setPopping] = useState(null);
   const [open, setEgg] = useState(false);
   const [rhythmGameOpen, setRhythmGameOpen] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
   const { currentUser, isAdmin } = useCurrentUser();
   const mainRef = useRef(null);
+  const { unlock, updateStats, isLoaded, unlockedAchievements } = useAchievements();
 
   // Konami code easter egg
-  useKonamiCode(() => setRhythmGameOpen(true));
+  useKonamiCode(() => {
+    setRhythmGameOpen(true);
+    unlock("konami_master");
+  });
+
+  // Track initial page visit on mount (only after localStorage is loaded)
+  useEffect(() => {
+    if (isLoaded) {
+      updateStats("visitedPages", "/about");
+    }
+  }, [isLoaded, updateStats]);
 
   useEffect(() => {
     const ua = navigator.userAgent || window.opera;
@@ -156,6 +173,9 @@ export default function Page() {
     // Render the new page
     setActive(page);
 
+    // Track page visits for achievements
+    updateStats("visitedPages", page);
+
     // Only wait for images on pages with dynamic content
     if (needsImageWait) {
       const imageWait = waitForImages(mainRef.current, true);
@@ -193,17 +213,27 @@ export default function Page() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[url(/LaptopSHQ.png)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
-      <header className="p-4 text-center bg-[#090909] text-[#39ff14]">
+      <header className="p-4 pb-0 text-center bg-[#090909] text-[#39ff14]">
         <h1
           className="text-4xl font-bold flex cursor-pointer items-center justify-center gap-2"
-          onClick={() => setEgg(true)}
+          onClick={() => {
+            setEgg(true);
+            unlock("futaba_fan");
+          }}
         >
           /home/pucas01
         </h1>
         {isAdmin && <span>Admin Mode</span>}
+        <button
+          onClick={() => setAchievementsOpen(true)}
+          className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors mt-1"
+          title="View Achievements"
+        >
+          Achievements
+        </button>
       </header>
 
-      <nav className="flex justify-center gap-6 bg-[#090909] border-b-2 border-[#39ff14] py-3">
+      <nav className="flex justify-center gap-6 bg-[#090909] border-b-2 border-[#39ff14] py-4">
         <div className="inline-flex gap-6 custom-dash pb-2">
           {["/about", "/projects", "/blog", "/collection", "/shitposts", "/guestbook", "/webring", "/admin"].map(
             (page) => (
@@ -250,10 +280,51 @@ export default function Page() {
         <RhythmGame
           show={rhythmGameOpen}
           onClose={() => setRhythmGameOpen(false)}
+          onGameEnd={(finalScore) => updateStats("rhythmHighScore", finalScore)}
         />
       </main>
 
       <Mascot />
+
+      <AchievementToast />
+      <AchievementsModal
+        show={achievementsOpen}
+        onClose={() => setAchievementsOpen(false)}
+      />
+
+      {!rhythmGameOpen && <ArrowHint />}
+
+      {/* Rhythm game quick access button - shows after unlocking konami code */}
+      {unlockedAchievements.konami_master && !rhythmGameOpen && (
+        <button
+          onClick={() => setRhythmGameOpen(true)}
+          className="fixed bottom-4 left-4 z-40 p-3 bg-[#121217] border-2 border-[#39ff14] hover:bg-[#39ff14] hover:text-black text-[#39ff14] transition-colors group"
+          title="Open Rhythm Game"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 32 32"
+            className="group-hover:scale-110 transition-transform"
+          >
+            <polygon
+              points="16,2 30,16 22,16 22,30 10,30 10,16 2,16"
+              fill="currentColor"
+              stroke="currentColor"
+              strokeWidth="1"
+            />
+          </svg>
+        </button>
+      )}
     </div>
+  );
+}
+
+// Main export wrapped with AchievementProvider
+export default function Page() {
+  return (
+    <AchievementProvider>
+      <PageContent />
+    </AchievementProvider>
   );
 }

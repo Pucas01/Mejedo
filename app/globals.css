@@ -144,3 +144,47 @@ body {
   animation: rhythm-feedback 0.3s ease-out forwards;
 }
 
+/* Achievement toast progress bar */
+@keyframes shrink-bar {
+  0% { width: 100%; }
+  100% { width: 0%; }
+}
+
+.animate-shrink-bar {
+  animation: shrink-bar linear forwards;
+}
+
+/* Achievement unlock glow */
+@keyframes achievement-glow {
+  0%, 100% { box-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14; }
+  50% { box-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14, 0 0 30px #39ff14; }
+}
+
+.animate-achievement-glow {
+  animation: achievement-glow 1s ease-in-out 3;
+}
+
+/* Arrow hint animation for easter egg */
+@keyframes arrow-hint {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+.animate-arrow-hint {
+  animation: arrow-hint 0.6s ease-out forwards;
+}
+
