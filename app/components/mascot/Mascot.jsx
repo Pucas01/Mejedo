@@ -123,7 +123,7 @@ export default function Mascot() {
     // Calm down after 2 seconds (queue it to wait for cycle)
     setTimeout(() => {
       setPendingExcited(false);
-    }, 2000);
+    }, 3000);
 
     // Start exit after 5 seconds
     hideTimeoutRef.current = setTimeout(() => {
@@ -202,7 +202,11 @@ export default function Mascot() {
           <div className={`${config.container} flex items-end justify-center`}>
             <img
               key={bounceKey}
-              src={frame === 0 ? "/mascot/frame1.png" : "/mascot/frame2.png"}
+              src={
+                isExcited
+                  ? frame === 0 ? "/mascot/frame1_happy.png" : "/mascot/frame2_happy.png"
+                  : frame === 0 ? "/mascot/frame1.png" : "/mascot/frame2.png"
+              }
               alt="Mascot"
               width={config.mascot}
               className={frame === 0 ? (isExcited ? "animate-mascot-bounce-fast" : "animate-mascot-bounce") : ""}
