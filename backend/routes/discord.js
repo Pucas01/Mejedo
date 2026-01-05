@@ -3,7 +3,6 @@ import asciify from "asciify-image";
 
 const router = express.Router();
 
-// Replace with your Discord user ID
 const DISCORD_USER_ID = "333274561430683649";
 const LANYARD_API_URL = `https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`;
 

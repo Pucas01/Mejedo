@@ -103,11 +103,7 @@ export default function ShitPosts() {
   };
 
   if (!posts) {
-    return (
-      <div className="text-gray-400 text-center  p-8">
-        No shitposts found.
-      </div>
-    );
+    return null;
   }
 
   return (
