@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import Sticker from "../stickers/Sticker";
 
 // External webring scripts to load (simple single-script webrings)
 const WEBRING_SCRIPTS = [
@@ -170,7 +171,14 @@ export default function Webring() {
   return (
     <div className="flex flex-col gap-4 p-4 text-xl min-h-screen text-white justify-start">
       {/* Info terminal */}
-      <div className="bg-[#121217] min-h-[200px] p-8 border-2 border-[#39ff14] shadow-lg">
+      <div className="bg-[#121217] min-h-[200px] p-8 border-2 border-[#39ff14] shadow-lg relative">
+        <Sticker
+          src="/stickers/futaba-jacket.png"
+          position="top-left"
+          size={70}
+          rotation={-10}
+          offset={{ x: -18, y: -18 }}
+        />
         {!doneInfo && (
           <div className="text-xl flex flex-wrap">
             <span className="text-[#39ff14]">pucas01</span>
@@ -194,7 +202,14 @@ export default function Webring() {
       </div>
 
       {/* Webrings list */}
-      <div className="bg-[#121217] border-2 p-8 border-[#39ff14] shadow-lg">
+      <div className="bg-[#121217] border-2 p-8 border-[#39ff14] shadow-lg relative">
+        <Sticker
+          src="/stickers/futaba-pointing.png"
+          position="bottom-right"
+          size={75}
+          rotation={8}
+          offset={{ x: 20, y: 20 }}
+        />
         {!doneList && (
           <div className="text-xl flex flex-wrap">
             <span className="text-[#39ff14]">pucas01</span>

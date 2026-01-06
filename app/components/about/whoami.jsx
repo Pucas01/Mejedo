@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import Sticker from "../stickers/Sticker";
 
 export default function Whoami({
   aboutText = `### Intro
@@ -72,8 +73,15 @@ Some things im good at
   return (
     <div
       ref={containerRef}
-      className="flex-1 min-w-[400px] min-h-[610px] max-h-[610px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col"
+      className="flex-1 min-w-[400px] min-h-[610px] max-h-[610px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative"
     >
+      <Sticker
+        src="/stickers/futaba-peace.png"
+        position="bottom-right"
+        size={85}
+        rotation={15}
+        offset={{ x: 22, y: 22 }}
+      />
       {/* Typing command */}
       {!doneTyping && (
         <div className="p-6 font-jetbrains text-xl flex flex-wrap">

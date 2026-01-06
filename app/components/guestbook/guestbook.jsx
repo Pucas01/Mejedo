@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import DOMPurify from "dompurify";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
+import Sticker from "../stickers/Sticker";
 
 export default function GuestBook() {
   const { currentUser, isAdmin } = useCurrentUser();
@@ -73,7 +74,14 @@ export default function GuestBook() {
   return (
     <div className="flex flex-col p-4 gap-4 text-xl font-jetbrains">
 
-      <div className="flex-1 min-w-[400px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col p-4">
+      <div className="flex-1 min-w-[400px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col p-4 relative">
+        <Sticker
+          src="/stickers/futaba-pointing.png"
+          position="top-right"
+          size={70}
+          rotation={-10}
+          offset={{ x: 20, y: -20 }}
+        />
         <p>┌─ Guestbook ───────────────────────────────</p>
         <p>│ Woah, a guestbook! That's pretty wild!</p>
         <p>│ Feel free to leave a message if you're cool.</p>
@@ -88,7 +96,14 @@ export default function GuestBook() {
         </form>
       </div>
 
-      <div className="flex-1 min-w-[400px] min-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col overflow-auto p-4 space-y-2">
+      <div className="flex-1 min-w-[400px] min-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col overflow-auto p-4 space-y-2 relative">
+        <Sticker
+          src="/stickers/futaba-shy.png"
+          position="bottom-left"
+          size={75}
+          rotation={-5}
+          offset={{ x: -25, y: 25 }}
+        />
         {messages.length === 0 && <p className="text-gray-500">No messages yet!</p>}
         {messages.map(msg => (
           <div key={msg.id} className="whitespace-pre-wrap text-[#39ff14] border border-[#39ff14] p-3 flex flex-col gap-2">

@@ -39,6 +39,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "concurrently": "^9.2.1",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "typescript": "5.9.3"
   }
 }

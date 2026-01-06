@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
+import Sticker from "../stickers/Sticker";
 
 export default function BlogList({ onSelectPost }) {
   const [posts, setPosts] = useState([]);
@@ -109,7 +110,14 @@ export default function BlogList({ onSelectPost }) {
 
   return (
     <div className="min-h-screen p-4 text-white">
-      <div className="bg-[#121217] border-2 border-[#39ff14] p-6 flex flex-col justify-between items-start mb-6">
+      <div className="bg-[#121217] border-2 border-[#39ff14] p-6 flex flex-col justify-between items-start mb-6 relative">
+        <Sticker
+          src="/stickers/futaba-keyboard.png"
+          position="top-left"
+          size={70}
+          rotation={-12}
+          offset={{ x: -18, y: -18 }}
+        />
         <div className="w-full flex justify-between items-center">
           <h1 className="text-2xl font-bold">Blog</h1>
           {isAdmin && (
@@ -127,12 +135,27 @@ export default function BlogList({ onSelectPost }) {
       </div>
 
       <div className="flex flex-wrap justify-center gap-6">
-        {posts.map((post) => (
+        {posts.map((post, index) => {
+          const postStickers = [
+            { src: "/stickers/futaba-happy.png", rotation: 8, position: "top-right" },
+            { src: "/stickers/futaba-sitting.png", rotation: -10, position: "bottom-left" },
+            { src: "/stickers/futaba-peace.png", rotation: 12, position: "top-left" },
+          ];
+          const stickerConfig = postStickers[index % postStickers.length];
+
+          return (
           <div
             key={post.id}
             onClick={() => onSelectPost(post)}
             className="bg-[#121217] border-2 border-[#39ff14] hover:border-[#22a50b] p-4 min-w-full transition cursor-pointer relative"
           >
+            <Sticker
+              src={stickerConfig.src}
+              position={stickerConfig.position}
+              size={60}
+              rotation={stickerConfig.rotation}
+              offset={{ x: 28, y: 28 }}
+            />
             <h2 className="text-xl font-semibold pb-1">{post.title}</h2>
             <p className="text-gray-400 text-sm mb-2">
               {new Date(post.publishDate).toLocaleDateString()} • {post.readTime}
@@ -167,7 +190,8 @@ export default function BlogList({ onSelectPost }) {
               </div>
             )}
           </div>
-        ))}
+        );
+        })}
       </div>
 
       {editingPost && (

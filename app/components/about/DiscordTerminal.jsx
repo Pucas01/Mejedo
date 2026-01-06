@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import AnsiToHtml from "ansi-to-html";
 import useTypingAnimation from "../../hooks/useTypingAnimation";
+import Sticker from "../stickers/Sticker";
 
 export default function DiscordTerminal() {
   const [presence, setPresence] = useState(null);
@@ -105,8 +106,15 @@ export default function DiscordTerminal() {
   return (
     <div
       ref={ref}
-      className="flex-1 min-w-[400px] min-h-[200px] max-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex"
+      className="flex-1 min-w-[400px] min-h-[200px] max-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex relative"
     >
+      <Sticker
+        src="/stickers/futaba-keyboard.png"
+        position="bottom-left"
+        size={75}
+        rotation={12}
+        offset={{ x: -20, y: 20 }}
+      />
       {!isDone && (
         <div className="p-8 font-jetbrains text-xl flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>

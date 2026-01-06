@@ -6,6 +6,7 @@ import NintendoSwitchTerminal from "./NintendoSwitchTerminal";
 import DiscordTerminal from "./DiscordTerminal";
 import Whoami from "./whoami";
 import { useAchievements } from "../../hooks/useAchievements.js";
+import Sticker from "../stickers/Sticker";
 
 export default function About() {
   const [fastfetch, setFastfetch] = useState("");
@@ -225,7 +226,14 @@ export default function About() {
         </div>
       )}
 
-      <div className="flex-1 min-w-[400px] min-h-[725px] max-h-[725px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col">
+      <div className="flex-1 min-w-[400px] min-h-[725px] max-h-[725px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
+        <Sticker
+          src="/stickers/futaba-jacket.png"
+          position="bottom-right"
+          size={75}
+          rotation={8}
+          offset={{ x: 32, y: 32 }}
+        />
 
         {!doneFastfetch && (
           <div className="p-8 font-jetbrains text-xl flex flex-wrap">
@@ -276,7 +284,14 @@ export default function About() {
         <div>
           <Whoami />
         </div>
-      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[310px] max-h-[310px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex">
+      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[310px] max-h-[310px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex relative">
+        <Sticker
+          src="/stickers/futaba-standing.png"
+          position="top-left"
+          size={72}
+          rotation={-10}
+          offset={{ x: -30, y: -30 }}
+        />
         <div className="flex-1">
           {!doneLinks && (
             <div className="p-8 font-jetbrains text-xl flex flex-wrap">

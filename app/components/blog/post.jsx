@@ -2,6 +2,7 @@
 import { useMemo } from "react";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+import Sticker from "../stickers/Sticker";
 
 export default function BlogPost({ post, onBack }) {
   if (!post) return null;
@@ -32,7 +33,21 @@ export default function BlogPost({ post, onBack }) {
 
   return (
     <div className="p-4">
-    <div className="min-h-screen p-6 border-2 border-[#39ff14] text-white bg-[#121217]">
+    <div className="min-h-screen p-6 border-2 border-[#39ff14] text-white bg-[#121217] relative">
+      <Sticker
+        src="/stickers/futaba-standing.png"
+        position="top-right"
+        size={75}
+        rotation={-10}
+        offset={{ x: 35, y: -35 }}
+      />
+      <Sticker
+        src="/stickers/futaba-shy.png"
+        position="bottom-left"
+        size={70}
+        rotation={12}
+        offset={{ x: -35, y: 35 }}
+      />
       <button
         onClick={onBack}
         className="mb-6 text-[#39ff14] hover:text-white cursor-pointer transition"

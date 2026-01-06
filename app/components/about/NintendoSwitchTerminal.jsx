@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import AnsiToHtml from "ansi-to-html";
 import useTypingAnimation from "../../hooks/useTypingAnimation";
+import Sticker from "../stickers/Sticker";
 
 export default function NintendoSwitchTerminal() {
   const [presence, setPresence] = useState(null);
@@ -83,8 +84,15 @@ export default function NintendoSwitchTerminal() {
   return (
     <div
       ref={ref}
-      className="flex-1 min-w-[400px] min-h-[200px] max-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex"
+      className="flex-1 min-w-[400px] min-h-[200px] max-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex relative"
     >
+      <Sticker
+        src="/stickers/futaba-happy.png"
+        position="top-left"
+        size={70}
+        rotation={-12}
+        offset={{ x: -18, y: -18 }}
+      />
       {!isDone && (
         <div className="p-8 font-jetbrains text-xl flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>

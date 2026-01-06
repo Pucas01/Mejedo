@@ -1,11 +1,25 @@
 "use client";
 import { useState, useEffect } from "react";
+import Sticker from "../stickers/Sticker";
 
 export default function ProjectTerminal({ project }) {
   const [typingCmd, setTypingCmd] = useState("");
   const [doneTyping, setDoneTyping] = useState(false);
 
   const command = `cd /${project.name}`;
+
+  // Pick a different sticker for each project based on project name
+  const stickers = [
+    { src: "/stickers/futaba-sitting.png", rotation: 8, position: "bottom-right" },
+    { src: "/stickers/futaba-headphones.png", rotation: -10, position: "top-left" },
+    { src: "/stickers/futaba-keyboard.png", rotation: 12, position: "top-right" },
+    { src: "/stickers/futaba-happy.png", rotation: -8, position: "bottom-left" },
+    { src: "/stickers/futaba-peace.png", rotation: 15, position: "bottom-right" },
+    { src: "/stickers/futaba-jacket.png", rotation: -12, position: "top-right" },
+    { src: "/stickers/futaba-kneeling.png", rotation: 10, position: "bottom-left" },
+  ];
+  const stickerIndex = Math.abs(project.name.charCodeAt(0) + project.name.length) % stickers.length;
+  const selectedSticker = stickers[stickerIndex];
 
   useEffect(() => {
     const TOTAL_TIME = 1000;
@@ -26,7 +40,14 @@ export default function ProjectTerminal({ project }) {
   }, [command]);
 
   return (
-    <div className="flex-1 min-w-[550px] max-w-[550px] min-h-[410px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col m-2">
+    <div className="flex-1 min-w-[550px] max-w-[550px] min-h-[410px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col m-2 relative">
+      <Sticker
+        src={selectedSticker.src}
+        position={selectedSticker.position}
+        size={65}
+        rotation={selectedSticker.rotation}
+        offset={{ x: 18, y: 18 }}
+      />
       {!doneTyping && (
         <div className="p-4 font-jetbrains text-lg flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>

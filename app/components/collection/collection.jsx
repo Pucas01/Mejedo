@@ -4,6 +4,7 @@ import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
 import ConsolesSection from "./consolesSection.jsx";
 import MangaSection from "./mangaSection.jsx";
+import Sticker from "../stickers/Sticker";
 
 export default function CollectionPage() {
   const { isAdmin } = useCurrentUser();
@@ -59,7 +60,14 @@ export default function CollectionPage() {
 
   return (
     <div>
-      <div className="flex flex-col p-6 bg-[#121217] border-2 border-[#39ff14] m-4">
+      <div className="flex flex-col p-6 bg-[#121217] border-2 border-[#39ff14] m-4 relative">
+        <Sticker
+          src="/stickers/futaba-jumping.png"
+          position="bottom-right"
+          size={70}
+          rotation={-8}
+          offset={{ x: 30, y: 30 }}
+        />
         <h1 className="text-2xl font-bold">Collection</h1>
         <p className="text-xl text-gray-400 mt-2">
           This is where I can show off some of the stuff I own :)
