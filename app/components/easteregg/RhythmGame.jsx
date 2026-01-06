@@ -73,6 +73,7 @@ const HoldNoteTail = ({ color, height, held, progress, broken }) => (
       alignItems: "center",
       position: "relative",
       opacity: broken ? 0.4 : 1,
+      transition: "height 0.016s linear",
     }}
   >
     <div
@@ -86,6 +87,7 @@ const HoldNoteTail = ({ color, height, held, progress, broken }) => (
         borderRight: `2px solid ${broken ? "#ff555566" : `${color}66`}`,
         position: "relative",
         overflow: "hidden",
+        transition: "height 0.016s linear",
       }}
     >
       {progress > 0 && (
@@ -161,6 +163,7 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
   const [feedback, setFeedback] = useState(null);
   const [pressedLanes, setPressedLanes] = useState({});
   const [gameState, setGameState] = useState("menu");
+  const [countdownValue, setCountdownValue] = useState(3);
   const [timeLeft, setTimeLeft] = useState(30000);
   const [hitEffects, setHitEffects] = useState([]);
   const [selectedSong, setSelectedSong] = useState("lit-up");
@@ -228,10 +231,27 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
     setHitEffects([]);
     nextNoteIndexRef.current = 0;
 
-    setGameState("playing");
+    setGameState("countdown");
+    setCountdownValue(3);
   };
 
   const pressedLanesRef = useRef({});
+
+  useEffect(() => {
+    if (gameState !== "countdown") return;
+
+    if (countdownValue > 0) {
+      const timer = setTimeout(() => {
+        setCountdownValue(countdownValue - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      const timer = setTimeout(() => {
+        setGameState("playing");
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, countdownValue]);
 
   useEffect(() => {
     if (!show || gameState !== "playing") return;
@@ -243,7 +263,7 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
     const hasAudio = song.audioSrc && audioRef.current;
 
     const startGame = () => {
-      startTimeRef.current = Date.now();
+      startTimeRef.current = Date.now() + NOTE_TRAVEL_TIME_MS;
       lastFrameTimeRef.current = Date.now();
       audioStartedRef.current = true;
       runLoop();
@@ -260,23 +280,25 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
 
       const onCanPlay = () => {
         audioRef.current.removeEventListener("canplaythrough", onCanPlay);
-        audioRef.current.play().then(() => {
-          if (song.voiceSrc && voiceRef.current) {
-            voiceRef.current.play().catch(() => {});
-          }
-          startGame();
-        }).catch(() => {
-          startGame();
-        });
+        startGame();
+        setTimeout(() => {
+          audioRef.current.play().then(() => {
+            if (song.voiceSrc && voiceRef.current) {
+              voiceRef.current.play().catch(() => {});
+            }
+          }).catch(() => {});
+        }, NOTE_TRAVEL_TIME_MS);
       };
 
       if (audioRef.current.readyState >= 4) {
-        audioRef.current.play().then(() => {
-          if (song.voiceSrc && voiceRef.current) {
-            voiceRef.current.play().catch(() => {});
-          }
-          startGame();
-        }).catch(() => startGame());
+        startGame();
+        setTimeout(() => {
+          audioRef.current.play().then(() => {
+            if (song.voiceSrc && voiceRef.current) {
+              voiceRef.current.play().catch(() => {});
+            }
+          }).catch(() => {});
+        }, NOTE_TRAVEL_TIME_MS);
       } else {
         audioRef.current.addEventListener("canplaythrough", onCanPlay);
       }
@@ -544,6 +566,19 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
     return () => window.removeEventListener("keydown", handleEscape);
   }, [show, gameState, onClose]);
 
+  useEffect(() => {
+    if (!show || gameState !== "countdown") return;
+
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        setGameState("menu");
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [show, gameState]);
+
   if (!show) return null;
 
   const formatTime = (ms) => Math.ceil(ms / 1000);
@@ -606,6 +641,18 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80">
         <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg p-8">
           <div className="text-[#39ff14] font-mono animate-pulse">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (gameState === "countdown") {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80">
+        <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg p-16">
+          <div className="text-[#39ff14] font-mono text-8xl font-bold text-center animate-pulse">
+            {countdownValue > 0 ? countdownValue : "GO!"}
+          </div>
         </div>
       </div>
     );
@@ -717,8 +764,10 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
           ))}
 
           {notes.map((note) => {
-            const holdHeight = note.hold ? (note.hold / NOTE_TRAVEL_TIME_MS) * NOTE_TRAVEL_DISTANCE : 0;
             const holdProgressPercent = note.hold > 0 ? (note.holdProgress / note.hold) * 100 : 0;
+
+            const remainingHoldDuration = note.hold - note.holdProgress;
+            const holdHeight = note.hold > 0 ? (remainingHoldDuration / NOTE_TRAVEL_TIME_MS) * NOTE_TRAVEL_DISTANCE : 0;
 
             const isActiveHold = note.hold > 0 && note.holdHit && !note.holdBroken;
 
@@ -740,7 +789,7 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
                     lane={note.lane}
                   />
                 </div>
-                {note.hold > 0 && !note.holdBroken && (
+                {note.hold > 0 && (
                   <div
                     style={{
                       position: "absolute",
