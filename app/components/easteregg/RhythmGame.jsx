@@ -19,6 +19,14 @@ const ARROW_ROTATIONS = [270, 180, 0, 90];
 
 // Available songs
 const SONGS = {
+  "lit-up": {
+    name: "Lit Up (BF Mix)",
+    artist: "Saruky",
+    duration: 136000,
+    audioSrc: "/songs/lit-up.ogg",
+    voiceSrc: "/songs/lit-up-voices.ogg",
+    chartSrc: "/songs/lit-up-chart.json",
+  },
   "2hot": {
     name: "2hot",
     artist: "Kawai Sprite",
@@ -56,6 +64,73 @@ const PixelNote = ({ color, hit, lane }) => (
         strokeWidth="1.5"
       />
     </svg>
+  </div>
+);
+
+// Hold note tail component - renders the body and end cap
+const HoldNoteTail = ({ color, height, held, progress, broken }) => (
+  <div
+    style={{
+      width: NOTE_WIDTH,
+      height: Math.max(0, height),
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      position: "relative",
+      opacity: broken ? 0.4 : 1,
+    }}
+  >
+    {/* Hold body */}
+    <div
+      style={{
+        width: 16,
+        height: Math.max(0, height - 10),
+        background: broken
+          ? `linear-gradient(180deg, ${color}22 0%, ${color}44 100%)`
+          : `linear-gradient(180deg, ${color}22 0%, ${color}44 100%)`,
+        borderLeft: `2px solid ${broken ? "#ff555566" : `${color}66`}`,
+        borderRight: `2px solid ${broken ? "#ff555566" : `${color}66`}`,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Filled progress overlay - fills from top down as you hold */}
+      {progress > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: -2,
+            right: -2,
+            height: `${Math.min(100, progress)}%`,
+            background: broken
+              ? `linear-gradient(180deg, #ff5555 0%, #ff5555aa 100%)`
+              : `linear-gradient(180deg, ${color} 0%, ${color}aa 100%)`,
+            borderLeft: `2px solid ${broken ? "#ff5555" : color}`,
+            borderRight: `2px solid ${broken ? "#ff5555" : color}`,
+            boxShadow: held && !broken ? `0 0 8px ${color}` : "none",
+          }}
+        />
+      )}
+    </div>
+    {/* Hold end cap */}
+    {height > 10 && (
+      <div
+        style={{
+          width: 20,
+          height: 10,
+          background: broken
+            ? "#ff555544"
+            : (held && progress >= 95 ? color : `${color}44`),
+          borderRadius: "0 0 4px 4px",
+          borderLeft: `2px solid ${broken ? "#ff555566" : (held && progress >= 95 ? color : `${color}66`)}`,
+          borderRight: `2px solid ${broken ? "#ff555566" : (held && progress >= 95 ? color : `${color}66`)}`,
+          borderBottom: `2px solid ${broken ? "#ff555566" : (held && progress >= 95 ? color : `${color}66`)}`,
+          borderTop: "none",
+          boxShadow: held && progress >= 95 && !broken ? `0 0 8px ${color}` : "none",
+        }}
+      />
+    )}
   </div>
 );
 
@@ -97,7 +172,7 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
   const [gameState, setGameState] = useState("menu"); // "menu" | "loading" | "playing" | "ended"
   const [timeLeft, setTimeLeft] = useState(30000);
   const [hitEffects, setHitEffects] = useState([]);
-  const [selectedSong, setSelectedSong] = useState("2hot");
+  const [selectedSong, setSelectedSong] = useState("lit-up");
   const [chartData, setChartData] = useState(null);
 
   const gameLoopRef = useRef(null);
@@ -164,11 +239,15 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
     setMaxCombo(0);
     setFeedback(null);
     setPressedLanes({});
+    pressedLanesRef.current = {};
     setHitEffects([]);
     nextNoteIndexRef.current = 0;
 
     setGameState("playing");
   };
+
+  // Track pressed lanes in a ref for the game loop
+  const pressedLanesRef = useRef({});
 
   // Game loop
   useEffect(() => {
@@ -277,6 +356,10 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
                 y: startY,
                 hit: false,
                 targetTime: chartNote.t,
+                hold: chartNote.hold || 0,
+                holdHit: false,
+                holdProgress: 0,
+                holdBroken: false,
               },
             ]);
             nextNoteIndexRef.current++;
@@ -288,20 +371,76 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
 
         setNotes((prev) => {
           const updated = prev
-            .map((note) => ({
-              ...note,
-              y: note.y - pixelsToMove,
-            }))
+            .map((note) => {
+              // Don't move the note if it's an active hold
+              const isActiveHold = note.hold > 0 && note.holdHit && !note.holdBroken;
+              let updatedNote = {
+                ...note,
+                y: isActiveHold ? note.y : note.y - pixelsToMove,
+              };
+
+              // Update hold progress if note is being held
+              if (note.hold > 0 && note.hit && !note.holdBroken) {
+                const isKeyHeld = pressedLanesRef.current[note.lane] === true;
+
+                if (isKeyHeld && note.holdProgress < note.hold) {
+                  // Increment progress by delta time
+                  const newProgress = Math.min(note.hold, note.holdProgress + deltaMs);
+                  updatedNote.holdProgress = newProgress;
+                  updatedNote.holdHit = true;
+
+                  // Award points for holding (10 points per 100ms held)
+                  const oldChunks = Math.floor(note.holdProgress / 100);
+                  const newChunks = Math.floor(newProgress / 100);
+                  if (newChunks > oldChunks) {
+                    const holdPoints = 10 * (newChunks - oldChunks);
+                    scoreRef.current += holdPoints;
+                    setScore(scoreRef.current);
+                  }
+                } else if (!isKeyHeld && note.holdHit) {
+                  // Key was released while holding
+                  const percentHeld = (note.holdProgress / note.hold) * 100;
+                  if (percentHeld < 80) {
+                    setCombo(0);
+                    setFeedback({ type: "miss", lane: note.lane });
+                    setTimeout(() => setFeedback(null), 300);
+                  }
+                  updatedNote.holdHit = false;
+                  updatedNote.holdBroken = true;
+                }
+              }
+
+              return updatedNote;
+            })
             .filter((note) => {
-              // Miss if note passed hit zone (Y too low)
+              // For hold notes, check if hold is complete
+              if (note.hold > 0 && note.holdHit) {
+                const holdComplete = note.holdProgress >= note.hold;
+                if (holdComplete) {
+                  // Award bonus for completing the full hold
+                  const holdBonus = 50;
+                  scoreRef.current += holdBonus;
+                  setScore(scoreRef.current);
+                  setFeedback({ type: "perfect", lane: note.lane });
+                  setTimeout(() => setFeedback(null), 200);
+                  return false; // Remove completed hold notes
+                }
+              }
+
+              // Remove broken hold notes after a short delay
+              if (note.holdBroken && note.y < HIT_ZONE_Y - 100) {
+                return false;
+              }
+
+              // Miss if note passed hit zone (Y too low) and not hit
               if (!note.hit && note.y < HIT_ZONE_Y - GOOD_WINDOW) {
                 setCombo(0);
                 setFeedback({ type: "miss", lane: note.lane });
                 setTimeout(() => setFeedback(null), 300);
                 return false;
               }
-              // Remove hit notes that scrolled off screen
-              if (note.hit && note.y < -NOTE_HEIGHT) {
+              // Remove hit notes that scrolled off screen (non-hold notes)
+              if (note.hit && !note.hold && note.y < -NOTE_HEIGHT) {
                 return false;
               }
               return note.y > -NOTE_HEIGHT;
@@ -350,6 +489,7 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
       }
 
       e.preventDefault();
+      pressedLanesRef.current[lane] = true;
       setPressedLanes((prev) => ({ ...prev, [lane]: true }));
 
       setNotes((prev) => {
@@ -386,7 +526,9 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
           setTimeout(() => setFeedback(null), 200);
 
           return prev.map((n) =>
-            n.id === hitNote.id ? { ...n, hit: true } : n
+            n.id === hitNote.id
+              ? { ...n, hit: true, holdHit: n.hold > 0 }
+              : n
           );
         }
 
@@ -397,7 +539,9 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
     const handleKeyUp = (e) => {
       const lane = LANES.indexOf(e.key.toLowerCase());
       if (lane !== -1) {
+        pressedLanesRef.current[lane] = false;
         setPressedLanes((prev) => ({ ...prev, [lane]: false }));
+        // Hold release is now handled in the game loop by checking pressedLanesRef
       }
     };
 
@@ -421,6 +565,7 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
       setMaxCombo(0);
       setFeedback(null);
       setPressedLanes({});
+      pressedLanesRef.current = {};
       setHitEffects([]);
       setChartData(null);
     }
@@ -623,18 +768,57 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
           ))}
 
           {/* Notes */}
-          {notes.map((note) => (
-            <div
-              key={note.id}
-              className="absolute"
-              style={{
-                left: laneStartX + note.lane * LANE_WIDTH + 7,
-                top: note.y,
-              }}
-            >
-              <PixelNote color={LANE_COLORS[note.lane]} hit={note.hit} lane={note.lane} />
-            </div>
-          ))}
+          {notes.map((note) => {
+            const holdHeight = note.hold ? (note.hold / NOTE_TRAVEL_TIME_MS) * NOTE_TRAVEL_DISTANCE : 0;
+            const holdProgressPercent = note.hold > 0 ? (note.holdProgress / note.hold) * 100 : 0;
+
+            // For hold notes being held: lock head at hit zone
+            const isActiveHold = note.hold > 0 && note.holdHit && !note.holdBroken;
+
+            // Note position: if actively holding, lock at hit zone
+            const noteY = isActiveHold ? HIT_ZONE_Y - NOTE_WIDTH / 2 : note.y;
+
+            return (
+              <div
+                key={note.id}
+                className="absolute"
+                style={{
+                  left: laneStartX + note.lane * LANE_WIDTH + 7,
+                  top: noteY,
+                }}
+              >
+                {/* Note head - only hide for regular notes when hit, keep visible for hold notes until complete */}
+                <div style={{ position: "relative", zIndex: 2 }}>
+                  <PixelNote
+                    color={LANE_COLORS[note.lane]}
+                    hit={note.hit && !note.hold}
+                    lane={note.lane}
+                  />
+                </div>
+                {/* Hold tail (rendered below the note head for upscroll - tail trails behind the note) */}
+                {note.hold > 0 && !note.holdBroken && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: NOTE_WIDTH - 8,
+                      left: 0,
+                      width: NOTE_WIDTH,
+                      height: holdHeight,
+                      zIndex: 1,
+                    }}
+                  >
+                    <HoldNoteTail
+                      color={LANE_COLORS[note.lane]}
+                      height={holdHeight}
+                      held={note.holdHit}
+                      progress={holdProgressPercent}
+                      broken={note.holdBroken}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
           {/* Feedback text */}
           {feedback && (
