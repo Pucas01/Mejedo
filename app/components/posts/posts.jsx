@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import TopCard from "./TopCard.jsx";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
+import Sticker from "../stickers/Sticker";
 
 export default function ShitPosts() {
   const [posts, setPosts] = useState(null);
@@ -109,7 +110,14 @@ export default function ShitPosts() {
   return (
     <div className="min-h-screen p-4 text-white">
       <div className="mx-auto flex flex-col gap-6">
-        <div className="bg-[#121217] border-2 border-[#39ff14] p-6 flex items-center justify-between">
+        <div className="bg-[#121217] border-2 border-[#39ff14] p-6 flex items-center justify-between relative">
+          <Sticker
+            src="/stickers/futaba-happy.png"
+            position="top-right"
+            size={75}
+            rotation={-15}
+            offset={{ x: 22, y: -22 }}
+          />
           <div>
             <h1 className="text-2xl font-bold">Shitposts</h1>
             <p className="text-xl text-gray-400 mt-1">
@@ -117,11 +125,27 @@ export default function ShitPosts() {
             </p>
           </div>
         </div>
-        {["tiktoks", "tweets", "tenor", "youtube"].map((section) => (
+        {["tiktoks", "tweets", "tenor", "youtube"].map((section, index) => {
+          const sectionStickers = [
+            { src: "/stickers/futaba-jumping.png", rotation: -8, position: "bottom-left" },
+            { src: "/stickers/futaba-peace.png", rotation: 12, position: "bottom-right" },
+            { src: "/stickers/futaba-sitting.png", rotation: -10, position: "top-right" },
+            { src: "/stickers/futaba-kneeling.png", rotation: 8, position: "bottom-left" },
+          ];
+          const stickerConfig = sectionStickers[index];
+
+          return (
           <section
             key={section}
-            className="bg-[#121217] p-6 border-[#39ff14] border-2 space-y-3"
+            className="bg-[#121217] p-6 border-[#39ff14] border-2 space-y-3 relative"
           >
+            <Sticker
+              src={stickerConfig.src}
+              position={stickerConfig.position}
+              size={65}
+              rotation={stickerConfig.rotation}
+              offset={{ x: 30, y: 30 }}
+            />
             <div className="flex justify-between items-center">
               <h2 className="text-xl text-[#39ff14] capitalize">Top {section}</h2>
               {isAdmin && (
@@ -167,7 +191,8 @@ export default function ShitPosts() {
               )}
             </div>
           </section>
-        ))}
+        );
+        })}
       </div>
 
       {editingPost && (

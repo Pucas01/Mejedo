@@ -5,6 +5,7 @@ import Image from 'next/image'
 import User from "./user.jsx";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
+import Sticker from "../stickers/Sticker";
 
 export default function AnimePage() {
   const [login, setLogin] = useState("");
@@ -73,7 +74,14 @@ export default function AnimePage() {
   return (
     <div className="flex flex-col gap-4 p-4 text-xl min-h-screen text-white justify-start">
 
-      <div className="bg-[#121217] min-h-[200px] p-8 border-2 border-[#39ff14] shadow-lg ">
+      <div className="bg-[#121217] min-h-[200px] p-8 border-2 border-[#39ff14] shadow-lg relative">
+        <Sticker
+          src="/stickers/futaba-headphones.png"
+          position="top-right"
+          size={70}
+          rotation={-8}
+          offset={{ x: 30, y: -30 }}
+        />
         {!doneLogin && (
           <div className=" text-xl flex flex-wrap">
             <span className="text-[#39ff14]">pucas01</span>
@@ -101,7 +109,14 @@ export default function AnimePage() {
         )}
       </div>
 
-      <div className="bg-[#121217] border-2 p-8 border-[#39ff14] shadow-lg">
+      <div className="bg-[#121217] border-2 p-8 border-[#39ff14] shadow-lg relative">
+        <Sticker
+          src="/stickers/futaba-sitting.png"
+          position="bottom-left"
+          size={65}
+          rotation={10}
+          offset={{ x: -30, y: 30 }}
+        />
         {!doneList && (
           <div className=" text-xl flex flex-wrap">
             <span className="text-[#39ff14]">pucas01</span>
@@ -129,7 +144,14 @@ export default function AnimePage() {
       {isAdmin && (
       <User/>
       )}
-      <div className="bg-[#121217] border-2 p-8 border-[#39ff14] shadow-lg">
+      <div className="bg-[#121217] border-2 p-8 border-[#39ff14] shadow-lg relative">
+        <Sticker
+          src="/stickers/futaba-kneeling.png"
+          position="bottom-right"
+          size={68}
+          rotation={-12}
+          offset={{ x: 30, y: 30 }}
+        />
         {!doneImg && (
           <div className=" text-xl flex flex-wrap">
             <span className="text-[#39ff14]">pucas01</span>
