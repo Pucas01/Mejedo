@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function ConsolesSection({
   isAdmin,
@@ -120,7 +121,9 @@ export default function ConsolesSection({
     const c = selectedConsole;
 
     return (
-      <div className="min-h-screen p-6 m-4 border-2 border-[#39ff14] text-white bg-[#121217]">
+      <div className="min-h-screen ml-0 mr-0  m-4 border-2 border-[#39ff14] text-white bg-[#121217]">
+        <WindowDecoration title="Kitty - Consoles.txt" showControls={true} />
+        <div className="p-6">
 
         <button
           className="mb-6 text-[#39ff14] hover:text-white"
@@ -180,6 +183,7 @@ export default function ConsolesSection({
           )}
         </div>
       </div>
+    </div>
     );
   }
 
@@ -442,7 +446,9 @@ export default function ConsolesSection({
   }
 
   return (
-    <div className="flex flex-col items-center bg-[#121217] border-2 border-[#39ff14] m-4 gap-4 p-4">
+    <div className="   bg-[#121217] border-2 border-[#39ff14] ">
+      <WindowDecoration title="Kitty - Consoles.txt" showControls={true} />
+      <div className="flex flex-col items-center m-4 gap-4">
       <h1 className="text-3xl font-bold">Gaming Consoles</h1>
 
       {isAdmin && (
@@ -492,6 +498,7 @@ export default function ConsolesSection({
           ))
         )}
       </div>
+    </div>
     </div>
   );
 }

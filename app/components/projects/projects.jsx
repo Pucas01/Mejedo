@@ -101,7 +101,7 @@ const handleDeleteProject = async (project) => {
             <ProjectTerminal project={project} />
 
             {isAdmin && (
-              <div className="absolute p-2 top-2 right-2 flex gap-2">
+              <div className="absolute pt-12 pr-4 top-2 right-2 flex gap-2">
                 <button
                   className="px-2 py-1 bg-[#1f8f0c] hover:bg-[#22a50b] text-white"
                   onClick={() => setEditingProject({ ...project, originalName: project.name })}

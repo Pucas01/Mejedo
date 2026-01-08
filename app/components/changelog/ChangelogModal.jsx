@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function ChangelogModal({ show, onClose }) {
   const [versions, setVersions] = useState([]);
@@ -98,34 +99,27 @@ export default function ChangelogModal({ show, onClose }) {
       }}
     >
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
-        <div className="flex justify-between items-center px-6 py-4 bg-[#090909] border-b-2 border-[#39ff14]">
-          <div className="font-mono">
-            <span className="text-[#39ff14]">pucas01</span>
-            <span className="text-white">@</span>
-            <span className="text-[#D73DA3]">PucasArch</span>
-            <span className="text-white">:</span>
-            <span className="text-[#FF5555]">~</span>
-            <span className="text-white">$</span>
-            <span className="text-gray-400 ml-2">cat CHANGELOG.md</span>
-          </div>
-          <div className="flex gap-3 items-center">
+        <WindowDecoration title="Changelog - cat CHANGELOG.md" onClose={handleClose} />
+
+        <div className="px-6 py-3 bg-[#090909] border-b border-[#39ff14]/30">
+          <div className="font-mono flex items-center justify-between">
+            <div>
+              <span className="text-[#39ff14]">pucas01</span>
+              <span className="text-white">@</span>
+              <span className="text-[#D73DA3]">PucasArch</span>
+              <span className="text-white">:</span>
+              <span className="text-[#FF5555]">~</span>
+              <span className="text-white">$</span>
+              <span className="text-gray-400 ml-2">cat CHANGELOG.md</span>
+            </div>
             {isAdmin && (
               <button
                 onClick={() => setIsAdding(true)}
                 className="text-gray-500 cursor-pointer hover:text-[#39ff14] font-mono transition-colors"
               >
-                [+]
+                [+ Add Version]
               </button>
             )}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClose();
-              }}
-              className="text-gray-500 cursor-pointer hover:text-[#39ff14] font-mono transition-colors"
-            >
-              [X]
-            </button>
           </div>
         </div>
 
@@ -272,20 +266,10 @@ function VersionEditor({ version, onSave, onCancel }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 animate-fadeIn">
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
-        <div className="flex justify-between items-center px-6 py-4 bg-[#090909] border-b-2 border-[#39ff14]">
-          <div className="font-mono text-[#39ff14]">
-            {version ? "Edit Version" : "New Version"}
-          </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onCancel();
-            }}
-            className="text-gray-500 cursor-pointer hover:text-[#39ff14] font-mono transition-colors"
-          >
-            [X]
-          </button>
-        </div>
+        <WindowDecoration
+          title={version ? "Edit Version" : "New Version"}
+          onClose={onCancel}
+        />
 
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">

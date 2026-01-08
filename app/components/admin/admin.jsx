@@ -6,6 +6,7 @@ import User from "./user.jsx";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function AnimePage() {
   const [login, setLogin] = useState("");
@@ -74,7 +75,9 @@ export default function AnimePage() {
   return (
     <div className="flex flex-col gap-4 p-4 text-xl min-h-screen text-white justify-start">
 
-      <div className="bg-[#121217] min-h-[200px] p-8 border-2 border-[#39ff14] shadow-lg relative">
+      <div className="bg-[#121217] min-h-[200px]  border-2 border-[#39ff14] shadow-lg relative">
+        <WindowDecoration title="Kitty - Admin.txt" showControls={true} />
+        <div className="p-8">
         <Sticker
           src="/stickers/futaba-headphones.png"
           position="top-right"
@@ -108,8 +111,11 @@ export default function AnimePage() {
           </div>
         )}
       </div>
+    </div>
 
-      <div className="bg-[#121217] border-2 p-8 border-[#39ff14] shadow-lg relative">
+      <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative">
+        <WindowDecoration title="Kitty - Todo.txt" showControls={true} />
+        <div className="p-8">
         <Sticker
           src="/stickers/futaba-sitting.png"
           position="bottom-left"
@@ -134,17 +140,19 @@ export default function AnimePage() {
             <p className="text-[#39ff14] mb-2">To-Do List:</p>
             <ul className="list-disc list-inside text-white space-y-1">
               <li>- Make the codebase not ass (its even worse now)</li>
-              <li>- Webring stuff </li>
               <li>- Make it usable on phone (never happening)</li>
               <li>- uhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh</li>
             </ul>
           </>
         )}
       </div>
+    </div>
       {isAdmin && (
       <User/>
       )}
-      <div className="bg-[#121217] border-2 p-8 border-[#39ff14] shadow-lg relative">
+      <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative">
+        <WindowDecoration title="Kitty - ~/Pictures" showControls={true} />
+        <div className="p-8">
         <Sticker
           src="/stickers/futaba-kneeling.png"
           position="bottom-right"
@@ -273,5 +281,6 @@ export default function AnimePage() {
         )}
       </div>
     </div>
+  </div>
   );
 }

@@ -5,6 +5,7 @@ import { useAchievements } from "../../hooks/useAchievements.js";
 import ConsolesSection from "./consolesSection.jsx";
 import MangaSection from "./mangaSection.jsx";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function CollectionPage() {
   const { isAdmin } = useCurrentUser();
@@ -54,7 +55,9 @@ export default function CollectionPage() {
 
   return (
     <div>
-      <div className="flex flex-col p-6 bg-[#121217] border-2 border-[#39ff14] m-4 relative">
+      <div className="flex flex-col bg-[#121217] border-2 border-[#39ff14] m-4 mr-0 ml-0 relative">
+        <WindowDecoration title="Kitty - Collection.txt" showControls={true} />
+        <div className="p-6">
         <Sticker
           src="/stickers/futaba-jumping.png"
           position="bottom-right"
@@ -67,6 +70,7 @@ export default function CollectionPage() {
           This is where I can show off some of the stuff I own :)
         </p>
       </div>
+    </div>
 
       <ConsolesSection
         isAdmin={isAdmin}
@@ -76,7 +80,7 @@ export default function CollectionPage() {
         setSelectedConsole={handleSelectConsole}
         refresh={fetchConsoles}
       />
-
+    <div className="pt-4">
       <MangaSection
         isAdmin={isAdmin}
         manga={manga}
@@ -85,6 +89,7 @@ export default function CollectionPage() {
         setSelectedManga={handleSelectManga}
         refresh={fetchManga}
       />
+      </div>
     </div>
   );
 }
