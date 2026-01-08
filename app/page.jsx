@@ -35,6 +35,7 @@ const ArrowHint = dynamic(() => import("./components/easteregg/ArrowHint.jsx"));
 const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 const AchievementToast = dynamic(() => import("./components/achievements/AchievementToast.jsx"));
 const AchievementsModal = dynamic(() => import("./components/achievements/AchievementsModal.jsx"));
+const ChangelogModal = dynamic(() => import("./components/changelog/ChangelogModal.jsx"));
 
 function PageContent() {
   const [active, setActive] = useState("/about");
@@ -43,6 +44,7 @@ function PageContent() {
   const [open, setEgg] = useState(false);
   const [rhythmGameOpen, setRhythmGameOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [changelogOpen, setChangelogOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
   const { currentUser, isAdmin } = useCurrentUser();
@@ -204,13 +206,22 @@ function PageContent() {
           /home/pucas01
         </h1>
         {isAdmin && <span>Admin Mode</span>}
-        <button
-          onClick={() => setAchievementsOpen(true)}
-          className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors mt-1"
-          title="View Achievements"
-        >
-          Achievements
-        </button>
+        <div className="flex items-center justify-center gap-4 mt-1">
+          <button
+            onClick={() => setAchievementsOpen(true)}
+            className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
+            title="View Achievements"
+          >
+            Achievements
+          </button>
+          <button
+            onClick={() => setChangelogOpen(true)}
+            className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
+            title="View Changelog"
+          >
+            Changelog
+          </button>
+        </div>
       </header>
 
       <nav className="flex justify-center gap-6 bg-[#090909] border-b-2 border-[#39ff14] py-4">
@@ -270,6 +281,10 @@ function PageContent() {
       <AchievementsModal
         show={achievementsOpen}
         onClose={() => setAchievementsOpen(false)}
+      />
+      <ChangelogModal
+        show={changelogOpen}
+        onClose={() => setChangelogOpen(false)}
       />
 
       {!rhythmGameOpen && <ArrowHint />}

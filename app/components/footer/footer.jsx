@@ -4,17 +4,26 @@ import { useEffect, useState } from "react";
 export default function Footer() {
   const date = new Date();
   const year = date.getFullYear();
-  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION;
 
   const [counterName, setCounterName] = useState("test");
   const [pageSize, setPageSize] = useState(null);
+  const [appVersion, setAppVersion] = useState("...");
 
   useEffect(() => {
     async function fetchConfig() {
       try {
-        const res = await fetch("/api/counter");
-        const data = await res.json();
-        setCounterName(data.counterName || "test");
+        const [counterRes, changelogRes] = await Promise.all([
+          fetch("/api/counter"),
+          fetch("/api/changelog")
+        ]);
+
+        const counterData = await counterRes.json();
+        setCounterName(counterData.counterName || "test");
+
+        const changelogData = await changelogRes.json();
+        if (changelogData && changelogData.length > 0) {
+          setAppVersion(changelogData[0].version);
+        }
       } catch (err) {
         console.error("Failed to load footer config:", err);
       }

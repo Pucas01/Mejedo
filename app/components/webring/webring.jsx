@@ -7,6 +7,11 @@ const WEBRING_SCRIPTS = [
     name: "Persona Ring",
     src: "https://flonkie.github.io/personaring/persona5.setup.js",
   },
+  {
+    name: "Project Sekai Ring",
+    src: "https://dazaisfunpalace.nekoweb.org/pjsk.js",
+    dataWidget: "n25",
+  },
 ];
 
 const COMPLEX_WEBRINGS = [
@@ -21,7 +26,7 @@ const COMPLEX_WEBRINGS = [
   },
 ];
 
-function WebringWidget({ src, name }) {
+function WebringWidget({ src, name, dataWidget }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -31,19 +36,33 @@ function WebringWidget({ src, name }) {
 
     const script = document.createElement("script");
     script.src = src;
+    if (dataWidget) {
+      script.setAttribute("data-widget", dataWidget);
+    }
     containerRef.current.appendChild(script);
+
+    setTimeout(() => {
+      if (containerRef.current) {
+        const allElements = containerRef.current.querySelectorAll('*');
+        allElements.forEach(el => {
+          el.style.textAlign = 'left';
+          el.style.marginLeft = '0';
+          el.style.marginRight = 'auto';
+        });
+      }
+    }, 100);
 
     return () => {
       if (containerRef.current) {
         containerRef.current.innerHTML = "";
       }
     };
-  }, [src]);
+  }, [src, dataWidget]);
 
   return (
     <div className="border border-[#39ff14] p-4">
       <h3 className="text-[#39ff14] font-bold mb-3">{name}</h3>
-      <div ref={containerRef} />
+      <div ref={containerRef} style={{ textAlign: 'left' }} />
     </div>
   );
 }
@@ -211,7 +230,12 @@ export default function Webring() {
             <p className="text-2xl mb-4">Webrings I'm part of:</p>
             <div className="space-y-6">
               {WEBRING_SCRIPTS.map((ring, index) => (
-                <WebringWidget key={`simple-${index}`} src={ring.src} name={ring.name} />
+                <WebringWidget
+                  key={`simple-${index}`}
+                  src={ring.src}
+                  name={ring.name}
+                  dataWidget={ring.dataWidget}
+                />
               ))}
               {COMPLEX_WEBRINGS.map((ring, index) => (
                 <ComplexWebringWidget
