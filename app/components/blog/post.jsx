@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function BlogPost({ post, onBack }) {
   if (!post) return null;
@@ -33,7 +34,9 @@ export default function BlogPost({ post, onBack }) {
 
   return (
     <div className="p-4">
-    <div className="min-h-screen p-6 border-2 border-[#39ff14] text-white bg-[#121217] relative">
+    <div className="min-h-screen  border-2 border-[#39ff14] text-white bg-[#121217] relative">
+      <WindowDecoration title={`Blog - ${post.title}`} showControls={true} />
+      <div className="p-6">
       <Sticker
         src="/stickers/futaba-standing.png"
         position="top-right"
@@ -65,6 +68,7 @@ export default function BlogPost({ post, onBack }) {
         className="prose prose-invert max-w-none text-gray-200"
         dangerouslySetInnerHTML={{ __html: parsedHTML }}
       />
+    </div>
     </div>
     </div>
   );

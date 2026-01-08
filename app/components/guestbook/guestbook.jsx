@@ -4,6 +4,7 @@ import DOMPurify from "dompurify";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function GuestBook() {
   const { currentUser, isAdmin } = useCurrentUser();
@@ -74,7 +75,9 @@ export default function GuestBook() {
   return (
     <div className="flex flex-col p-4 gap-4 text-xl font-jetbrains">
 
-      <div className="flex-1 min-w-[400px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col p-4 relative">
+      <div className="flex-1 min-w-[400px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
+        <WindowDecoration title="Kitty - whoami.txt" showControls={true} />
+        <div className="p-4">
         <Sticker
           src="/stickers/futaba-pointing.png"
           position="top-right"
@@ -95,8 +98,11 @@ export default function GuestBook() {
           <button type="submit" className="bg-[#39ff14] text-black px-4 py-1 hover:bg-[#32cc12] w-max">Send</button>
         </form>
       </div>
+    </div>
 
-      <div className="flex-1 min-w-[400px] min-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col overflow-auto p-4 space-y-2 relative">
+      <div className="flex-1 min-w-[400px] min-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col overflow-auto space-y-2 relative">
+        <WindowDecoration title="Kitty - whoami.txt" showControls={true} />
+        <div className="p-4">
         <Sticker
           src="/stickers/futaba-shy.png"
           position="bottom-left"
@@ -134,6 +140,7 @@ export default function GuestBook() {
             )}
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

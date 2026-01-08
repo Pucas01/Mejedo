@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function ConsolesTerminal({ consoleData }) {
   // Randomly pick a sticker for variety

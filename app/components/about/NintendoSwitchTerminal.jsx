@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import AnsiToHtml from "ansi-to-html";
 import useTypingAnimation from "../../hooks/useTypingAnimation";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function NintendoSwitchTerminal() {
   const [presence, setPresence] = useState(null);
@@ -84,8 +85,8 @@ export default function NintendoSwitchTerminal() {
   return (
     <div
       ref={ref}
-      className="flex-1 min-w-[400px] min-h-[200px] max-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex relative"
-    >
+      className="flex-1 min-w-[400px] min-h-[220px] bg-[#121217] border-2 border-[#39ff14] shadow-lg  relative">
+        <WindowDecoration title="Kitty - Switch" showControls={true} />
       <Sticker
         src="/stickers/futaba-happy.png"
         position="top-left"

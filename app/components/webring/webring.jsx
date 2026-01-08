@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 // External webring scripts to load (simple single-script webrings)
 const WEBRING_SCRIPTS = [
@@ -191,81 +192,87 @@ export default function Webring() {
   return (
     <div className="flex flex-col gap-4 p-4 text-xl min-h-screen text-white justify-start">
       {/* Info terminal */}
-      <div className="bg-[#121217] min-h-[200px] p-8 border-2 border-[#39ff14] shadow-lg relative">
-        <Sticker
-          src="/stickers/futaba-jacket.png"
-          position="top-left"
-          size={70}
-          rotation={-10}
-          offset={{ x: -18, y: -18 }}
-        />
-        {!doneInfo && (
-          <div className="text-xl flex flex-wrap">
-            <span className="text-[#39ff14]">pucas01</span>
-            <span className="text-white">@</span>
-            <span className="text-[#D73DA3]">PucasArch</span>
-            <span className="text-white">:</span>
-            <span className="text-[#FF5555]">~</span>
-            <span className="text-white">$</span>
-            <span className="text-white">&nbsp;{infoCmd}</span>
-            <span className="cursor animate-blink">|</span>
-          </div>
-        )}
-        {doneInfo && (
-          <div className="space-y-2 mt-2">
-            <header className="text-2xl text-[#FFFFFF]">Webrings</header>
-            <p className="text-gray-400">
-              This is where i place all my webrings, cool right? yeah i know.
-            </p>
-          </div>
-        )}
+      <div className="bg-[#121217] min-h-[200px] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
+        <WindowDecoration title="Webring - webrings.txt" showControls={true} />
+        <div className="p-8 flex-1 relative">
+          <Sticker
+            src="/stickers/futaba-jacket.png"
+            position="top-left"
+            size={70}
+            rotation={-10}
+            offset={{ x: -18, y: -18 }}
+          />
+          {!doneInfo && (
+            <div className="text-xl flex flex-wrap">
+              <span className="text-[#39ff14]">pucas01</span>
+              <span className="text-white">@</span>
+              <span className="text-[#D73DA3]">PucasArch</span>
+              <span className="text-white">:</span>
+              <span className="text-[#FF5555]">~</span>
+              <span className="text-white">$</span>
+              <span className="text-white">&nbsp;{infoCmd}</span>
+              <span className="cursor animate-blink">|</span>
+            </div>
+          )}
+          {doneInfo && (
+            <div className="space-y-2 mt-2">
+              <header className="text-2xl text-[#FFFFFF]">Webrings</header>
+              <p className="text-gray-400">
+                This is where i place all my webrings, cool right? yeah i know.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Webrings list */}
-      <div className="bg-[#121217] border-2 p-8 border-[#39ff14] shadow-lg relative">
-        <Sticker
-          src="/stickers/futaba-pointing.png"
-          position="bottom-right"
-          size={75}
-          rotation={8}
-          offset={{ x: 20, y: 20 }}
-        />
-        {!doneList && (
-          <div className="text-xl flex flex-wrap">
-            <span className="text-[#39ff14]">pucas01</span>
-            <span className="text-white">@</span>
-            <span className="text-[#D73DA3]">PucasArch</span>
-            <span className="text-white">:</span>
-            <span className="text-[#FF5555]">~</span>
-            <span className="text-white">$</span>
-            <span className="text-white">&nbsp;{listCmd}</span>
-            <span className="cursor animate-blink">|</span>
-          </div>
-        )}
-        {doneList && (
-          <>
-            <p className="text-2xl mb-4">Webrings I'm part of:</p>
-            <div className="space-y-6">
-              {WEBRING_SCRIPTS.map((ring, index) => (
-                <WebringWidget
-                  key={`simple-${index}`}
-                  src={ring.src}
-                  name={ring.name}
-                  dataWidget={ring.dataWidget}
-                />
-              ))}
-              {COMPLEX_WEBRINGS.map((ring, index) => (
-                <ComplexWebringWidget
-                  key={`complex-${index}`}
-                  name={ring.name}
-                  containerId={ring.containerId}
-                  css={ring.css}
-                  scripts={ring.scripts}
-                />
-              ))}
+      <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
+        <WindowDecoration title="Webrings - ~/Webrings" showControls={true} />
+        <div className="p-8 flex-1 relative">
+          <Sticker
+            src="/stickers/futaba-pointing.png"
+            position="bottom-right"
+            size={75}
+            rotation={8}
+            offset={{ x: 20, y: 20 }}
+          />
+          {!doneList && (
+            <div className="text-xl flex flex-wrap">
+              <span className="text-[#39ff14]">pucas01</span>
+              <span className="text-white">@</span>
+              <span className="text-[#D73DA3]">PucasArch</span>
+              <span className="text-white">:</span>
+              <span className="text-[#FF5555]">~</span>
+              <span className="text-white">$</span>
+              <span className="text-white">&nbsp;{listCmd}</span>
+              <span className="cursor animate-blink">|</span>
             </div>
-          </>
-        )}
+          )}
+          {doneList && (
+            <>
+              <p className="text-2xl mb-4">Webrings I'm part of:</p>
+              <div className="space-y-6">
+                {WEBRING_SCRIPTS.map((ring, index) => (
+                  <WebringWidget
+                    key={`simple-${index}`}
+                    src={ring.src}
+                    name={ring.name}
+                    dataWidget={ring.dataWidget}
+                  />
+                ))}
+                {COMPLEX_WEBRINGS.map((ring, index) => (
+                  <ComplexWebringWidget
+                    key={`complex-${index}`}
+                    name={ring.name}
+                    containerId={ring.containerId}
+                    css={ring.css}
+                    scripts={ring.scripts}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

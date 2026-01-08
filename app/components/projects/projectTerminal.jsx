@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function ProjectTerminal({ project }) {
   const [typingCmd, setTypingCmd] = useState("");
@@ -41,6 +42,7 @@ export default function ProjectTerminal({ project }) {
 
   return (
     <div className="flex-1 min-w-[550px] max-w-[550px] min-h-[410px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col m-2 relative">
+      <WindowDecoration title="Kitty - Project" showControls={true} />
       <Sticker
         src={selectedSticker.src}
         position={selectedSticker.position}

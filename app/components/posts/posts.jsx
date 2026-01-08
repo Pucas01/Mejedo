@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import TopCard from "./TopCard.jsx";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function ShitPosts() {
   const [posts, setPosts] = useState(null);
@@ -110,7 +111,9 @@ export default function ShitPosts() {
   return (
     <div className="min-h-screen p-4 text-white">
       <div className="mx-auto flex flex-col gap-6">
-        <div className="bg-[#121217] border-2 border-[#39ff14] p-6 flex items-center justify-between relative">
+        <div className="bg-[#121217] border-2 border-[#39ff14] items-center justify-between relative">
+          <WindowDecoration title="Kitty - Shitposts.txt" showControls={true} />
+          <div className="p-6">
           <Sticker
             src="/stickers/futaba-happy.png"
             position="top-right"
@@ -125,6 +128,7 @@ export default function ShitPosts() {
             </p>
           </div>
         </div>
+        </div>
         {["tiktoks", "tweets", "tenor", "youtube"].map((section, index) => {
           const sectionStickers = [
             { src: "/stickers/futaba-jumping.png", rotation: -8, position: "bottom-left" },
@@ -137,8 +141,9 @@ export default function ShitPosts() {
           return (
           <section
             key={section}
-            className="bg-[#121217] p-6 border-[#39ff14] border-2 space-y-3 relative"
-          >
+            className="bg-[#121217] p-6 pt-0 pl-0 pr-0 border-[#39ff14] border-2 space-y-3 relative">
+              <WindowDecoration title={`Kitty - ${section}`} showControls={true} />
+              <div className="pl-4">
             <Sticker
               src={stickerConfig.src}
               position={stickerConfig.position}
@@ -157,8 +162,9 @@ export default function ShitPosts() {
                 </button>
               )}
             </div>
+            </div>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap pl-6 pr-6 gap-4">
               {posts[section]?.length > 0 ? (
                 posts[section].map((p) => (
                   <div key={p.id} className="relative">

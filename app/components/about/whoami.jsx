@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function Whoami({
   aboutText = `### Intro
@@ -73,8 +74,8 @@ Some things im good at
   return (
     <div
       ref={containerRef}
-      className="flex-1 min-w-[400px] min-h-[610px] max-h-[610px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative"
-    >
+      className="flex-1 min-w-[400px] min-h-[630px] max-h-[630px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
+        <WindowDecoration title="Kitty - whoami.txt" showControls={true} />
       <Sticker
         src="/stickers/futaba-peace.png"
         position="bottom-right"

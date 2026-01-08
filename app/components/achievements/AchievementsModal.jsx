@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAchievements, ACHIEVEMENTS } from "../../hooks/useAchievements";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function AchievementsModal({ show, onClose }) {
   const { unlockedAchievements, unlockedCount, totalCount } = useAchievements();
@@ -23,27 +24,8 @@ export default function AchievementsModal({ show, onClose }) {
       }}
     >
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[600px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
-        {/* Header */}
-        <div className="flex justify-between items-center px-6 py-4 bg-[#090909] border-b-2 border-[#39ff14]">
-          <div className="font-mono">
-            <span className="text-[#39ff14]">pucas01</span>
-            <span className="text-white">@</span>
-            <span className="text-[#D73DA3]">PucasArch</span>
-            <span className="text-white">:</span>
-            <span className="text-[#FF5555]">~</span>
-            <span className="text-white">$</span>
-            <span className="text-gray-400 ml-2">cat trophies.txt</span>
-          </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClose();
-            }}
-            className="text-gray-500 cursor-pointer hover:text-[#39ff14] font-mono transition-colors"
-          >
-            [X]
-          </button>
-        </div>
+        {/* Window Decoration */}
+        <WindowDecoration title="Achievements - trophies.txt" onClose={handleClose} />
 
         {/* Progress */}
         <div className="px-6 py-3 bg-[#090909]">

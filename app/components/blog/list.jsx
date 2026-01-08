@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function BlogList({ onSelectPost }) {
   const [posts, setPosts] = useState([]);
@@ -110,7 +111,9 @@ export default function BlogList({ onSelectPost }) {
 
   return (
     <div className="min-h-screen p-4 text-white">
-      <div className="bg-[#121217] border-2 border-[#39ff14] p-6 flex flex-col justify-between items-start mb-6 relative">
+      <div className="bg-[#121217] border-2 border-[#39ff14] p-6 pt-0 pr-0 pl-0  flex-col justify-between items-start mb-6 relative">
+        <WindowDecoration title="Blog - blog.txt" showControls={true} />
+        <div className="pl-4">
         <Sticker
           src="/stickers/futaba-keyboard.png"
           position="top-left"
@@ -118,7 +121,7 @@ export default function BlogList({ onSelectPost }) {
           rotation={-12}
           offset={{ x: -18, y: -18 }}
         />
-        <div className="w-full flex justify-between items-center">
+        <div className="w-full flex pt-3 pr-4 justify-between items-center">
           <h1 className="text-2xl font-bold">Blog</h1>
           {isAdmin && (
             <button
@@ -133,6 +136,7 @@ export default function BlogList({ onSelectPost }) {
           So this is where i post some blog posts, they won't be to long tho, i'll write one when something cool happens.
         </p>
       </div>
+    </div>
 
       <div className="flex flex-wrap justify-center gap-6">
         {posts.map((post, index) => {
@@ -147,8 +151,9 @@ export default function BlogList({ onSelectPost }) {
           <div
             key={post.id}
             onClick={() => onSelectPost(post)}
-            className="bg-[#121217] border-2 border-[#39ff14] hover:border-[#22a50b] p-4 min-w-full transition cursor-pointer relative"
-          >
+            className="bg-[#121217] border-2 border-[#39ff14] hover:border-[#22a50b] min-w-full transition cursor-pointer relative">
+              <WindowDecoration title="Blog - allposts.txt" showControls={true} />
+              <div className="p-4">
             <Sticker
               src={stickerConfig.src}
               position={stickerConfig.position}
@@ -189,6 +194,7 @@ export default function BlogList({ onSelectPost }) {
                 </button>
               </div>
             )}
+          </div>
           </div>
         );
         })}

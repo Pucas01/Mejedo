@@ -7,6 +7,7 @@ import DiscordTerminal from "./DiscordTerminal";
 import Whoami from "./whoami";
 import { useAchievements } from "../../hooks/useAchievements.js";
 import Sticker from "../stickers/Sticker";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function About() {
   const [fastfetch, setFastfetch] = useState("");
@@ -226,7 +227,8 @@ export default function About() {
         </div>
       )}
 
-      <div className="flex-1 min-w-[400px] min-h-[725px] max-h-[725px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
+      <div className="flex-1 min-w-[400px] min-h-[735px] max-h-[725px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
+        <WindowDecoration title="Kitty - fastfetch" showControls={true} />
         <Sticker
           src="/stickers/futaba-jacket.png"
           position="bottom-left"
@@ -291,7 +293,8 @@ export default function About() {
         <div>
           <Whoami />
         </div>
-      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[310px] max-h-[310px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex relative">
+      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[350px] max-h-[350px] bg-[#121217] border-2 border-[#39ff14] shadow-lg  relative">
+        <WindowDecoration title="Kitty - /" showControls={true} />
         <Sticker
           src="/stickers/futaba-standing.png"
           position="top-left"
