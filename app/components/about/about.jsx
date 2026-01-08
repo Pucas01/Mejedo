@@ -229,11 +229,18 @@ export default function About() {
       <div className="flex-1 min-w-[400px] min-h-[725px] max-h-[725px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
         <Sticker
           src="/stickers/futaba-jacket.png"
-          position="bottom-right"
+          position="bottom-left"
           size={75}
           rotation={8}
-          offset={{ x: 32, y: 32 }}
+          offset={{ x: -32, y: 32 }}
         />
+        <Sticker
+          src="/stickers/futaba-standing.png"
+          position="top-right"
+          size={72}
+          rotation={-10}
+          offset={{ x: 30, y: -30 }}
+            />
 
         {!doneFastfetch && (
           <div className="p-8 font-jetbrains text-xl flex flex-wrap">

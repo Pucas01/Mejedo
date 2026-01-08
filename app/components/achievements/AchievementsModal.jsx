@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useAchievements, ACHIEVEMENTS } from "../../hooks/useAchievements";
 
 export default function AchievementsModal({ show, onClose }) {
@@ -6,18 +7,22 @@ export default function AchievementsModal({ show, onClose }) {
 
   if (!show) return null;
 
+  const handleClose = () => {
+    onClose();
+  };
+
   const achievementList = Object.values(ACHIEVEMENTS);
   const unlockedList = achievementList.filter((a) => unlockedAchievements[a.id]);
   const lockedList = achievementList.filter((a) => !unlockedAchievements[a.id]);
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 animate-fadeIn"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[600px] w-full max-h-[80vh] overflow-hidden flex flex-col">
+      <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[600px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 bg-[#090909] border-b-2 border-[#39ff14]">
           <div className="font-mono">
@@ -30,7 +35,10 @@ export default function AchievementsModal({ show, onClose }) {
             <span className="text-gray-400 ml-2">cat trophies.txt</span>
           </div>
           <button
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClose();
+            }}
             className="text-gray-500 cursor-pointer hover:text-[#39ff14] font-mono transition-colors"
           >
             [X]

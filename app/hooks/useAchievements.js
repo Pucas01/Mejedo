@@ -46,6 +46,13 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: false,
   },
+  changelog_reader: {
+    id: "changelog_reader",
+    name: "Stupid Nerd",
+    description: "Read the changelog like a fucking nerd",
+    icon: "",
+    hidden: false,
+  },
   junpei_clicker: {
     id: "junpei_clicker",
     name: "Junpei I-Yuri",

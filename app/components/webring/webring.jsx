@@ -8,6 +8,11 @@ const WEBRING_SCRIPTS = [
     name: "Persona Ring",
     src: "https://flonkie.github.io/personaring/persona5.setup.js",
   },
+  {
+    name: "Project Sekai Ring",
+    src: "https://dazaisfunpalace.nekoweb.org/pjsk.js",
+    dataWidget: "n25",
+  },
 ];
 
 // Webrings that need more complex setup (CSS + multiple scripts + container)
@@ -24,7 +29,7 @@ const COMPLEX_WEBRINGS = [
 ];
 
 // Component to load a webring script properly
-function WebringWidget({ src, name }) {
+function WebringWidget({ src, name, dataWidget }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -36,7 +41,22 @@ function WebringWidget({ src, name }) {
     // Create and append the script inside the container
     const script = document.createElement("script");
     script.src = src;
+    if (dataWidget) {
+      script.setAttribute("data-widget", dataWidget);
+    }
     containerRef.current.appendChild(script);
+
+    // Force left alignment on all child elements after script loads
+    setTimeout(() => {
+      if (containerRef.current) {
+        const allElements = containerRef.current.querySelectorAll('*');
+        allElements.forEach(el => {
+          el.style.textAlign = 'left';
+          el.style.marginLeft = '0';
+          el.style.marginRight = 'auto';
+        });
+      }
+    }, 100);
 
     return () => {
       // Cleanup on unmount
@@ -44,12 +64,12 @@ function WebringWidget({ src, name }) {
         containerRef.current.innerHTML = "";
       }
     };
-  }, [src]);
+  }, [src, dataWidget]);
 
   return (
     <div className="border border-[#39ff14] p-4">
       <h3 className="text-[#39ff14] font-bold mb-3">{name}</h3>
-      <div ref={containerRef} />
+      <div ref={containerRef} style={{ textAlign: 'left' }} />
     </div>
   );
 }
@@ -227,7 +247,12 @@ export default function Webring() {
             <p className="text-2xl mb-4">Webrings I'm part of:</p>
             <div className="space-y-6">
               {WEBRING_SCRIPTS.map((ring, index) => (
-                <WebringWidget key={`simple-${index}`} src={ring.src} name={ring.name} />
+                <WebringWidget
+                  key={`simple-${index}`}
+                  src={ring.src}
+                  name={ring.name}
+                  dataWidget={ring.dataWidget}
+                />
               ))}
               {COMPLEX_WEBRINGS.map((ring, index) => (
                 <ComplexWebringWidget
