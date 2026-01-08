@@ -7,20 +7,28 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const router = express.Router();
 
-const changelogPath = path.join(__dirname, "../config/changelog.json");
+const CONFIG_DIR = path.join(process.cwd(), "config");
+const changelogPath = path.join(CONFIG_DIR, "changelog.json");
 
 // GET changelog entries
 router.get("/", (req, res) => {
   try {
+    console.log("Changelog path:", changelogPath);
+    console.log("File exists:", fs.existsSync(changelogPath));
+
     if (!fs.existsSync(changelogPath)) {
+      console.log("Changelog file not found, returning empty array");
       return res.json([]);
     }
+
     const data = fs.readFileSync(changelogPath, "utf8");
+    console.log("Raw data:", data);
     const changelog = JSON.parse(data);
+    console.log("Parsed changelog:", changelog);
     res.json(changelog);
   } catch (error) {
     console.error("Error reading changelog:", error);
-    res.status(500).json({ error: "Failed to load changelog" });
+    res.status(500).json({ error: "Failed to load changelog", details: error.message });
   }
 });
 
@@ -36,6 +44,12 @@ router.post("/", (req, res) => {
     // Validate required fields
     if (!newVersion.version || !newVersion.date) {
       return res.status(400).json({ error: "Version and date are required" });
+    }
+
+    // Ensure the config directory exists
+    const configDir = path.dirname(changelogPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
     }
 
     // Read existing changelog
