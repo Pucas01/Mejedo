@@ -47,8 +47,25 @@ export default function Footer() {
       setPageSize(total);
     };
 
-    window.addEventListener("load", calculateSize);
-    return () => window.removeEventListener("load", calculateSize);
+    if (document.readyState === "complete") {
+      calculateSize();
+    } else {
+      window.addEventListener("load", calculateSize);
+    }
+
+    const observer = new MutationObserver(() => {
+      setTimeout(calculateSize, 500);
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      window.removeEventListener("load", calculateSize);
+      observer.disconnect();
+    };
   }, []);
 
   const counterUrl = `https://count.getloli.com/@${encodeURIComponent(counterName)}?name=${encodeURIComponent(
