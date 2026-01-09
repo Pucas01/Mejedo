@@ -96,6 +96,13 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: true,
   },
+  window_rebel: {
+    id: "window_rebel",
+    name: "Yeah those dont close",
+    description: "Try to close a window that can't be closed (idiot)",
+    icon: "",
+    hidden: true,
+  },
   collector: {
     id: "collector",
     name: "Collector",

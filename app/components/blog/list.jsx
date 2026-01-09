@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import Sticker from "../stickers/Sticker";
 import WindowDecoration from "../window/WindowDecoration.jsx";
+import Button from "../ui/Button";
 
 export default function BlogList({ onSelectPost }) {
   const [posts, setPosts] = useState([]);
@@ -124,12 +125,13 @@ export default function BlogList({ onSelectPost }) {
         <div className="w-full flex pt-3 pr-4 justify-between items-center">
           <h1 className="text-2xl font-bold">Blog</h1>
           {isAdmin && (
-            <button
+            <Button
               onClick={handleAdd}
-              className="bg-[#1f8f0c] hover:bg-[#22a50b] px-3 py-1 text-white"
+              variant="primary"
+              size="sm"
             >
               Add Post
-            </button>
+            </Button>
           )}
         </div>
         <p className="text-gray-400 text-xl mt-2">
@@ -168,30 +170,33 @@ export default function BlogList({ onSelectPost }) {
             <div className="text-gray-300 text-sm line-clamp-3 pb-6">
               {getPreviewText(post.body, 20)}
             </div>
-            <button
+            <Button
               onClick={() => onSelectPost(post)}
-              className="px-2 py-1 bg-[#1f8f0c] hover:bg-[#22a50b] cursor-pointer text-white"
+              variant="primary"
+              size="sm"
             >
               Read More
-            </button>
+            </Button>
 
             {isAdmin && (
               <div
                 className="flex justify-end gap-2 mt-3 z-10 relative"
                 onClick={(e) => e.stopPropagation()}
               >
-                <button
+                <Button
                   onClick={() => setEditingPost(post)}
-                  className="px-2 py-1 bg-[#1f8f0c] hover:bg-[#22a50b] text-white cursor-pointer"
+                  variant="primary"
+                  size="sm"
                 >
                   Edit
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => handleDelete(post)}
-                  className="px-2 py-1 bg-[#1f8f0c] hover:bg-[#22a50b] text-white cursor-pointer"
+                  variant="primary"
+                  size="sm"
                 >
                   Delete
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -247,7 +252,7 @@ export default function BlogList({ onSelectPost }) {
                   />
 
                   {/* Insert button */}
-                  <button
+                  <Button
                     onClick={() => {
                       // Ask user for width/height or use defaults
                       const width = prompt("Width (px)?", "400");
@@ -259,36 +264,40 @@ export default function BlogList({ onSelectPost }) {
                         editingPost.body.slice(cursorPos);
                       setEditingPost({ ...editingPost, body: newBody });
                     }}
-                    className="absolute bottom-0 left-0 bg-[#1f8f0c] text-white text-xs px-1"
+                    variant="primary"
+                    size="sm"
+                    className="absolute bottom-0 left-0 text-xs px-1"
                   >
                     Insert
-                  </button>
+                  </Button>
 
                   {/* Remove button */}
-                  <button
+                  <Button
                     onClick={() =>
                       setEditingPost({
                         ...editingPost,
                         images: editingPost.images.filter((_, idx) => idx !== i),
                       })
                     }
-                    className="absolute top-0 right-0 bg-red-600 text-white px-1 text-xs"
+                    variant="danger"
+                    size="sm"
+                    className="absolute top-0 right-0 px-1 text-xs"
                   >
                     ✕
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
             <div className="flex justify-end gap-2 mt-3">
-              <button onClick={() => setEditingPost(null)} className="bg-gray-600 text-white px-4 py-1">
+              <Button onClick={() => setEditingPost(null)} variant="default">
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => handleSave(editingPost)}
-                className="bg-[#39ff14] text-black px-4 py-1 hover:bg-[#32cc12]"
+                variant="primary"
               >
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </div>

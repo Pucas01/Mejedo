@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import WindowDecoration from "../window/WindowDecoration.jsx";
+import Button from "../ui/Button";
 
 export default function MangaSection({
   isAdmin,
@@ -129,26 +130,28 @@ export default function MangaSection({
         <div className="min-h-screen ml-0 mr-0 mt-0 m-4 border-2 border-[#39ff14] text-white bg-[#121217]">
         <WindowDecoration title="Kitty - Manga.txt" showControls={true} />
         <div className="p-6">
-        <button
+        <Button
           className="mb-6 text-[#39ff14] hover:text-white"
+          variant="default"
           onClick={() => {
             setSelectedManga(null);
             setEditMode(false);
           }}
         >
           ← Back to collection
-        </button>
+        </Button>
 
         {isAdmin && (
-          <button
-            className="px-4 py-2 mb-4 bg-[#39ff14] text-black hover:bg-white"
+          <Button
+            className="mb-4"
+            variant="primary"
             onClick={() => {
               setEditMode(true);
               setEditData({ ...m });
             }}
           >
             Edit Manga
-          </button>
+          </Button>
         )}
 
         <h1 className="text-3xl font-bold">{m.title}</h1>
@@ -205,15 +208,16 @@ export default function MangaSection({
             <h1 className="text-2xl font-bold text-[#39ff14]">
               {m.id === "new" ? "Add Manga" : "Edit Manga"}
             </h1>
-            <button
+            <Button
               onClick={() => {
                 setEditMode(false);
                 setSelectedManga(null);
               }}
+              variant="default"
               className="text-gray-400 hover:text-white text-2xl"
             >
               ✕
-            </button>
+            </Button>
           </div>
 
           <div className="p-6">
@@ -310,8 +314,9 @@ export default function MangaSection({
             <div className="border-t border-[#39ff14] pt-4">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-[#39ff14]">Volumes ({m.volumes?.length || 0})</h2>
-                <button
-                  className="px-3 py-1 bg-[#39ff14] text-black hover:bg-white text-sm"
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => {
                     const nextNum = Array.isArray(m.volumes) ? m.volumes.length + 1 : 1;
                     const updated = Array.isArray(m.volumes)
@@ -321,7 +326,7 @@ export default function MangaSection({
                   }}
                 >
                   + Add Volume
-                </button>
+                </Button>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[300px] overflow-y-auto">
@@ -359,15 +364,17 @@ export default function MangaSection({
                   >
                     {/* Controls overlay */}
                     <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <button
+                      <Button
                         onClick={() => {
                           const updated = m.volumes.filter((_, idx) => idx !== i);
                           setEditData({ ...m, volumes: updated });
                         }}
-                        className="w-6 h-6 bg-red-600 text-white text-xs"
+                        variant="danger"
+                        size="sm"
+                        className="w-6 h-6 text-xs"
                       >
                         ✕
-                      </button>
+                      </Button>
                     </div>
 
                     {/* Drag handle indicator */}
@@ -452,32 +459,32 @@ export default function MangaSection({
           <div className="sticky bottom-0 bg-[#121217] border-t border-[#39ff14] p-4 flex justify-between">
             <div>
               {m.id !== "new" && (
-                <button
-                  className="px-4 py-2 bg-red-600 text-white hover:bg-red-800"
+                <Button
+                  variant="danger"
                   onClick={deleteManga}
                   disabled={deleting}
                 >
                   {deleting ? "Deleting..." : "Delete Manga"}
-                </button>
+                </Button>
               )}
             </div>
             <div className="flex gap-3">
-              <button
-                className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-500"
+              <Button
+                variant="default"
                 onClick={() => {
                   setEditMode(false);
                   setSelectedManga(null);
                 }}
               >
                 Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-[#39ff14] text-black hover:bg-white"
+              </Button>
+              <Button
+                variant="primary"
                 onClick={saveManga}
                 disabled={saving}
               >
                 {saving ? "Saving..." : "Save Manga"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -492,8 +499,9 @@ export default function MangaSection({
       <h1 className="text-3xl font-bold">Manga Collection</h1>
 
       {isAdmin && (
-        <button
-          className="px-4 py-2 bg-[#39ff14] text-black hover:bg-white mb-4"
+        <Button
+          variant="primary"
+          className="mb-4"
           onClick={() => {
             const newManga = { ...emptyMangaTemplate, id: "new" };
             setEditMode(true);
@@ -502,7 +510,7 @@ export default function MangaSection({
           }}
         >
           + Add Manga
-        </button>
+        </Button>
       )}
 
       <div className="flex flex-wrap justify-center items-start gap-4 p-2">

@@ -5,6 +5,7 @@ import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
 import Sticker from "../stickers/Sticker";
 import WindowDecoration from "../window/WindowDecoration.jsx";
+import Button from "../ui/Button";
 
 export default function GuestBook() {
   const { currentUser, isAdmin } = useCurrentUser();
@@ -95,7 +96,7 @@ export default function GuestBook() {
           <input type="text" placeholder="Nickname" value={name} onChange={e => setName(e.target.value)} className="bg-[#121217] border border-[#39ff14] px-2 py-1" />
           <input type="text" placeholder="Website (optional)" value={website} onChange={e => setWebsite(e.target.value)} className="bg-[#121217] border border-[#39ff14] px-2 py-1" />
           <textarea placeholder="Message" value={message} onChange={e => setMessage(e.target.value)} className="bg-[#121217] border border-[#39ff14] px-2 py-1 resize-none" />
-          <button type="submit" className="bg-[#39ff14] text-black px-4 py-1 hover:bg-[#32cc12] w-max">Send</button>
+          <Button type="submit" variant="primary">Send</Button>
         </form>
       </div>
     </div>
@@ -125,9 +126,9 @@ export default function GuestBook() {
             {isAdmin && (
               <div className="flex gap-2 mt-2">
                 {!msg.approved && (
-                  <button onClick={() => approveMessage(msg.id)} className="bg-[#39ff14] px-2 py-1 text-black hover:bg-[#32cc12]">Approve</button>
+                  <Button onClick={() => approveMessage(msg.id)} variant="primary" size="sm">Approve</Button>
                 )}
-                <button onClick={() => deleteMessage(msg.id)} className="bg-red-600 px-2 py-1 text-white hover:bg-red-700">Delete</button>
+                <Button onClick={() => deleteMessage(msg.id)} variant="danger" size="sm">Delete</Button>
                 <input
                   type="text"
                   placeholder="Reply..."
@@ -135,7 +136,7 @@ export default function GuestBook() {
                   onChange={e => setReplyText(prev => ({ ...prev, [msg.id]: e.target.value }))}
                   className="bg-[#121217] border border-[#39ff14] px-2 py-1 flex-1"
                 />
-                <button onClick={() => sendReply(msg.id)} className="bg-[#39ff14] px-2 py-1 text-black hover:bg-[#32cc12]">Send Reply</button>
+                <Button onClick={() => sendReply(msg.id)} variant="primary" size="sm">Send Reply</Button>
               </div>
             )}
           </div>

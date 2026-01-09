@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import ProjectTerminal from "./projectTerminal.jsx";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
+import Button from "../ui/Button";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
@@ -87,12 +88,12 @@ const handleDeleteProject = async (project) => {
   return (
     <div className="flex flex-col items-center gap-4">
       {isAdmin && (
-        <button
-          className="px-2 py-2 bg-[#1f8f0c] hover:bg-[#22a50b] cursor-pointer text-white"
+        <Button
+          variant="primary"
           onClick={handleAddProject}
         >
           Add Project
-        </button>
+        </Button>
       )}
 
       <div className="flex flex-wrap justify-center items-start gap-4 p-2">
@@ -102,18 +103,20 @@ const handleDeleteProject = async (project) => {
 
             {isAdmin && (
               <div className="absolute pt-12 pr-4 top-2 right-2 flex gap-2">
-                <button
-                  className="px-2 py-1 bg-[#1f8f0c] hover:bg-[#22a50b] text-white"
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => setEditingProject({ ...project, originalName: project.name })}
                 >
                   Edit
-                </button>
-                <button
-                  className="px-2 py-1 bg-[#1f8f0c] hover:bg-[#22a50b] text-white"
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => handleDeleteProject(project)}
                 >
                   Delete
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -151,8 +154,8 @@ const handleDeleteProject = async (project) => {
             )}
 
             <div className="flex justify-end gap-2 mt-2">
-              <button className="bg-[#39ff14] text-black px-4 py-1 hover:bg-gray-400" onClick={() => setEditingProject(null)}>Cancel</button>
-              <button className="bg-[#39ff14] text-black px-4 py-1 hover:bg-[#32cc12]" onClick={() => handleSaveProject(editingProject, editingProject.originalName)}>Save</button>
+              <Button variant="default" onClick={() => setEditingProject(null)}>Cancel</Button>
+              <Button variant="primary" onClick={() => handleSaveProject(editingProject, editingProject.originalName)}>Save</Button>
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import TopCard from "./TopCard.jsx";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import Sticker from "../stickers/Sticker";
 import WindowDecoration from "../window/WindowDecoration.jsx";
+import Button from "../ui/Button";
 
 export default function ShitPosts() {
   const [posts, setPosts] = useState(null);
@@ -154,12 +155,13 @@ export default function ShitPosts() {
             <div className="flex justify-between items-center">
               <h2 className="text-xl text-[#39ff14] capitalize">Top {section}</h2>
               {isAdmin && (
-                <button
+                <Button
                   onClick={() => handleAddPost(section)}
-                  className="bg-[#1f8f0c] hover:bg-[#22a50b] px-3 py-1 text-white"
+                  variant="primary"
+                  size="sm"
                 >
                   Add
-                </button>
+                </Button>
               )}
             </div>
             </div>
@@ -173,21 +175,23 @@ export default function ShitPosts() {
                     />
                     {isAdmin && (
                       <div className="absolute top-2 right-2 flex gap-2">
-                        <button
+                        <Button
                           onClick={() => {
                             setEditingPost(p);
                             setSelectedCategory(section);
                           }}
-                          className="bg-[#1f8f0c] hover:bg-[#22a50b] text-white px-2 py-1"
+                          variant="primary"
+                          size="sm"
                         >
                           Edit
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => handleDeletePost(section, p.id)}
-                          className="bg-[#1f8f0c] hover:bg-[#22a50b] text-white px-2 py-1"
+                          variant="primary"
+                          size="sm"
                         >
                           Delete
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -284,18 +288,18 @@ export default function ShitPosts() {
             </div>
 
             <div className="flex justify-end gap-2 mt-3">
-              <button
-                className="bg-[#39ff14] text-black px-4 py-1 hover:bg-[#32cc12] "
+              <Button
+                variant="primary"
                 onClick={() => setEditingPost(null)}
               >
                 Cancel
-              </button>
-              <button
-                className="bg-[#39ff14] text-black px-4 py-1 hover:bg-[#32cc12]"
+              </Button>
+              <Button
+                variant="primary"
                 onClick={() => handleSavePost(selectedCategory, editingPost)}
               >
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -1,6 +1,18 @@
 "use client";
+import { useAchievements } from "../../hooks/useAchievements";
 
 export default function WindowDecoration({ title = "Terminal", onClose, showControls = true }) {
+  const { unlock } = useAchievements();
+
+  const handleCloseClick = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      // Window is not closable, trigger achievement
+      unlock("window_rebel");
+    }
+  };
+
   return (
     <div
   className="
@@ -32,7 +44,7 @@ export default function WindowDecoration({ title = "Terminal", onClose, showCont
 
           {/* Close button */}
           <button
-            onClick={onClose}
+            onClick={handleCloseClick}
             className="w-5 h-5 bg-gradient-to-b from-[#e85d5d] to-[#c62828] hover:from-[#ff6b6b] hover:to-[#d32f2f] border border-[#ff8080] border-b-[#8b1a1a] flex items-center justify-center text-white text-xs font-bold transition-all shadow-sm"
             title="Close"
           >
