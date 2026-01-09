@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import WindowDecoration from "../window/WindowDecoration.jsx";
+import Button from "../ui/Button";
 
 export default function ConsolesSection({
   isAdmin,
@@ -125,26 +126,28 @@ export default function ConsolesSection({
         <WindowDecoration title="Kitty - Consoles.txt" showControls={true} />
         <div className="p-6">
 
-        <button
+        <Button
           className="mb-6 text-[#39ff14] hover:text-white"
+          variant="default"
           onClick={() => {
             setSelectedConsole(null);
             setEditMode(false);
           }}
         >
           ← Back to collection
-        </button>
+        </Button>
 
         {isAdmin && (
-          <button
-            className="px-4 py-2 mb-4 bg-[#39ff14] text-black hover:bg-white"
+          <Button
+            className="mb-4"
+            variant="primary"
             onClick={() => {
               setEditMode(true);
               setEditData({ ...c });
             }}
           >
             Edit Console
-          </button>
+          </Button>
         )}
 
         <h1 className="text-3xl font-bold">{c.name}</h1>
@@ -197,15 +200,16 @@ export default function ConsolesSection({
             <h1 className="text-2xl font-bold text-[#39ff14]">
               {c.id === "new" ? "Add Console" : "Edit Console"}
             </h1>
-            <button
+            <Button
               onClick={() => {
                 setEditMode(false);
                 setSelectedConsole(null);
               }}
+              variant="default"
               className="text-gray-400 hover:text-white text-2xl"
             >
               ✕
-            </button>
+            </Button>
           </div>
 
           <div className="p-6">
@@ -288,8 +292,9 @@ export default function ConsolesSection({
             <div className="border-t border-[#39ff14] pt-4">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-[#39ff14]">Games ({c.games?.length || 0})</h2>
-                <button
-                  className="px-3 py-1 bg-[#39ff14] text-black hover:bg-white text-sm"
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => {
                     const updated = Array.isArray(c.games)
                       ? [...c.games, { title: "", cover: "" }]
@@ -298,7 +303,7 @@ export default function ConsolesSection({
                   }}
                 >
                   + Add Game
-                </button>
+                </Button>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[300px] overflow-y-auto">
@@ -335,15 +340,17 @@ export default function ConsolesSection({
                     } ${draggedIndex === i ? "opacity-50" : ""}`}
                   >
                     <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <button
+                      <Button
                         onClick={() => {
                           const updated = c.games.filter((_, idx) => idx !== i);
                           setEditData({ ...c, games: updated });
                         }}
-                        className="w-6 h-6 bg-red-600 text-white text-xs"
+                        variant="danger"
+                        size="sm"
+                        className="w-6 h-6 text-xs"
                       >
                         ✕
-                      </button>
+                      </Button>
                     </div>
 
                     <div className="absolute top-1 left-1 text-gray-500 text-xs opacity-0 group-hover:opacity-100">
@@ -412,32 +419,32 @@ export default function ConsolesSection({
           <div className="sticky bottom-0 bg-[#121217] border-t border-[#39ff14] p-4 flex justify-between">
             <div>
               {c.id !== "new" && (
-                <button
-                  className="px-4 py-2 bg-red-600 text-white hover:bg-red-800"
+                <Button
+                  variant="danger"
                   onClick={deleteConsole}
                   disabled={deleting}
                 >
                   {deleting ? "Deleting..." : "Delete Console"}
-                </button>
+                </Button>
               )}
             </div>
             <div className="flex gap-3">
-              <button
-                className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-500"
+              <Button
+                variant="default"
                 onClick={() => {
                   setEditMode(false);
                   setSelectedConsole(null);
                 }}
               >
                 Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-[#39ff14] text-black hover:bg-white"
+              </Button>
+              <Button
+                variant="primary"
                 onClick={saveConsole}
                 disabled={saving}
               >
                 {saving ? "Saving..." : "Save Console"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -452,8 +459,9 @@ export default function ConsolesSection({
       <h1 className="text-3xl font-bold">Gaming Consoles</h1>
 
       {isAdmin && (
-        <button
-          className="px-4 py-2 bg-[#39ff14] text-black hover:bg-white mb-4"
+        <Button
+          variant="primary"
+          className="mb-4"
           onClick={() => {
             const newConsole = { ...emptyConsoleTemplate, id: "new" };
             setEditMode(true);
@@ -462,7 +470,7 @@ export default function ConsolesSection({
           }}
         >
           + Add Console
-        </button>
+        </Button>
       )}
 
       <div className="flex flex-wrap justify-center items-start gap-4 p-2">

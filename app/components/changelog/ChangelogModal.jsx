@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
 import WindowDecoration from "../window/WindowDecoration.jsx";
+import Button from "../ui/Button";
 
 export default function ChangelogModal({ show, onClose }) {
   const [versions, setVersions] = useState([]);
@@ -101,6 +102,7 @@ export default function ChangelogModal({ show, onClose }) {
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
         <WindowDecoration title="Changelog - cat CHANGELOG.md" onClose={handleClose} />
 
+        {isAdmin && (
         <div className="px-6 py-3 bg-[#090909] border-b border-[#39ff14]/30">
           <div className="font-mono flex items-center justify-between">
             <div>
@@ -112,16 +114,17 @@ export default function ChangelogModal({ show, onClose }) {
               <span className="text-white">$</span>
               <span className="text-gray-400 ml-2">cat CHANGELOG.md</span>
             </div>
-            {isAdmin && (
-              <button
+              <Button
                 onClick={() => setIsAdding(true)}
-                className="text-gray-500 cursor-pointer hover:text-[#39ff14] font-mono transition-colors"
+                variant="default"
+                size="sm"
+                className="text-gray-500 hover:text-[#39ff14] font-mono transition-colors"
               >
                 [+ Add Version]
-              </button>
-            )}
+              </Button>
           </div>
         </div>
+        )}
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {loading ? (
@@ -133,18 +136,22 @@ export default function ChangelogModal({ show, onClose }) {
               <div key={idx} className="border-l-2 border-[#39ff14] pl-4 relative group">
                 {isAdmin && (
                   <div className="absolute -right-2 top-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
+                    <Button
                       onClick={() => setEditingVersion(version)}
-                      className="text-blue-400 hover:text-blue-300 text-sm cursor-pointer"
+                      variant="default"
+                      size="sm"
+                      className="text-blue-400 hover:text-blue-300 text-sm"
                     >
                       [Edit]
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => handleDelete(version.version)}
-                      className="text-red-400 hover:text-red-300 text-sm cursor-pointer"
+                      variant="danger"
+                      size="sm"
+                      className="text-sm"
                     >
                       [Del]
-                    </button>
+                    </Button>
                   </div>
                 )}
 
@@ -306,12 +313,13 @@ function VersionEditor({ version, onSave, onCancel }) {
                 {formData[key].map((item, idx) => (
                   <div key={idx} className="flex items-center gap-2">
                     <span className="text-gray-300 flex-1">{item}</span>
-                    <button
+                    <Button
                       onClick={() => handleRemoveItem(key, idx)}
-                      className="text-red-400 hover:text-red-300 text-sm cursor-pointer"
+                      variant="danger"
+                      size="sm"
                     >
                       [X]
-                    </button>
+                    </Button>
                   </div>
                 ))}
                 <div className="flex gap-2">
@@ -328,12 +336,12 @@ function VersionEditor({ version, onSave, onCancel }) {
                     className="flex-1 bg-[#090909] border border-gray-600 text-white px-3 py-2 focus:outline-none focus:border-[#39ff14]"
                     placeholder="Add item..."
                   />
-                  <button
+                  <Button
                     onClick={() => handleAddItem(key)}
-                    className="bg-[#39ff14] text-black px-4 py-2 cursor-pointer hover:bg-[#2dd10d] transition-colors"
+                    variant="primary"
                   >
                     Add
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -341,21 +349,21 @@ function VersionEditor({ version, onSave, onCancel }) {
         </div>
 
         <div className="px-6 py-3 bg-[#090909] border-t border-[#39ff14]/30 flex justify-end gap-3">
-          <button
+          <Button
             onClick={(e) => {
               e.stopPropagation();
               onCancel();
             }}
-            className="px-4 py-2 border border-gray-600 text-gray-400 cursor-pointer hover:border-[#39ff14] hover:text-[#39ff14] transition-colors"
+            variant="default"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSubmit}
-            className="px-4 py-2 bg-[#39ff14] text-black cursor-pointer hover:bg-[#2dd10d] transition-colors"
+            variant="primary"
           >
             Save
-          </button>
+          </Button>
         </div>
       </div>
     </div>
