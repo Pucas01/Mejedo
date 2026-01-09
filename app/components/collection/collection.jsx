@@ -86,7 +86,7 @@ export default function CollectionPage() {
         setSelectedConsole={handleSelectConsole}
         refresh={fetchConsoles}
       />
-    <div className="pt-4">
+    <div className="pt-4 pb-4">
       <MangaSection
         isAdmin={isAdmin}
         manga={manga}

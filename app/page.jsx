@@ -17,6 +17,7 @@ const pageComponents = {
   "/admin": dynamic(() => import("./components/admin/admin.jsx")),
   "/collection": dynamic(() => import("./components/collection/collection.jsx")),
   "/webring": dynamic(() => import("./components/webring/webring.jsx")),
+  "/buttons": dynamic(() => import("./components/buttons/buttons.jsx")),
 };
 
 // Import functions for preloading
@@ -29,6 +30,7 @@ const pageImports = {
   "/admin": () => import("./components/admin/admin.jsx"),
   "/collection": () => import("./components/collection/collection.jsx"),
   "/webring": () => import("./components/webring/webring.jsx"),
+  "/buttons": () => import("./components/buttons/buttons.jsx"),
 };
 
 const FutabaOverlay = dynamic(() => import("./components/easteregg/futaba.jsx"));
@@ -246,7 +248,7 @@ function PageContent() {
 
       <nav className="flex justify-center gap-6 bg-[#090909] border-b-2 border-[#39ff14] py-4">
         <div className="inline-flex gap-6 custom-dash pb-2">
-          {["/about", "/projects", "/blog", "/collection", "/shitposts", "/guestbook", "/webring", "/admin"].map(
+          {["/about", "/projects", "/blog", "/collection", "/shitposts", "/guestbook", "/webring", "/buttons", "/admin"].map(
             (page) => (
               <button
                 key={page}
