@@ -34,11 +34,14 @@ router.get("/", async (req, res) => {
     // Convert avatar to ASCII
     let avatarAsciiArt = null;
     try {
+      // Force color support in production by setting environment variable
+      process.env.FORCE_COLOR = '1';
       avatarAsciiArt = await asciify(avatarUrl, {
         fit: "box",
         width: 9,
         height: 6,
         color: true,
+        c_ratio: 2,
       });
     } catch (e) {
       console.error("Failed to asciify Discord avatar:", e);
@@ -59,11 +62,13 @@ router.get("/", async (req, res) => {
       }
 
       try {
+        process.env.FORCE_COLOR = '1';
         activityAsciiArt = await asciify(imageUrl, {
           fit: "box",
           width: 9,
           height: 6,
           color: true,
+          c_ratio: 2,
         });
       } catch (e) {
         console.error("Failed to asciify activity image:", e);

@@ -25,11 +25,13 @@ router.get("/", async (req, res) => {
       // Convert album art to ASCII
       let asciiArt = null;
       if (data.item?.album?.images?.[0]?.url) {
+        process.env.FORCE_COLOR = '1';
         asciiArt = await asciify(data.item.album.images[0].url, {
           fit: "box",
           width: 9,
           height: 6,
           color: true,
+          c_ratio: 2,
         });
       }
 
