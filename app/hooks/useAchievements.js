@@ -65,6 +65,13 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: false,
   },
+  button_copier: {
+    id: "button_copier",
+    name: "Cool person!!!",
+    description: "Copy my button code because your cool",
+    icon: "",
+    hidden: false,
+  },
   konami_master: {
     id: "konami_master",
     name: "Konami Code",
@@ -215,7 +222,7 @@ export function AchievementProvider({ children }) {
       if (key === "visitedPages" && !prev.visitedPages.includes(value)) {
         updated.visitedPages = [...prev.visitedPages, value];
 
-        const allPages = ["/about", "/projects", "/blog", "/collection", "/shitposts", "/guestbook", "/webring", "/admin"];
+        const allPages = ["/about", "/projects", "/blog", "/collection", "/shitposts", "/guestbook", "/webring", "/buttons", "/admin"];
         if (allPages.every((p) => updated.visitedPages.includes(p))) {
           setTimeout(() => unlockRef.current?.("explorer"), 500);
         }
