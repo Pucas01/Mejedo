@@ -21,11 +21,13 @@ router.get("/", async (req, res) => {
     let pfpAsciiArt = null;
     if (friend?.imageUri) {
       try {
+        process.env.FORCE_COLOR = '1';
         pfpAsciiArt = await asciify(friend.imageUri, {
           fit: "box",
           width: 9,
           height: 6,
           color: true,
+          c_ratio: 2,
         });
       } catch (e) {
         console.error("Failed to asciify profile picture:", e);
@@ -35,11 +37,13 @@ router.get("/", async (req, res) => {
     let gameAsciiArt = null;
     if (isPlaying && game?.imageUri) {
       try {
+        process.env.FORCE_COLOR = '1';
         gameAsciiArt = await asciify(game.imageUri, {
           fit: "box",
           width: 9,
           height: 6,
           color: true,
+          c_ratio: 2,
         });
       } catch (e) {
         console.error("Failed to asciify game image:", e);
