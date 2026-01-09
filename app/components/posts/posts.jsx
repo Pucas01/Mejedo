@@ -187,7 +187,7 @@ export default function ShitPosts() {
                         </Button>
                         <Button
                           onClick={() => handleDeletePost(section, p.id)}
-                          variant="primary"
+                          variant="danger"
                           size="sm"
                         >
                           Delete

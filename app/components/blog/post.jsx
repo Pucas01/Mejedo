@@ -4,6 +4,7 @@ import { marked } from "marked";
 import DOMPurify from "dompurify";
 import Sticker from "../stickers/Sticker";
 import WindowDecoration from "../window/WindowDecoration.jsx";
+import Button from "../ui/Button";
 
 export default function BlogPost({ post, onBack }) {
   if (!post) return null;
@@ -51,12 +52,13 @@ export default function BlogPost({ post, onBack }) {
         rotation={12}
         offset={{ x: -35, y: 35 }}
       />
-      <button
+      <Button
         onClick={onBack}
-        className="mb-6 text-[#39ff14] hover:text-white cursor-pointer transition"
+        size="sm"
+        className="mb-6"
       >
         ← Back to blog
-      </button>
+      </Button>
 
       <h1 className="text-3xl font-bold mb-2">{post.title}</h1>
       <p className="text-gray-400 mb-6">
