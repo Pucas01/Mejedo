@@ -1,3 +1,5 @@
+process.env.FORCE_COLOR = '3';
+
 import express from "express";
 import spotifyRoute from "./routes/spotify.js"
 import nintendoRoute from "./routes/nintendo.js"
