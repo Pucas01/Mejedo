@@ -1,4 +1,6 @@
 process.env.FORCE_COLOR = '3';
+process.env.COLORTERM = 'truecolor';
+process.env.TERM = 'xterm-256color';
 
 import express from "express";
 import spotifyRoute from "./routes/spotify.js"
