@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Button from "../ui/Button";
 
 const SourceBadge = ({ source }) => {
   switch (source) {
@@ -88,14 +89,16 @@ export default function TopCard({ post }) {
         </div>
 
         <div className="flex items-center justify-between gap-2 mt-2">
-          <a
+          <Button
+            as="a"
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs bg-[#39FF14] border border-[#39ff14] px-3 py-1 hover:bg-[#32cc12] text-black"
+            variant="primary"
+            size="sm"
           >
             Visit post
-          </a>
+          </Button>
         </div>
       </div>
     </div>
