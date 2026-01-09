@@ -40,6 +40,7 @@ const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 const AchievementToast = dynamic(() => import("./components/achievements/AchievementToast.jsx"));
 const AchievementsModal = dynamic(() => import("./components/achievements/AchievementsModal.jsx"));
 const ChangelogModal = dynamic(() => import("./components/changelog/ChangelogModal.jsx"));
+const MobileNav = dynamic(() => import("./components/navigation/MobileNav.jsx"));
 
 // Inner component that uses achievements
 function PageContent() {
@@ -50,7 +51,7 @@ function PageContent() {
   const [rhythmGameOpen, setRhythmGameOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
   const { currentUser, isAdmin } = useCurrentUser();
   const mainRef = useRef(null);
@@ -69,12 +70,6 @@ function PageContent() {
     }
   }, [isLoaded, updateStats]);
 
-  useEffect(() => {
-    const ua = navigator.userAgent || window.opera;
-    if (/android|iphone|ipad|ipod|windows phone/i.test(ua)) {
-      setIsMobile(true);
-    }
-  }, []);
 
   // Preload a page component
   const preloadPage = useCallback(async (page) => {
@@ -191,35 +186,23 @@ function PageContent() {
     setPopping(null);
   };
 
-  if (isMobile) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen p-4 bg-[url(/LaptopSHQ.png)] bg-cover text-white gap-4">
-        <div className="p-6 text-center bg-[#090909] text-[#39ff14] items-center justify-center flex-col flex border-[#39ff14] border-2">
-        <p className="w-full text-xl text-center p-2 text-[#39ff14]">
-          The website doesn't support mobile yet
-        </p>
-        <p className="w-full text-xl text-center p-2 text-[#39ff14]">
-          Its like way too much work
-        </p>
-        <Image
-          src="/randomimages/Yoshizawa.gif"
-          alt="Mobile image"
-          width={200}
-          height={200}
-          className="pt-2"
-        />
-        </div>
-      </div>
-    );
-  }
-
   const ActiveComponent = pageComponents[active];
+  const navPages = ["/about", "/projects", "/blog", "/collection", "/shitposts", "/guestbook", "/webring", "/buttons", "/admin"];
 
   return (
-    <div className="flex flex-col min-h-screen bg-[url(/LaptopSHQ.png)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-[#121217] md:bg-[url(/LaptopSHQ.png)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
+      {/* Mobile Navigation */}
+      <MobileNav
+        isOpen={mobileNavOpen}
+        onToggle={() => setMobileNavOpen(!mobileNavOpen)}
+        active={active}
+        onNavigate={NavClick}
+        pages={navPages}
+      />
+
       <header className="p-4 pb-0 text-center bg-[#090909] text-[#39ff14]">
         <h1
-          className="text-4xl font-bold flex cursor-pointer items-center justify-center gap-2"
+          className="text-2xl md:text-4xl font-bold flex cursor-pointer items-center justify-center gap-2"
           onClick={() => {
             setEgg(true);
             unlock("futaba_fan");
@@ -227,18 +210,18 @@ function PageContent() {
         >
           /home/pucas01
         </h1>
-        {isAdmin && <span>Admin Mode</span>}
-        <div className="flex items-center justify-center gap-4 mt-1">
+        {isAdmin && <span className="text-sm md:text-base">Admin Mode</span>}
+        <div className="flex items-center justify-center gap-2 md:gap-4 mt-1">
           <button
             onClick={() => setAchievementsOpen(true)}
-            className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
+            className="text-sm md:text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
             title="View Achievements"
           >
             Achievements
           </button>
           <button
             onClick={() => setChangelogOpen(true)}
-            className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
+            className="text-sm md:text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
             title="View Changelog"
           >
             Changelog
@@ -246,9 +229,10 @@ function PageContent() {
         </div>
       </header>
 
-      <nav className="flex justify-center gap-6 bg-[#090909] border-b-2 border-[#39ff14] py-4">
+      {/* Desktop Navigation - Hidden on mobile */}
+      <nav className="hidden md:flex justify-center gap-6 bg-[#090909] border-b-2 border-[#39ff14] py-4">
         <div className="inline-flex gap-6 custom-dash pb-2">
-          {["/about", "/projects", "/blog", "/collection", "/shitposts", "/guestbook", "/webring", "/buttons", "/admin"].map(
+          {navPages.map(
             (page) => (
               <button
                 key={page}
@@ -280,7 +264,7 @@ function PageContent() {
         </div>
       )}
 
-      <main ref={mainRef} className={`flex-1 pr-16 pl-16 ${transitioning ? "invisible" : "visible"}`}>
+      <main ref={mainRef} className={`flex-1 px-4 md:px-8 lg:px-16 ${transitioning ? "invisible" : "visible"}`}>
         {ActiveComponent && <ActiveComponent />}
 
         <FutabaOverlay

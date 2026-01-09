@@ -25,7 +25,7 @@ export default function Sticker({
 
   return (
     <div
-      className={`absolute ${positionClasses[position]} pointer-events-none z-10`}
+      className={`hidden md:block absolute ${positionClasses[position]} pointer-events-none z-10`}
       style={style}
     >
       <Image

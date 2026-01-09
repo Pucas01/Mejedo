@@ -51,7 +51,7 @@ export default function SpotifyTerminal() {
   return (
     <div
       ref={ref}
-      className="flex-1 min-w-[400px] min-h-[220px] bg-[#121217] border-2 border-[#39ff14] shadow-lg  relative">
+      className="flex-1 w-full md:min-w-[400px] min-h-[220px] bg-[#121217] border-2 border-[#39ff14] shadow-lg relative">
         <WindowDecoration title="Kitty - Spotify" showControls={true} />
       <Sticker
         src="/stickers/futaba-headphones.png"
@@ -61,7 +61,7 @@ export default function SpotifyTerminal() {
         offset={{ x: 15, y: -15 }}
       />
       {!isDone && (
-        <div className="p-8 font-jetbrains text-xl flex flex-wrap">
+        <div className="p-4 md:p-8 font-jetbrains text-sm md:text-xl flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>
           <span className="text-white">@</span>
           <span className="text-[#D73DA3]">PucasArch</span>
@@ -74,9 +74,9 @@ export default function SpotifyTerminal() {
       )}
 
       {isDone && track && (
-        <div className="flex flex-row p-6 font-jetbrains overflow-auto">
+        <div className="flex flex-col md:flex-row p-4 md:p-6 font-jetbrains overflow-auto gap-4">
           <div
-            className="mr-6 select-none"
+            className="hidden md:block mr-0 md:mr-6 select-none text-sm leading-tight"
             style={{ whiteSpace: "pre" }}
             dangerouslySetInnerHTML={{
               __html: track.asciiArt
@@ -90,18 +90,18 @@ export default function SpotifyTerminal() {
             }}
           />
 
-          <div className="text-xl space-y-1 text-white">
-            <p>
+          <div className="text-base md:text-xl space-y-0.5 md:space-y-1 text-white">
+            <p className="break-words">
               <span className="text-[#39ff14]">Now Playing:</span>{" "}
               {track.name}{" "}
               {!track.playing && track.name !== "Nothing Played Yet" && (
                 <span className="text-[#FF5555]">[PAUSED]</span>
               )}
             </p>
-            <p>
+            <p className="break-words">
               <span className="text-[#39ff14]">Artist:</span> {track.artist}
             </p>
-            <p>
+            <p className="break-words">
               <span className="text-[#39ff14]">Album:</span> {track.album}
             </p>
             <p>

@@ -9,7 +9,7 @@ const tips = [
   "Did you really try logging in? o no wait that was me.",
   "Did you know? This site runs on hopes and prayers.",
   "Check out the manga collection! Spoiler, theres chainsawman.",
-  "This website doesn't work on mobile. Skill issue!",
+  "Mobile support is now available! Check it out!",
   "who... are you?",
   "FIST OF JUSTICE! oh wait wrong character.",
   "Bona-fide Monafied.",
@@ -209,49 +209,51 @@ export default function Mascot() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end">
-      {/* Speech bubble - positioned above mascot */}
-      {bubbleState !== "hidden" && (
-        <div className={`relative mb-4 transition-transform duration-200 ${isHovered ? "-translate-y-2" : ""} ${getBubbleClass()}`}>
-          <div className={`bg-[#121217] border-2 border-[#39ff14] ${config.bubble} text-white`}>
-            {currentTip}
+    <div className="pointer-events-none fixed bottom-0 right-0 z-40 p-4">
+      <div className="pointer-events-auto flex flex-col items-end">
+        {/* Speech bubble - positioned above mascot */}
+        {bubbleState !== "hidden" && (
+          <div className={`relative mb-4 transition-transform duration-200 ${isHovered ? "-translate-y-2" : ""} ${getBubbleClass()}`}>
+            <div className={`bg-[#121217] border-2 border-[#39ff14] ${config.bubble} text-white`}>
+              {currentTip}
+            </div>
+            {/* Speech bubble tail - pointing down towards mascot on right side */}
+            <div className="absolute -bottom-2 right-6 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#39ff14]" />
+            <div className="absolute -bottom-1 right-[26px] w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#121217]" />
           </div>
-          {/* Speech bubble tail - pointing down towards mascot on right side */}
-          <div className="absolute -bottom-2 right-6 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#39ff14]" />
-          <div className="absolute -bottom-1 right-[26px] w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#121217]" />
-        </div>
-      )}
+        )}
 
-      {/* Mascot box */}
-      <div
-        className={`transition-transform duration-200 cursor-pointer ${isHovered ? "scale-110" : ""}`}
-        onClick={() => {
-          // Track mascot clicks for achievement
-          if (achievements?.updateStats) {
-            achievements.updateStats("mascotClicks", 1);
-          }
-          showRandomTip();
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <div className={`bg-[#121217] border-2 border-[#39ff14] ${config.padding} pb-0`}>
-          {/* Character container - anchored to bottom with bounce */}
-          <div className={`${config.container} flex items-end justify-center`}>
-            <img
-              key={bounceKey}
-              src={
-                isExcited
-                  ? frame === 0 ? "/mascot/frame1_happy.png" : "/mascot/frame2_happy.png"
-                  : frame === 0 ? "/mascot/frame1.png" : "/mascot/frame2.png"
-              }
-              alt="Mascot"
-              width={config.mascot}
-              className={frame === 0 ? (isExcited ? "animate-mascot-bounce-fast" : "animate-mascot-bounce") : ""}
-              style={{
-                imageRendering: "pixelated",
-              }}
-            />
+        {/* Mascot box */}
+        <div
+          className={`transition-transform duration-200 cursor-pointer ${isHovered ? "scale-110" : ""}`}
+          onClick={() => {
+            // Track mascot clicks for achievement
+            if (achievements?.updateStats) {
+              achievements.updateStats("mascotClicks", 1);
+            }
+            showRandomTip();
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <div className={`bg-[#121217] border-2 border-[#39ff14] ${config.padding} pb-0`}>
+            {/* Character container - anchored to bottom with bounce */}
+            <div className={`${config.container} flex items-end justify-center`}>
+              <img
+                key={bounceKey}
+                src={
+                  isExcited
+                    ? frame === 0 ? "/mascot/frame1_happy.png" : "/mascot/frame2_happy.png"
+                    : frame === 0 ? "/mascot/frame1.png" : "/mascot/frame2.png"
+                }
+                alt="Mascot"
+                width={config.mascot}
+                className={frame === 0 ? (isExcited ? "animate-mascot-bounce-fast" : "animate-mascot-bounce") : ""}
+                style={{
+                  imageRendering: "pixelated",
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

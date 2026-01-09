@@ -202,7 +202,7 @@ export default function About() {
   }, [doneFastfetch]);
 
   return (
-    <div className="relative flex flex-col gap-4 p-4 min-h-screen text-white justify-start">
+    <div className="relative flex flex-col gap-4 p-2 md:p-4 min-h-screen text-white justify-start">
       {/* Scroll Indicator */}
       {showScrollIndicator && (
         <div
@@ -210,9 +210,9 @@ export default function About() {
             indicatorVisible ? "opacity-100" : "opacity-0"
           }`}
         >
-          <span className="text-[#39ff14] text-sm font-jetbrains">Scroll for more</span>
+          <span className="text-[#39ff14] text-xs md:text-sm font-jetbrains">Scroll for more</span>
           <svg
-            className="w-6 h-6 text-[#39ff14]"
+            className="w-4 h-4 md:w-6 md:h-6 text-[#39ff14]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -227,7 +227,7 @@ export default function About() {
         </div>
       )}
 
-      <div className="flex-1 min-w-[400px] min-h-[735px] max-h-[725px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
+      <div className="flex-1 w-full md:min-w-[400px] min-h-[600px] md:min-h-[735px] md:max-h-[725px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
         <WindowDecoration title="Kitty - fastfetch" showControls={true} />
         <Sticker
           src="/stickers/futaba-jacket.png"
@@ -245,7 +245,7 @@ export default function About() {
             />
 
         {!doneFastfetch && (
-          <div className="p-8 font-jetbrains text-xl flex flex-wrap">
+          <div className="p-4 md:p-8 font-jetbrains text-sm md:text-xl flex flex-wrap">
             <span className="text-[#39ff14]">pucas01</span>
             <span className="text-[#FFFFFF]">@</span>
             <span className="text-[#D73DA3]">PucasArch</span>
@@ -258,12 +258,13 @@ export default function About() {
         )}
 
         {doneFastfetch && (
-          <div className="flex-1 p-8 overflow-auto text-gray-400 text-sm flex">
-            <pre className="ascii-font text-green-400 mr-4 select-none">
+          <div className="flex-1 p-4 md:p-8 overflow-auto text-gray-400 text-sm flex flex-col md:flex-row">
+            {/* ASCII art - hidden on mobile */}
+            <pre className="hidden md:block ascii-font text-green-400 mr-4 select-none text-[0.5rem] leading-[0.6rem]">
               {asciiLogo.join("\n")}
             </pre>
-            <div className="flex-1 flex text-xl justify-center">
-              <div className="flex flex-col text-left text-[#FFFFFF] space-y-1">
+            <div className="flex-1 flex text-sm md:text-xl justify-center md:justify-start">
+              <div className="flex flex-col text-left text-[#FFFFFF] space-y-0.5 md:space-y-1">
                 <p><span className="text-[#39ff14]">pucas01</span>
                    <span className="text-[#FFFFFF]">@</span>
                    <span className="text-[#39ff14]">PucasArch</span></p>
@@ -281,7 +282,7 @@ export default function About() {
                 <p><span className="text-[#39ff14]">WM:</span> Hyprland {versions.hyprland} (Wayland)</p>
                 <p>
                   <span className="text-[#39ff14]">Dots: </span>
-                  <a href="https://github.com/end-4/dots-hyprland?tab=readme-ov-file#illogical-impulsequickshell" className="decoration-[#39ff14] underline-offset-5 hover:underline decoration-wavy">
+                  <a href="https://github.com/end-4/dots-hyprland?tab=readme-ov-file#illogical-impulsequickshell" className="decoration-[#39ff14] underline-offset-5 hover:underline decoration-wavy break-all">
                     illogical-impulse (Quickshell)
                   </a>
                 </p>
@@ -293,7 +294,7 @@ export default function About() {
         <div>
           <Whoami />
         </div>
-      <div ref={secondRef} className="flex-1 min-w-[400px] min-h-[350px] max-h-[350px] bg-[#121217] border-2 border-[#39ff14] shadow-lg  relative">
+      <div ref={secondRef} className="flex-1 w-full md:min-w-[400px] min-h-[300px] md:min-h-[350px] md:max-h-[350px] bg-[#121217] border-2 border-[#39ff14] shadow-lg relative">
         <WindowDecoration title="Kitty - /" showControls={true} />
         <Sticker
           src="/stickers/futaba-standing.png"
@@ -304,7 +305,7 @@ export default function About() {
         />
         <div className="flex-1">
           {!doneLinks && (
-            <div className="p-8 font-jetbrains text-xl flex flex-wrap">
+            <div className="p-4 md:p-8 font-jetbrains text-sm md:text-xl flex flex-wrap">
               <span className="text-[#39ff14]">pucas01</span>
               <span className="text-white">@</span>
               <span className="text-[#D73DA3]">PucasArch</span>
@@ -317,7 +318,7 @@ export default function About() {
           )}
 
           {doneLinks && (
-            <div className="p-8 text-xl space-y-2 text-[#39ff14] font-jetbrains">
+            <div className="p-4 md:p-8 text-sm md:text-xl space-y-1 md:space-y-2 text-[#39ff14] font-jetbrains">
               <p> Twitter  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://x.com/Pucas02" target="_blank" rel="noopener noreferrer" onClick={(e) => handleSocialClick(e, "https://x.com/Pucas02")}>x.com/Pucas02</a></p>
               <p> GitHub  <a className="decoration-[#39ff14] text-white underline-offset-5 hover:underline decoration-wavy" href="https://github.com/pucas01" target="_blank" rel="noopener noreferrer" onClick={(e) => handleSocialClick(e, "https://github.com/pucas01")}>github.com/pucas01</a></p>
               <p> Discord  <a className="text-white">pucas01</a></p>
@@ -331,7 +332,7 @@ export default function About() {
         <div className="flex-1">
         </div>
       </div>
-      <div className="flex flex-row gap-4 flex-wrap">
+      <div className="flex flex-col md:flex-row gap-4 flex-wrap">
         <SpotifyTerminal />
         <NintendoSwitchTerminal />
         <DiscordTerminal />

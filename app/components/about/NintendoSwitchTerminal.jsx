@@ -85,7 +85,7 @@ export default function NintendoSwitchTerminal() {
   return (
     <div
       ref={ref}
-      className="flex-1 min-w-[400px] min-h-[220px] bg-[#121217] border-2 border-[#39ff14] shadow-lg  relative">
+      className="flex-1 w-full md:min-w-[400px] min-h-[220px] bg-[#121217] border-2 border-[#39ff14] shadow-lg relative">
         <WindowDecoration title="Kitty - Switch" showControls={true} />
       <Sticker
         src="/stickers/futaba-happy.png"
@@ -95,7 +95,7 @@ export default function NintendoSwitchTerminal() {
         offset={{ x: -18, y: -18 }}
       />
       {!isDone && (
-        <div className="p-8 font-jetbrains text-xl flex flex-wrap">
+        <div className="p-4 md:p-8 font-jetbrains text-sm md:text-xl flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>
           <span className="text-white">@</span>
           <span className="text-[#D73DA3]">PucasArch</span>
@@ -108,9 +108,9 @@ export default function NintendoSwitchTerminal() {
       )}
 
       {isDone && presence && (
-        <div className="flex flex-row p-6 font-jetbrains overflow-auto">
+        <div className="flex flex-col md:flex-row p-4 md:p-6 font-jetbrains overflow-auto gap-4">
           <div
-            className="mr-6 select-none"
+            className="hidden md:block mr-0 md:mr-6 select-none text-sm leading-tight"
             style={{ whiteSpace: "pre" }}
             dangerouslySetInnerHTML={{
               __html: getAsciiArt()
@@ -119,7 +119,7 @@ export default function NintendoSwitchTerminal() {
             }}
           />
 
-          <div className="text-xl space-y-1 text-white">
+          <div className="text-base md:text-xl space-y-0.5 md:space-y-1 text-white">
             <p>
               <span className="text-[#39ff14]">User:</span> {presence.username}
             </p>

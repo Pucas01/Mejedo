@@ -11,6 +11,7 @@ const jetbrainsMonoNF = localFont({
 export const metadata = {
   title: "Pucas01 | Mejedo",
   description: "Portfolio website",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
 };
 
 export default function RootLayout({ children }) {

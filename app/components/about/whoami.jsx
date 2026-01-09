@@ -74,7 +74,7 @@ Some things im good at
   return (
     <div
       ref={containerRef}
-      className="flex-1 min-w-[400px] min-h-[630px] max-h-[630px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
+      className="flex-1 w-full md:min-w-[400px] min-h-[500px] md:min-h-[630px] md:max-h-[630px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
         <WindowDecoration title="Kitty - whoami.txt" showControls={true} />
       <Sticker
         src="/stickers/futaba-peace.png"
@@ -85,7 +85,7 @@ Some things im good at
       />
       {/* Typing command */}
       {!doneTyping && (
-        <div className="p-6 font-jetbrains text-xl flex flex-wrap">
+        <div className="p-4 md:p-6 font-jetbrains text-sm md:text-xl flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>
           <span className="text-white">@</span>
           <span className="text-[#D73DA3]">PucasArch</span>
@@ -99,7 +99,7 @@ Some things im good at
 
       {/* Terminal output */}
       {doneTyping && (
-        <div className="p-6 text-md">
+        <div className="p-4 md:p-6 text-base md:text-md overflow-auto">
           <pre className="whitespace-pre-wrap">
             {formatTerminalText(aboutText)}
           </pre>
