@@ -16,6 +16,7 @@ export default function ButtonsPage() {
     { url: "https://electric-tenshi.nekoweb.org/", img: "https://file.garden/Z3nf4eZzZUtRPfhK/stuff/wvdtkw.gif", alt: "the miku-site of nekoweb... not the first but certainly one of them" },
     { url: "https://layercake.moe", img: "https://layercake.moe/assets/images/buttons/mine/layercake3.gif", alt: "its a cake but like layered" },
     { url: "https://poz.pet", img: "https://poz.pet/88x31/powered-by-poz.png", alt: "its a cake but like layered" },
+    { img: "https://poz.pet/88x31/this-site-is-miku-approved.gif", alt: "its a cake but like layered" },
     // Add more buttons here
   ];
 
