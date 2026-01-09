@@ -197,26 +197,18 @@ export default function ConsolesSection({
     const c = editData || { ...emptyConsoleTemplate, id: "new" };
 
     return (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-        <div className="bg-[#121217] border-2 border-[#39ff14] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-          {/* Header */}
-          <div className="sticky top-0 bg-[#121217] border-b border-[#39ff14] p-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-[#39ff14]">
-              {c.id === "new" ? "Add Console" : "Edit Console"}
-            </h1>
-            <Button
-              onClick={() => {
-                setEditMode(false);
-                setSelectedConsole(null);
-              }}
-              variant="default"
-              className="text-gray-400 hover:text-white text-2xl"
-            >
-              ✕
-            </Button>
-          </div>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 animate-fadeIn">
+        <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
+          {/* Window Decoration */}
+          <WindowDecoration
+            title={c.id === "new" ? "Add Console" : "Edit Console"}
+            onClose={() => {
+              setEditMode(false);
+              setSelectedConsole(null);
+            }}
+          />
 
-          <div className="p-6">
+          <div className="flex-1 overflow-y-auto p-6">
             {/* Two column layout for console details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               {/* Left: Form fields */}
@@ -224,7 +216,7 @@ export default function ConsolesSection({
                 <div>
                   <label className="text-sm text-gray-400 block mb-1">Name</label>
                   <input
-                    className="w-full p-2 bg-black border border-[#39ff14] text-white"
+                    className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
                     placeholder="Console name"
                     value={c.name}
                     onChange={(e) => setEditData({ ...c, name: e.target.value })}
@@ -234,7 +226,7 @@ export default function ConsolesSection({
                 <div>
                   <label className="text-sm text-gray-400 block mb-1">Manufacturer</label>
                   <input
-                    className="w-full p-2 bg-black border border-[#39ff14] text-white"
+                    className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
                     placeholder="Nintendo, Sony, etc."
                     value={c.manufacturer}
                     onChange={(e) => setEditData({ ...c, manufacturer: e.target.value })}
@@ -244,7 +236,7 @@ export default function ConsolesSection({
                 <div>
                   <label className="text-sm text-gray-400 block mb-1">Release Year</label>
                   <input
-                    className="w-full p-2 bg-black border border-[#39ff14] text-white"
+                    className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
                     placeholder="2020"
                     value={c.releaseYear}
                     onChange={(e) => setEditData({ ...c, releaseYear: e.target.value })}
@@ -254,7 +246,7 @@ export default function ConsolesSection({
                 <div>
                   <label className="text-sm text-gray-400 block mb-1">Image URL</label>
                   <input
-                    className="w-full p-2 bg-black border border-[#39ff14] text-white"
+                    className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
                     value={c.image}
                     placeholder="/uploads/console.png"
                     onChange={(e) => setEditData({ ...c, image: e.target.value })}
@@ -382,7 +374,7 @@ export default function ConsolesSection({
                     )}
 
                     <input
-                      className="w-full p-1 bg-black border border-[#39ff14] text-white text-sm mb-1"
+                      className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1 text-sm mb-1"
                       placeholder="Title"
                       value={game.title}
                       onClick={(e) => e.stopPropagation()}
@@ -394,7 +386,7 @@ export default function ConsolesSection({
                     />
 
                     <input
-                      className="w-full p-1 bg-black border border-[#39ff14] text-white text-xs mb-1"
+                      className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1 text-xs mb-1"
                       placeholder="Cover URL"
                       value={game.cover}
                       onClick={(e) => e.stopPropagation()}
@@ -427,7 +419,7 @@ export default function ConsolesSection({
           </div>
 
           {/* Footer with actions */}
-          <div className="sticky bottom-0 bg-[#121217] border-t border-[#39ff14] p-4 flex justify-between">
+          <div className="px-6 py-3 bg-[#090909] border-t border-[#39ff14]/30 flex justify-between">
             <div>
               {c.id !== "new" && (
                 <Button

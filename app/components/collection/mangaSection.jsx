@@ -201,26 +201,18 @@ export default function MangaSection({
     const m = editData || { ...emptyMangaTemplate, id: "new" };
 
     return (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-        <div className="bg-[#121217] border-2 border-[#39ff14] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-          {/* Header */}
-          <div className="sticky top-0 bg-[#121217] border-b border-[#39ff14] p-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-[#39ff14]">
-              {m.id === "new" ? "Add Manga" : "Edit Manga"}
-            </h1>
-            <Button
-              onClick={() => {
-                setEditMode(false);
-                setSelectedManga(null);
-              }}
-              variant="default"
-              className="text-gray-400 hover:text-white text-2xl"
-            >
-              ✕
-            </Button>
-          </div>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 animate-fadeIn">
+        <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
+          {/* Window Decoration */}
+          <WindowDecoration
+            title={m.id === "new" ? "Add Manga" : "Edit Manga"}
+            onClose={() => {
+              setEditMode(false);
+              setSelectedManga(null);
+            }}
+          />
 
-          <div className="p-6">
+          <div className="flex-1 overflow-y-auto p-6">
             {/* Two column layout for manga details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               {/* Left: Form fields */}
@@ -228,7 +220,7 @@ export default function MangaSection({
                 <div>
                   <label className="text-sm text-gray-400 block mb-1">Title</label>
                   <input
-                    className="w-full p-2 bg-black border border-[#39ff14] text-white"
+                    className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
                     placeholder="Manga title"
                     value={m.title}
                     onChange={(e) => setEditData({ ...m, title: e.target.value })}
@@ -238,7 +230,7 @@ export default function MangaSection({
                 <div>
                   <label className="text-sm text-gray-400 block mb-1">Author</label>
                   <input
-                    className="w-full p-2 bg-black border border-[#39ff14] text-white"
+                    className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
                     placeholder="Author name"
                     value={m.author}
                     onChange={(e) => setEditData({ ...m, author: e.target.value })}
@@ -248,7 +240,7 @@ export default function MangaSection({
                 <div>
                   <label className="text-sm text-gray-400 block mb-1">Publisher</label>
                   <input
-                    className="w-full p-2 bg-black border border-[#39ff14] text-white"
+                    className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
                     placeholder="Publisher"
                     value={m.publisher}
                     onChange={(e) => setEditData({ ...m, publisher: e.target.value })}
@@ -258,7 +250,7 @@ export default function MangaSection({
                 <div>
                   <label className="text-sm text-gray-400 block mb-1">Release Year</label>
                   <input
-                    className="w-full p-2 bg-black border border-[#39ff14] text-white"
+                    className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
                     placeholder="2020"
                     value={m.releaseYear}
                     onChange={(e) => setEditData({ ...m, releaseYear: e.target.value })}
@@ -268,7 +260,7 @@ export default function MangaSection({
                 <div>
                   <label className="text-sm text-gray-400 block mb-1">Cover URL</label>
                   <input
-                    className="w-full p-2 bg-black border border-[#39ff14] text-white"
+                    className="w-full bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
                     value={m.cover}
                     placeholder="/uploads/manga-cover.png"
                     onChange={(e) => setEditData({ ...m, cover: e.target.value })}
@@ -399,7 +391,7 @@ export default function MangaSection({
                     <div className="flex gap-1 mb-1">
                       <input
                         type="number"
-                        className="w-12 p-1 bg-black border border-[#39ff14] text-white text-sm text-center"
+                        className="w-12 bg-[#121217] border border-[#39ff14] text-white text-sm text-center px-1 py-1"
                         placeholder="#"
                         value={vol.number || ""}
                         onClick={(e) => e.stopPropagation()}
@@ -410,7 +402,7 @@ export default function MangaSection({
                         }}
                       />
                       <input
-                        className="flex-1 min-w-0 p-1 bg-black border border-[#39ff14] text-white text-sm"
+                        className="flex-1 min-w-0 bg-[#121217] border border-[#39ff14] text-white text-sm px-1 py-1"
                         placeholder="Title"
                         value={vol.title}
                         onClick={(e) => e.stopPropagation()}
@@ -423,7 +415,7 @@ export default function MangaSection({
                     </div>
 
                     <input
-                      className="w-full p-1 bg-black border border-[#39ff14] text-white text-xs mb-1"
+                      className="w-full bg-[#121217] border border-[#39ff14] text-white text-xs px-1 py-1 mb-1"
                       placeholder="Cover URL"
                       value={vol.cover}
                       onClick={(e) => e.stopPropagation()}
@@ -456,7 +448,7 @@ export default function MangaSection({
           </div>
 
           {/* Footer with actions */}
-          <div className="sticky bottom-0 bg-[#121217] border-t border-[#39ff14] p-4 flex justify-between">
+          <div className="px-6 py-3 bg-[#090909] border-t border-[#39ff14]/30 flex justify-between">
             <div>
               {m.id !== "new" && (
                 <Button

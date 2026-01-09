@@ -206,100 +206,101 @@ export default function ShitPosts() {
       </div>
 
       {editingPost && (
-        <div className="fixed inset-0 max-h-full bg-black/60 flex justify-center items-center z-50">
-          <div className="bg-[#121217] border-2 border-[#39ff14] max-h-full p-6 shadow-lg w-[400px] flex flex-col gap-2">
-            <h2 className="text-white text-lg font-bold mb-2">Edit Post</h2>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 animate-fadeIn">
+          <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
+            <WindowDecoration title="Edit Post" showControls={false} />
 
-            <input
-              type="text"
-              placeholder="Title"
-              value={editingPost.title}
-              onChange={(e) =>
-                setEditingPost({ ...editingPost, title: e.target.value })
-              }
-              className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
-            />
-
-            <input
-              type="text"
-              placeholder="URL"
-              value={editingPost.url}
-              onChange={(e) =>
-                setEditingPost({ ...editingPost, url: e.target.value })
-              }
-              className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
-            />
-
-            <label className="text-sm text-gray-400 mt-2">Custom Thumbnail URL:</label>
-            <input
-              type="text"
-              placeholder="/path/to/image.png"
-              value={editingPost.thumbnail || ""}
-              onChange={(e) =>
-                setEditingPost({ ...editingPost, thumbnail: e.target.value })
-              }
-              className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full"
-            />
-
-            <label className="text-sm text-gray-400 mt-2">Upload Thumbnail:</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const url = await handleImageUpload(file);
-                  setEditingPost({ ...editingPost, thumbnail: url });
+            <div className="flex-1 overflow-y-auto p-6">
+              <input
+                type="text"
+                placeholder="Title"
+                value={editingPost.title}
+                onChange={(e) =>
+                  setEditingPost({ ...editingPost, title: e.target.value })
                 }
-              }}
-              className="text-gray-300 text-sm"
-            />
-
-            {editingPost.thumbnail && (
-              <img
-                src={editingPost.thumbnail}
-                alt="thumbnail"
-                className="w-full max-h-100 rounded border border-[#39ff14] mt-2"
+                className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full mb-4"
               />
-            )}
 
+              <input
+                type="text"
+                placeholder="URL"
+                value={editingPost.url}
+                onChange={(e) =>
+                  setEditingPost({ ...editingPost, url: e.target.value })
+                }
+                className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full mb-4"
+              />
 
-            <div className="flex flex-col gap-1 mt-2">
-              <label className="text-sm text-gray-400">Meta:</label>
-              {Object.entries(editingPost.meta || {}).map(([key, value]) => (
-                <div key={key} className="flex justify-between items-center gap-2">
-                  <span className="capitalize">{key}:</span>
-                  <input
-                    type="number"
-                    value={value}
-                    onChange={(e) =>
-                      setEditingPost({
-                        ...editingPost,
-                        meta: {
-                          ...editingPost.meta,
-                          [key]: parseInt(e.target.value, 10) || 0,
-                        },
-                      })
-                    }
-                    className="bg-[#121217] border border-[#39ff14] text-white w-24 px-2 py-1"
-                  />
-                </div>
-              ))}
-            </div>
+              <label className="text-sm text-gray-400 mt-2 block">Custom Thumbnail URL:</label>
+              <input
+                type="text"
+                placeholder="/path/to/image.png"
+                value={editingPost.thumbnail || ""}
+                onChange={(e) =>
+                  setEditingPost({ ...editingPost, thumbnail: e.target.value })
+                }
+                className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full mb-4"
+              />
 
-            <div className="flex justify-end gap-2 mt-3">
-              <Button
-                variant="primary"
-                onClick={() => setEditingPost(null)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => handleSavePost(selectedCategory, editingPost)}
-              >
-                Save
-              </Button>
+              <label className="text-sm text-gray-400 mt-2 block">Upload Thumbnail:</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const url = await handleImageUpload(file);
+                    setEditingPost({ ...editingPost, thumbnail: url });
+                  }
+                }}
+                className="text-gray-300 text-sm mb-4"
+              />
+
+              {editingPost.thumbnail && (
+                <img
+                  src={editingPost.thumbnail}
+                  alt="thumbnail"
+                  className="w-full max-h-100 rounded border border-[#39ff14] mt-2 mb-4"
+                />
+              )}
+
+              <div className="flex flex-col gap-1 mt-2">
+                <label className="text-sm text-gray-400">Meta:</label>
+                {Object.entries(editingPost.meta || {}).map(([key, value]) => (
+                  <div key={key} className="flex justify-between items-center gap-2">
+                    <span className="capitalize">{key}:</span>
+                    <input
+                      type="number"
+                      value={value}
+                      onChange={(e) =>
+                        setEditingPost({
+                          ...editingPost,
+                          meta: {
+                            ...editingPost.meta,
+                            [key]: parseInt(e.target.value, 10) || 0,
+                          },
+                        })
+                      }
+                      className="bg-[#121217] border border-[#39ff14] text-white w-24 px-2 py-1"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6">
+                <Button
+                  variant="primary"
+                  onClick={() => setEditingPost(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => handleSavePost(selectedCategory, editingPost)}
+                >
+                  Save
+                </Button>
+              </div>
             </div>
           </div>
         </div>

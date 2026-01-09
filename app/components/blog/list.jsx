@@ -206,98 +206,102 @@ export default function BlogList({ onSelectPost }) {
       </div>
 
       {editingPost && (
-        <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4 overflow-auto">
-          <div className="bg-[#121217] border-2 border-[#39ff14] p-6 rounded w-[600px] flex flex-col gap-2">
-            <h2 className="text-lg font-bold mb-2">Edit Post</h2>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 animate-fadeIn">
+          <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
+            <WindowDecoration title="Edit Post - edit.txt" />
 
-            <input
-              type="text"
-              value={editingPost.title}
-              onChange={(e) => setEditingPost({ ...editingPost, title: e.target.value })}
-              className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
-              placeholder="Title"
-            />
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  value={editingPost.title}
+                  onChange={(e) => setEditingPost({ ...editingPost, title: e.target.value })}
+                  className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1"
+                  placeholder="Title"
+                />
 
-            {/* Single Markdown textarea */}
-            <textarea
-              id="editingBody"
-              value={editingPost.body}
-              onChange={(e) => setEditingPost({ ...editingPost, body: e.target.value })}
-              className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 resize-none h-40"
-              placeholder="Markdown body"
-            />
+                {/* Single Markdown textarea */}
+                <textarea
+                  id="editingBody"
+                  value={editingPost.body}
+                  onChange={(e) => setEditingPost({ ...editingPost, body: e.target.value })}
+                  className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 resize-none h-40"
+                  placeholder="Markdown body"
+                />
 
-            {/* Image uploads with Insert button */}
-            <label className="text-sm text-gray-400 mt-2">Upload Images to Insert:</label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={async (e) => {
-                const files = Array.from(e.target.files);
-                if (files.length) {
-                  const urls = await handleImageUpload(files);
-                  setEditingPost({ ...editingPost, images: [...(editingPost.images || []), ...urls] });
-                }
-              }}
-              className="text-gray-300 text-sm"
-            />
-            <div className="flex flex-wrap gap-2 mt-2">
-              {editingPost.images?.map((url, i) => (
-                <div key={i} className="relative">
-                  <img
-                    src={url}
-                    className="w-24 h-24 object-cover border border-[#39ff14] rounded"
-                    title="Click Insert to add to Markdown"
-                  />
-
-                  {/* Insert button */}
-                  <Button
-                    onClick={() => {
-                      // Ask user for width/height or use defaults
-                      const width = prompt("Width (px)?", "400");
-                      const height = prompt("Height (px)?", "300");
-                      const cursorPos = document.querySelector("#editingBody").selectionStart || 0;
-                      const newBody =
-                        editingPost.body.slice(0, cursorPos) +
-                        `![Image](${url}){width=${width} height=${height}}` +
-                        editingPost.body.slice(cursorPos);
-                      setEditingPost({ ...editingPost, body: newBody });
-                    }}
-                    variant="primary"
-                    size="sm"
-                    className="absolute bottom-0 left-0 text-xs px-1"
-                  >
-                    Insert
-                  </Button>
-
-                  {/* Remove button */}
-                  <Button
-                    onClick={() =>
-                      setEditingPost({
-                        ...editingPost,
-                        images: editingPost.images.filter((_, idx) => idx !== i),
-                      })
+                {/* Image uploads with Insert button */}
+                <label className="text-sm text-gray-400 mt-2">Upload Images to Insert:</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files);
+                    if (files.length) {
+                      const urls = await handleImageUpload(files);
+                      setEditingPost({ ...editingPost, images: [...(editingPost.images || []), ...urls] });
                     }
-                    variant="danger"
-                    size="sm"
-                    className="absolute top-0 right-0 px-1 text-xs"
+                  }}
+                  className="text-gray-300 text-sm"
+                />
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {editingPost.images?.map((url, i) => (
+                    <div key={i} className="relative">
+                      <img
+                        src={url}
+                        className="w-24 h-24 object-cover border border-[#39ff14] rounded"
+                        title="Click Insert to add to Markdown"
+                      />
+
+                      {/* Insert button */}
+                      <Button
+                        onClick={() => {
+                          // Ask user for width/height or use defaults
+                          const width = prompt("Width (px)?", "400");
+                          const height = prompt("Height (px)?", "300");
+                          const cursorPos = document.querySelector("#editingBody").selectionStart || 0;
+                          const newBody =
+                            editingPost.body.slice(0, cursorPos) +
+                            `![Image](${url}){width=${width} height=${height}}` +
+                            editingPost.body.slice(cursorPos);
+                          setEditingPost({ ...editingPost, body: newBody });
+                        }}
+                        variant="primary"
+                        size="sm"
+                        className="absolute bottom-0 left-0 text-xs px-1"
+                      >
+                        Insert
+                      </Button>
+
+                      {/* Remove button */}
+                      <Button
+                        onClick={() =>
+                          setEditingPost({
+                            ...editingPost,
+                            images: editingPost.images.filter((_, idx) => idx !== i),
+                          })
+                        }
+                        variant="danger"
+                        size="sm"
+                        className="absolute top-0 right-0 px-1 text-xs"
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-2 mt-3">
+                  <Button onClick={() => setEditingPost(null)} variant="default">
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => handleSave(editingPost)}
+                    variant="primary"
                   >
-                    ✕
+                    Save
                   </Button>
                 </div>
-              ))}
-            </div>
-            <div className="flex justify-end gap-2 mt-3">
-              <Button onClick={() => setEditingPost(null)} variant="default">
-                Cancel
-              </Button>
-              <Button
-                onClick={() => handleSave(editingPost)}
-                variant="primary"
-              >
-                Save
-              </Button>
+              </div>
             </div>
           </div>
         </div>

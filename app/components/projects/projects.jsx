@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import ProjectTerminal from "./projectTerminal.jsx";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import Button from "../ui/Button";
+import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
@@ -125,37 +126,65 @@ const handleDeleteProject = async (project) => {
 
       {/* Edit Modal */}
       {editingProject && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 overflow-auto p-4">
-          <div className="bg-[#121217] border-2 border-[#39ff14] p-6 rounded shadow-lg w-[400px] flex flex-col gap-2">
-            <h2 className="text-white text-lg font-bold mb-2">Edit Project</h2>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 animate-fadeIn">
+          <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
+            <WindowDecoration title="Edit Project" onClose={() => setEditingProject(null)} />
 
-            <input type="text" placeholder="Name" value={editingProject.name} onChange={e => setEditingProject({ ...editingProject, name: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1" />
-            <textarea placeholder="Description" value={editingProject.description} onChange={e => setEditingProject({ ...editingProject, description: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 resize-none" />
-            <input type="text" placeholder="Status" value={editingProject.status} onChange={e => setEditingProject({ ...editingProject, status: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1" />
-            <input type="text" placeholder="Commit" value={editingProject.commit} onChange={e => setEditingProject({ ...editingProject, commit: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1" />
-            <input type="text" placeholder="Link" value={editingProject.link} onChange={e => setEditingProject({ ...editingProject, link: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1" />
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Name</label>
+                  <input type="text" placeholder="Name" value={editingProject.name} onChange={e => setEditingProject({ ...editingProject, name: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full" />
+                </div>
 
-            {/* Custom Image URL */}
-            <label className="text-sm text-gray-400 mt-2">Custom Image URL:</label>
-            <input type="text" placeholder="/path/to/image.png" value={editingProject.image || ""} onChange={e => setEditingProject({ ...editingProject, image: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full" />
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Description</label>
+                  <textarea placeholder="Description" value={editingProject.description} onChange={e => setEditingProject({ ...editingProject, description: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 resize-none w-full" rows="4" />
+                </div>
 
-            {/* Upload Image */}
-            <label className="text-sm text-gray-400 mt-2">Upload Image:</label>
-            <input type="file" accept="image/*" onChange={async e => {
-              const file = e.target.files[0];
-              if (file) {
-                const url = await handleImageUpload(file);
-                setEditingProject({ ...editingProject, image: url });
-              }
-            }} className="text-gray-300 text-sm" />
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Status</label>
+                  <input type="text" placeholder="Status" value={editingProject.status} onChange={e => setEditingProject({ ...editingProject, status: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full" />
+                </div>
 
-            {editingProject.image && (
-              <img src={editingProject.image} alt="Project" className="w-full max-h-60 object-contain rounded border border-[#39ff14] mt-2" />
-            )}
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Commit</label>
+                  <input type="text" placeholder="Commit" value={editingProject.commit} onChange={e => setEditingProject({ ...editingProject, commit: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full" />
+                </div>
 
-            <div className="flex justify-end gap-2 mt-2">
-              <Button variant="default" onClick={() => setEditingProject(null)}>Cancel</Button>
-              <Button variant="primary" onClick={() => handleSaveProject(editingProject, editingProject.originalName)}>Save</Button>
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Link</label>
+                  <input type="text" placeholder="Link" value={editingProject.link} onChange={e => setEditingProject({ ...editingProject, link: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full" />
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Custom Image URL</label>
+                  <input type="text" placeholder="/path/to/image.png" value={editingProject.image || ""} onChange={e => setEditingProject({ ...editingProject, image: e.target.value })} className="bg-[#121217] border border-[#39ff14] text-white px-2 py-1 w-full" />
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Upload Image</label>
+                  <input type="file" accept="image/*" onChange={async e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const url = await handleImageUpload(file);
+                      setEditingProject({ ...editingProject, image: url });
+                    }
+                  }} className="text-gray-300 text-sm" />
+                </div>
+
+                {editingProject.image && (
+                  <div>
+                    <label className="text-sm text-gray-400 mb-1 block">Preview</label>
+                    <img src={editingProject.image} alt="Project" className="w-full max-h-60 object-contain rounded border border-[#39ff14]" />
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2 mt-2">
+                  <Button variant="default" onClick={() => setEditingProject(null)}>Cancel</Button>
+                  <Button variant="primary" onClick={() => handleSaveProject(editingProject, editingProject.originalName)}>Save</Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
