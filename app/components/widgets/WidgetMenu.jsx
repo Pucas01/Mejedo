@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 
 const availableWidgets = [
   { type: 'music', name: 'Music Player', icon: '', description: 'Play music from the server' },
+  { type: 'youtube', name: 'Teto Mix', icon: '', description: 'Watch YouTube videos' },
 ];
 
 export default function WidgetMenu() {

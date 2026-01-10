@@ -60,6 +60,9 @@ export function WidgetProvider({ children, mascotVisible, onToggleMascot }) {
     if (type === 'music') {
       defaultWidth = 550;
       defaultHeight = 450;
+    } else if (type === 'youtube') {
+      defaultWidth = 484;
+      defaultHeight = 356;
     }
 
     const newWidget = {
