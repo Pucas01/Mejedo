@@ -9,13 +9,35 @@ import Button from "../ui/Button";
 
 export default function GuestBook() {
   const { currentUser, isAdmin } = useCurrentUser();
-  const { unlock } = useAchievements();
+  const { unlock, unlockedAchievements } = useAchievements();
 
   const [messages, setMessages] = useState([]);
   const [name, setName] = useState("");
   const [website, setWebsite] = useState("");
   const [message, setMessage] = useState("");
   const [replyText, setReplyText] = useState({});
+
+  const ensureProtocol = (url) => {
+    if (!url) return url;
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    return `https://${url}`;
+  };
+
+  const handleWebsiteClick = (e, url) => {
+    if (unlockedAchievements.guestbook_visitor) {
+      return;
+    }
+
+    e.preventDefault();
+
+    unlock("guestbook_visitor");
+
+    setTimeout(() => {
+      window.open(ensureProtocol(url), "_blank", "noopener,noreferrer");
+    }, 2000);
+  };
 
   const fetchMessages = async () => {
     const url = isAdmin ? "/api/guestbook/admin" : "/api/guestbook";
@@ -76,7 +98,7 @@ export default function GuestBook() {
     <div className="flex flex-col p-4 gap-4 text-xl font-jetbrains">
 
       <div className="flex-1 min-w-[400px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
-        <WindowDecoration title="Kitty - whoami.txt" showControls={true} />
+        <WindowDecoration title="Kitty - docs.pucas01.com" showControls={true} />
         <div className="p-4">
         <Sticker
           src="/stickers/futaba-pointing.png"
@@ -100,8 +122,8 @@ export default function GuestBook() {
       </div>
     </div>
 
-      <div className="flex-1 min-w-[400px] min-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col overflow-auto space-y-2 relative">
-        <WindowDecoration title="Kitty - whoami.txt" showControls={true} />
+      <div className="flex-1 min-w-[400px] min-h-[200px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col space-y-2 relative">
+        <WindowDecoration title="Kitty - Guestbook-posts.md" showControls={true} />
         <div className="p-4">
         <Sticker
           src="/stickers/futaba-shy.png"
@@ -115,7 +137,7 @@ export default function GuestBook() {
           <div key={msg.id} className="whitespace-pre-wrap text-[#39ff14] border border-[#39ff14] p-3 flex flex-col gap-2">
             <p className="mb-1 text-gray-400">
               <span dangerouslySetInnerHTML={{ __html: msg.name}} />
-              {msg.website && <a href={msg.website} className=" hover:text-white">{` (${msg.website})`}</a>}
+              {msg.website && <a href={ensureProtocol(msg.website)} className=" hover:text-white" target="_blank" rel="noopener noreferrer" onClick={(e) => handleWebsiteClick(e, msg.website)}>{` (${msg.website})`}</a>}
               <span> </span>{new Date(msg.timestamp).toLocaleString()}
             </p>
             <hr className="border-gray-600 mb-1" />
