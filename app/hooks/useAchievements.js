@@ -95,6 +95,13 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: false,
   },
+  teto_watcher: {
+    id: "teto_watcher",
+    name: "Mischievous Function",
+    description: "Im sorry this is like my most favorite video i have ever seen and everyone in the entire world has to listen to this remix ones",
+    icon: "",
+    hidden: false,
+  },
   // Hidden achievements
   konami_master: {
     id: "konami_master",
@@ -163,6 +170,7 @@ export function AchievementProvider({ children }) {
     viewedManga: false,
     openedWidget: false,
     playedSong: false,
+    openedTetoWidget: false,
   });
   const [pendingAchievement, setPendingAchievement] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -315,6 +323,13 @@ export function AchievementProvider({ children }) {
 
         // Check for music listener achievement
         setTimeout(() => unlockRef.current?.("music_listener"), 500);
+      }
+
+      if (key === "openedTetoWidget") {
+        updated.openedTetoWidget = true;
+
+        // Check for teto watcher achievement
+        setTimeout(() => unlockRef.current?.("teto_watcher"), 500);
       }
 
       return updated;

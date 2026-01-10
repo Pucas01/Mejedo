@@ -84,8 +84,60 @@ export default function ResizeHandles({ widgetId, widget }) {
       const maxWidth = window.innerWidth * 0.9;
       const maxHeight = window.innerHeight * 0.9;
 
-      newWidth = Math.max(MIN_WIDTH, Math.min(maxWidth, newWidth));
-      newHeight = Math.max(MIN_HEIGHT, Math.min(maxHeight, newHeight));
+      // Aspect ratio lock for youtube widget (3:2 content area after 40px crop)
+      if (widget.type === 'youtube') {
+        const HEADER_HEIGHT = 32;
+        const BORDER_SIZE = 4;
+        const aspectRatio = 3 / 2; // 3:2 aspect ratio for content (480x320 after crop)
+
+        // Determine which dimension to constrain based on resize direction
+        if (resizing.includes('e') || resizing.includes('w')) {
+          // Width is being changed, adjust height to match
+          const contentWidth = newWidth - BORDER_SIZE;
+          const newContentHeight = contentWidth / aspectRatio;
+          newHeight = newContentHeight + HEADER_HEIGHT + BORDER_SIZE;
+        } else if (resizing.includes('n') || resizing.includes('s')) {
+          // Height is being changed, adjust width to match
+          const contentHeight = newHeight - HEADER_HEIGHT - BORDER_SIZE;
+          const newContentWidth = contentHeight * aspectRatio;
+          newWidth = newContentWidth + BORDER_SIZE;
+        } else {
+          // Corner resize - prioritize width
+          const contentWidth = newWidth - BORDER_SIZE;
+          const newContentHeight = contentWidth / aspectRatio;
+          newHeight = newContentHeight + HEADER_HEIGHT + BORDER_SIZE;
+        }
+
+        // Apply constraints and maintain aspect ratio
+        if (newWidth > maxWidth) {
+          newWidth = maxWidth;
+          const contentWidth = newWidth - BORDER_SIZE;
+          const newContentHeight = contentWidth / aspectRatio;
+          newHeight = newContentHeight + HEADER_HEIGHT + BORDER_SIZE;
+        }
+        if (newHeight > maxHeight) {
+          newHeight = maxHeight;
+          const contentHeight = newHeight - HEADER_HEIGHT - BORDER_SIZE;
+          const newContentWidth = contentHeight * aspectRatio;
+          newWidth = newContentWidth + BORDER_SIZE;
+        }
+        if (newWidth < MIN_WIDTH) {
+          newWidth = MIN_WIDTH;
+          const contentWidth = newWidth - BORDER_SIZE;
+          const newContentHeight = contentWidth / aspectRatio;
+          newHeight = newContentHeight + HEADER_HEIGHT + BORDER_SIZE;
+        }
+        if (newHeight < MIN_HEIGHT) {
+          newHeight = MIN_HEIGHT;
+          const contentHeight = newHeight - HEADER_HEIGHT - BORDER_SIZE;
+          const newContentWidth = contentHeight * aspectRatio;
+          newWidth = newContentWidth + BORDER_SIZE;
+        }
+      } else {
+        // Normal constraints for non-youtube widgets
+        newWidth = Math.max(MIN_WIDTH, Math.min(maxWidth, newWidth));
+        newHeight = Math.max(MIN_HEIGHT, Math.min(maxHeight, newHeight));
+      }
 
       // If we hit min size while resizing from left/top, adjust position
       if (newWidth === MIN_WIDTH && resizing.includes('w')) {

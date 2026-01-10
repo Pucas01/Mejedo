@@ -28,6 +28,9 @@ const tips = [
   "NO I WILL NEVER PLAY LEAGUE OF LEGENDS!",
   "TEAMMATES? FRIENDS? I LOVE THOSE!",
   "오! – 진짜요?",
+  "Mischievous Function Jerk remix",
+  "Have you seen the widgets?",
+  "i put alot of time into that audio player",
 ];
 
 // Shuffle array using Fisher-Yates algorithm

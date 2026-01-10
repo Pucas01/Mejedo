@@ -66,6 +66,12 @@ export function WidgetProvider({ children, mascotVisible, onToggleMascot }) {
     if (type === 'music') {
       defaultWidth = 550;
       defaultHeight = 450;
+    } else if (type === 'youtube') {
+      // Play area should be 480x320 (3:2 ratio after 40px crop from original 4:3)
+      // Width: 480 (content) + 4 (border-2 left+right)
+      // Height: 320 (content) + 32 (header h-8) + 4 (border-2 top+bottom)
+      defaultWidth = 484;
+      defaultHeight = 356;
     }
 
     const newWidget = {

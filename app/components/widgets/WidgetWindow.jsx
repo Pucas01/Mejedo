@@ -21,6 +21,9 @@ export default function WidgetWindow({ widget }) {
       if (widget.type === 'music') {
         const module = await import('./widgets/MusicPlayerWidget');
         setWidgetContent(() => module.default);
+      } else if (widget.type === 'youtube') {
+        const module = await import('./widgets/YouTubeWidget');
+        setWidgetContent(() => module.default);
       }
     }
     loadWidget();
@@ -82,6 +85,8 @@ export default function WidgetWindow({ widget }) {
     switch (widget.type) {
       case 'music':
         return 'Music Player';
+      case 'youtube':
+        return 'Teto Mix';
       default:
         return 'Widget';
     }
@@ -110,7 +115,7 @@ export default function WidgetWindow({ widget }) {
         />
       </div>
 
-      <div className="widget-content flex-1 overflow-auto p-4 font-jetbrains">
+      <div className={`widget-content flex-1 overflow-auto font-jetbrains ${widget.type === 'youtube' ? 'p-0' : 'p-4'}`}>
         {WidgetContent ? (
           <WidgetContent widgetId={widget.id} />
         ) : (
