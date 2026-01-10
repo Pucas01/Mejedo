@@ -81,6 +81,20 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: false,
   },
+  widget_opener: {
+    id: "widget_opener",
+    name: "Widgets and stuff",
+    description: "Open a widget for the first time",
+    icon: "",
+    hidden: false,
+  },
+  music_listener: {
+    id: "music_listener",
+    name: "Why would you listen to this",
+    description: "Play a song in the music player",
+    icon: "",
+    hidden: false,
+  },
   // Hidden achievements
   konami_master: {
     id: "konami_master",
@@ -147,6 +161,8 @@ export function AchievementProvider({ children }) {
     rhythmHighScore: 0,
     viewedConsole: false,
     viewedManga: false,
+    openedWidget: false,
+    playedSong: false,
   });
   const [pendingAchievement, setPendingAchievement] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -285,6 +301,20 @@ export function AchievementProvider({ children }) {
         if (updated.viewedConsole) {
           setTimeout(() => unlockRef.current?.("collection_viewer"), 500);
         }
+      }
+
+      if (key === "openedWidget") {
+        updated.openedWidget = true;
+
+        // Check for widget opener achievement
+        setTimeout(() => unlockRef.current?.("widget_opener"), 500);
+      }
+
+      if (key === "playedSong") {
+        updated.playedSong = true;
+
+        // Check for music listener achievement
+        setTimeout(() => unlockRef.current?.("music_listener"), 500);
       }
 
       return updated;

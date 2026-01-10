@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useCurrentUser } from "./hooks/CurrentUser.js";
 import { useKonamiCode } from "./hooks/useKonamiCode.js";
 import { AchievementProvider, useAchievements } from "./hooks/useAchievements.js";
+import { WidgetProvider } from "./hooks/useWidgets.js";
 
 // Dynamic imports with preload capability
 const pageComponents = {
@@ -40,9 +41,10 @@ const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 const AchievementToast = dynamic(() => import("./components/achievements/AchievementToast.jsx"));
 const AchievementsModal = dynamic(() => import("./components/achievements/AchievementsModal.jsx"));
 const ChangelogModal = dynamic(() => import("./components/changelog/ChangelogModal.jsx"));
+const WidgetManager = dynamic(() => import("./components/widgets/WidgetManager.jsx"));
 
 // Inner component that uses achievements
-function PageContent() {
+function PageContent({ mascotVisible }) {
   const [active, setActive] = useState("/about");
   const [transitioning, setTransitioning] = useState(false);
   const [popping, setPopping] = useState(null);
@@ -218,14 +220,16 @@ function PageContent() {
   return (
     <div className="flex flex-col min-h-screen bg-[url(/LaptopSHQ.png)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
       <header className="p-4 pb-0 text-center bg-[#090909] text-[#39ff14]">
-        <h1
-          className="text-4xl font-bold flex cursor-pointer items-center justify-center gap-2"
-          onClick={() => {
-            setEgg(true);
-            unlock("futaba_fan");
-          }}
-        >
-          /home/pucas01
+        <h1 className="text-4xl font-bold flex items-center justify-center gap-2">
+          <span
+            className="cursor-pointer"
+            onClick={() => {
+              setEgg(true);
+              unlock("futaba_fan");
+            }}
+          >
+            /home/pucas01
+          </span>
         </h1>
         {isAdmin && <span>Admin Mode</span>}
         <div className="flex items-center justify-center gap-4 mt-1">
@@ -297,7 +301,7 @@ function PageContent() {
         />
       </main>
 
-      <Mascot />
+      {mascotVisible && <Mascot />}
 
       <AchievementToast />
       <AchievementsModal
@@ -333,15 +337,26 @@ function PageContent() {
           </svg>
         </button>
       )}
+
+      {/* Widget System */}
+      <WidgetManager />
     </div>
   );
 }
 
-// Main export wrapped with AchievementProvider
+// Main export wrapped with providers
 export default function Page() {
+  const [mascotVisible, setMascotVisible] = useState(true);
+
+  const toggleMascot = () => {
+    setMascotVisible(prev => !prev);
+  };
+
   return (
     <AchievementProvider>
-      <PageContent />
+      <WidgetProvider mascotVisible={mascotVisible} onToggleMascot={toggleMascot}>
+        <PageContent mascotVisible={mascotVisible} />
+      </WidgetProvider>
     </AchievementProvider>
   );
 }

@@ -101,7 +101,7 @@ export default function ChangelogModal({ show, onClose }) {
     >
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
         {/* Window Decoration */}
-        <WindowDecoration title="Changelog - cat CHANGELOG.md" onClose={handleClose} />
+        <WindowDecoration title="Changelog - CHANGELOG.md" onClose={handleClose} />
 
         {/* Terminal Header */}
         {isAdmin && (
