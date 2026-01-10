@@ -192,12 +192,45 @@ export function AchievementProvider({ children }) {
 
     setIsLoaded(true);
     isLoadedRef.current = true;
+
+    // Listen for storage changes from other tabs/pages
+    const handleStorageChange = (e) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        setUnlockedAchievements(JSON.parse(e.newValue));
+      }
+      if (e.key === STATS_KEY && e.newValue) {
+        setStats(JSON.parse(e.newValue));
+      }
+    };
+
+    // Listen for custom event from same window (for cross-provider sync)
+    const handleAchievementsUpdated = (e) => {
+      setUnlockedAchievements(e.detail.achievements);
+    };
+
+    const handleStatsUpdated = (e) => {
+      setStats(e.detail.stats);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('achievementsUpdated', handleAchievementsUpdated);
+    window.addEventListener('statsUpdated', handleStatsUpdated);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('achievementsUpdated', handleAchievementsUpdated);
+      window.removeEventListener('statsUpdated', handleStatsUpdated);
+    };
   }, []);
 
   // Save to localStorage when achievements change
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(unlockedAchievements));
+      // Dispatch custom event for same-window sync
+      window.dispatchEvent(new CustomEvent('achievementsUpdated', {
+        detail: { achievements: unlockedAchievements }
+      }));
     }
   }, [unlockedAchievements, isLoaded]);
 
@@ -205,6 +238,10 @@ export function AchievementProvider({ children }) {
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+      // Dispatch custom event for same-window sync
+      window.dispatchEvent(new CustomEvent('statsUpdated', {
+        detail: { stats }
+      }));
     }
   }, [stats, isLoaded]);
 
