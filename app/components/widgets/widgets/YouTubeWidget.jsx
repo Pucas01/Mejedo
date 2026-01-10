@@ -24,7 +24,7 @@ export default function YouTubeWidget() {
         autoPlay
         muted
         playsInline
-        src="/videos/Zandsu - Ochame kinou⧸fukkireta (jerk remix) [VrWl4svZ-0U].webm"
+        src="/videos/teto-mix.webm"
         style={{
           objectFit: 'cover',
           objectPosition: 'center bottom'
