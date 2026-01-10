@@ -187,17 +187,50 @@ export function AchievementProvider({ children }) {
 
     setIsLoaded(true);
     isLoadedRef.current = true;
+
+    const handleStorageChange = (e) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        setUnlockedAchievements(JSON.parse(e.newValue));
+      }
+      if (e.key === STATS_KEY && e.newValue) {
+        setStats(JSON.parse(e.newValue));
+      }
+    };
+
+    const handleAchievementsUpdated = (e) => {
+      setUnlockedAchievements(e.detail.achievements);
+    };
+
+    const handleStatsUpdated = (e) => {
+      setStats(e.detail.stats);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('achievementsUpdated', handleAchievementsUpdated);
+    window.addEventListener('statsUpdated', handleStatsUpdated);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('achievementsUpdated', handleAchievementsUpdated);
+      window.removeEventListener('statsUpdated', handleStatsUpdated);
+    };
   }, []);
 
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(unlockedAchievements));
+      window.dispatchEvent(new CustomEvent('achievementsUpdated', {
+        detail: { achievements: unlockedAchievements }
+      }));
     }
   }, [unlockedAchievements, isLoaded]);
 
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+      window.dispatchEvent(new CustomEvent('statsUpdated', {
+        detail: { stats }
+      }));
     }
   }, [stats, isLoaded]);
 

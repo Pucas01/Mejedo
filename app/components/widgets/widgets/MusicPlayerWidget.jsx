@@ -118,6 +118,8 @@ export default function MusicPlayerWidget() {
     const audio = audioRef.current;
     if (!audio) return;
 
+    audio.volume = volume * 0.7;
+
     const updateTime = () => setCurrentTime(audio.currentTime);
     const updateDuration = () => setDuration(audio.duration);
     const handleEnded = () => {
@@ -134,7 +136,7 @@ export default function MusicPlayerWidget() {
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentSong]);
+  }, [currentSong, volume]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -204,10 +206,10 @@ export default function MusicPlayerWidget() {
   };
 
   const handleVolumeChange = (e) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
+    const sliderValue = parseFloat(e.target.value);
+    setVolume(sliderValue);
     if (audioRef.current) {
-      audioRef.current.volume = newVolume;
+      audioRef.current.volume = sliderValue * 0.7;
     }
   };
 
