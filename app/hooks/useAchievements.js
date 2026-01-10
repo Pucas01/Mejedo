@@ -110,6 +110,13 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: true,
   },
+  futaba_funeral: {
+    id: "futaba_funeral",
+    name: "Futaba dies",
+    description: "You fucking killed futaba",
+    icon: "",
+    hidden: true,
+  },
   futaba_fan: {
     id: "futaba_fan",
     name: "ALL OUT ATACK",

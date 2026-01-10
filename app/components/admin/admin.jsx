@@ -27,6 +27,7 @@ export default function AnimePage() {
 
   const handleJunpeiClick = () => {
     if (mikuAudioRef.current) {
+      mikuAudioRef.current.volume = 0.5;
       mikuAudioRef.current.currentTime = 0;
       mikuAudioRef.current.play();
     }
