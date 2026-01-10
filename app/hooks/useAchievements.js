@@ -74,6 +74,13 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: false,
   },
+  guestbook_visitor: {
+    id: "guestbook_visitor",
+    name: "Branching out",
+    description: "Visit someone's website from the guestbook",
+    icon: "",
+    hidden: false,
+  },
   // Hidden achievements
   konami_master: {
     id: "konami_master",
