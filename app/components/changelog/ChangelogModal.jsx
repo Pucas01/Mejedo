@@ -100,7 +100,7 @@ export default function ChangelogModal({ show, onClose }) {
       }}
     >
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
-        <WindowDecoration title="Changelog - cat CHANGELOG.md" onClose={handleClose} />
+        <WindowDecoration title="Changelog - CHANGELOG.md" onClose={handleClose} />
 
         {isAdmin && (
         <div className="px-6 py-3 bg-[#090909] border-b border-[#39ff14]/30">
