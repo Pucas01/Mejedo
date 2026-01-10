@@ -271,11 +271,11 @@ export default function RhythmGame({ show, onClose, onGameEnd }) {
 
     if (hasAudio) {
       audioRef.current.currentTime = 0;
-      audioRef.current.volume = 0.3;
+      audioRef.current.volume = 0.2;
 
       if (song.voiceSrc && voiceRef.current) {
         voiceRef.current.currentTime = 0;
-        voiceRef.current.volume = 0.4;
+        voiceRef.current.volume = 0.25;
       }
 
       const onCanPlay = () => {

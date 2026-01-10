@@ -41,7 +41,7 @@ const AchievementsModal = dynamic(() => import("./components/achievements/Achiev
 const ChangelogModal = dynamic(() => import("./components/changelog/ChangelogModal.jsx"));
 const WidgetManager = dynamic(() => import("./components/widgets/WidgetManager.jsx"));
 
-function PageContent({ mascotVisible }) {
+function PageContent() {
   const [active, setActive] = useState("/about");
   const [transitioning, setTransitioning] = useState(false);
   const [popping, setPopping] = useState(null);
@@ -51,15 +51,26 @@ function PageContent({ mascotVisible }) {
   const [changelogOpen, setChangelogOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
+  const [mascotVisible, setMascotVisible] = useState(true);
   const { currentUser, isAdmin } = useCurrentUser();
   const mainRef = useRef(null);
   const { unlock, updateStats, isLoaded, unlockedAchievements } = useAchievements();
+
+  const toggleMascot = () => {
+    setMascotVisible(prev => {
+      const newValue = !prev;
+      if (!newValue) {
+        unlock("futaba_funeral");
+      }
+      return newValue;
+    });
+  };
 
   useKonamiCode(() => {
     setRhythmGameOpen(true);
     unlock("konami_master");
   });
-
+  
   useEffect(() => {
     if (isLoaded) {
       updateStats("visitedPages", "/about");
@@ -198,6 +209,7 @@ function PageContent({ mascotVisible }) {
   const ActiveComponent = pageComponents[active];
 
   return (
+    <WidgetProvider mascotVisible={mascotVisible} onToggleMascot={toggleMascot}>
     <div className="flex flex-col min-h-screen bg-[url(/LaptopSHQ.png)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
       <header className="p-4 pb-0 text-center bg-[#090909] text-[#39ff14]">
         <h1 className="text-4xl font-bold flex items-center justify-center gap-2">
@@ -319,21 +331,14 @@ function PageContent({ mascotVisible }) {
 
       <WidgetManager />
     </div>
+    </WidgetProvider>
   );
 }
 
 export default function Page() {
-  const [mascotVisible, setMascotVisible] = useState(true);
-
-  const toggleMascot = () => {
-    setMascotVisible(prev => !prev);
-  };
-
   return (
     <AchievementProvider>
-      <WidgetProvider mascotVisible={mascotVisible} onToggleMascot={toggleMascot}>
-        <PageContent mascotVisible={mascotVisible} />
-      </WidgetProvider>
+      <PageContent />
     </AchievementProvider>
   );
 }
