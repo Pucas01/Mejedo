@@ -20,6 +20,7 @@ import versionsRoute from "./routes/versions.js"
 import discordRoute from "./routes/discord.js"
 import changelogRoute from "./routes/changelog.js"
 import musicRoute from "./routes/music.js"
+import speedrunLeaderboardRoute from "./routes/speedrunLeaderboard.js"
 import requireAuth from "./authMiddleware.js"
 import session from "express-session"
 import cors from "cors";
@@ -67,6 +68,7 @@ app.use("/api/versions", versionsRoute);
 app.use("/api/discord-presence", discordRoute);
 app.use("/api/changelog", changelogRoute);
 app.use("/api/music", musicRoute);
+app.use("/api/speedrun-leaderboard", speedrunLeaderboardRoute);
 
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 

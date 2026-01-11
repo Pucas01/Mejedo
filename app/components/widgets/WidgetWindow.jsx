@@ -10,10 +10,11 @@ const widgetRegistry = {
 };
 
 export default function WidgetWindow({ widget }) {
-  const { updatePosition, updateSize, bringToFront, closeWidget } = useWidgets();
+  const { updatePosition, updateSize, bringToFront, closeWidget, minimizeWidget } = useWidgets();
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const [WidgetContent, setWidgetContent] = useState(null);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   // Dynamically import widget content
   useEffect(() => {
@@ -80,6 +81,10 @@ export default function WidgetWindow({ widget }) {
     closeWidget(widget.id);
   };
 
+  const handleMinimize = () => {
+    setIsMinimized(!isMinimized);
+  };
+
   // Get widget title based on type
   const getTitle = () => {
     switch (widget.type) {
@@ -98,8 +103,8 @@ export default function WidgetWindow({ widget }) {
       style={{
         left: widget.position.x,
         top: widget.position.y,
-        width: widget.size.width,
-        height: widget.size.height,
+        width: isMinimized && widget.type === 'music' ? 300 : widget.size.width,
+        height: isMinimized && widget.type === 'music' ? 160 : widget.size.height,
         zIndex: widget.zIndex,
         cursor: isDragging ? "url('/cursors/Move.cur'), move" : "url('/cursors/Normal.cur'), auto"
       }}
@@ -111,19 +116,20 @@ export default function WidgetWindow({ widget }) {
         <WindowDecoration
           title={getTitle()}
           onClose={handleClose}
+          onMinimize={widget.type === 'music' ? handleMinimize : undefined}
           showControls={true}
         />
       </div>
 
       <div className={`widget-content flex-1 overflow-auto font-jetbrains ${widget.type === 'youtube' ? 'p-0' : 'p-4'}`}>
         {WidgetContent ? (
-          <WidgetContent widgetId={widget.id} />
+          <WidgetContent widgetId={widget.id} isMinimized={isMinimized} />
         ) : (
           <div className="text-white">Loading widget...</div>
         )}
       </div>
 
-      <ResizeHandles widgetId={widget.id} widget={widget} />
+      {!isMinimized && <ResizeHandles widgetId={widget.id} widget={widget} />}
     </div>
   );
 }

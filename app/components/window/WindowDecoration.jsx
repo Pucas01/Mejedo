@@ -1,7 +1,7 @@
 "use client";
 import { useAchievements } from "../../hooks/useAchievements";
 
-export default function WindowDecoration({ title = "Terminal", onClose, showControls = true }) {
+export default function WindowDecoration({ title = "Terminal", onClose, onMinimize, showControls = true }) {
   const { unlock } = useAchievements();
 
   const handleCloseClick = () => {
@@ -10,6 +10,12 @@ export default function WindowDecoration({ title = "Terminal", onClose, showCont
     } else {
       // Window is not closable, trigger achievement
       unlock("window_rebel");
+    }
+  };
+
+  const handleMinimizeClick = () => {
+    if (onMinimize) {
+      onMinimize();
     }
   };
 
@@ -28,16 +34,16 @@ export default function WindowDecoration({ title = "Terminal", onClose, showCont
         <div className="flex items-center gap-1.5 relative z-10">
           {/* Minimize button */}
           <button
-            className="w-5 h-5 bg-gradient-to-b from-[#5a5a5e] to-[#3a3a3e] hover:from-[#6a6a6e] hover:to-[#4a4a4e] border border-[#777] border-b-[#333] flex items-center justify-center text-white text-xs transition-all shadow-sm"
-            title="Minimize"
+            onClick={handleMinimizeClick}
+            disabled={!onMinimize}
+            className={`w-5 h-5 bg-gradient-to-b from-[#5a5a5e] to-[#3a3a3e] border border-[#777] border-b-[#333] flex items-center justify-center text-white text-xs transition-all shadow-sm ${onMinimize ? 'hover:from-[#6a6a6e] hover:to-[#4a4a4e] cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
           >
             _
           </button>
 
           {/* Maximize button */}
           <button
-            className="w-5 h-5 bg-gradient-to-b from-[#5a5a5e] to-[#3a3a3e] hover:from-[#6a6a6e] hover:to-[#4a4a4e] border border-[#777] border-b-[#333] flex items-center justify-center text-white text-xs transition-all shadow-sm"
-            title="Maximize"
+            className="w-5 h-5 bg-gradient-to-b from-[#4a4a4e] to-[#2a2a2e] hover:from-[#5a5a5e] hover:to-[#3a3a3e] border border-[#666] border-b-[#222] flex items-center justify-center text-white text-xs transition-all shadow-sm opacity-70"
           >
             □
           </button>
@@ -46,7 +52,6 @@ export default function WindowDecoration({ title = "Terminal", onClose, showCont
           <button
             onClick={handleCloseClick}
             className="w-5 h-5 bg-gradient-to-b from-[#e85d5d] to-[#c62828] hover:from-[#ff6b6b] hover:to-[#d32f2f] border border-[#ff8080] border-b-[#8b1a1a] flex items-center justify-center text-white text-xs font-bold transition-all shadow-sm"
-            title="Close"
           >
             ×
           </button>

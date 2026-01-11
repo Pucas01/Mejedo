@@ -41,6 +41,7 @@ const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 const AchievementToast = dynamic(() => import("./components/achievements/AchievementToast.jsx"));
 const AchievementsModal = dynamic(() => import("./components/achievements/AchievementsModal.jsx"));
 const ChangelogModal = dynamic(() => import("./components/changelog/ChangelogModal.jsx"));
+const SpeedrunLeaderboard = dynamic(() => import("./components/speedrun/SpeedrunLeaderboard.jsx"));
 const WidgetManager = dynamic(() => import("./components/widgets/WidgetManager.jsx"));
 
 // Inner component that uses achievements
@@ -52,6 +53,7 @@ function PageContent() {
   const [rhythmGameOpen, setRhythmGameOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
+  const [speedrunLeaderboardOpen, setSpeedrunLeaderboardOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [preloadedPages, setPreloadedPages] = useState(new Set(["/about"]));
   const [mascotVisible, setMascotVisible] = useState(true);
@@ -256,6 +258,13 @@ function PageContent() {
             Achievements
           </button>
           <button
+            onClick={() => setSpeedrunLeaderboardOpen(true)}
+            className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
+            title="View Speedrun Leaderboard"
+          >
+            Speedruns
+          </button>
+          <button
             onClick={() => setChangelogOpen(true)}
             className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
             title="View Changelog"
@@ -322,6 +331,10 @@ function PageContent() {
       <AchievementsModal
         show={achievementsOpen}
         onClose={() => setAchievementsOpen(false)}
+      />
+      <SpeedrunLeaderboard
+        show={speedrunLeaderboardOpen}
+        onClose={() => setSpeedrunLeaderboardOpen(false)}
       />
       <ChangelogModal
         show={changelogOpen}
