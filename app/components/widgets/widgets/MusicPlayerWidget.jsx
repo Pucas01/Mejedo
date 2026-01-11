@@ -4,7 +4,7 @@ import { useCurrentUser } from "../../../hooks/CurrentUser";
 import { useAchievements } from "../../../hooks/useAchievements";
 import Button from "../../ui/Button";
 
-export default function MusicPlayerWidget() {
+export default function MusicPlayerWidget({ isMinimized }) {
   const { isAdmin } = useCurrentUser();
   const { updateStats } = useAchievements();
   const [songs, setSongs] = useState([]);
@@ -58,7 +58,7 @@ export default function MusicPlayerWidget() {
   }, [currentSong]);
 
   useEffect(() => {
-    if (!isPlaying || !analyserRef.current || !canvasRef.current) {
+    if (!isPlaying || isMinimized || !analyserRef.current || !canvasRef.current) {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -112,7 +112,7 @@ export default function MusicPlayerWidget() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPlaying]);
+  }, [isPlaying, isMinimized]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -123,8 +123,20 @@ export default function MusicPlayerWidget() {
     const updateTime = () => setCurrentTime(audio.currentTime);
     const updateDuration = () => setDuration(audio.duration);
     const handleEnded = () => {
-      setIsPlaying(false);
-      setCurrentTime(0);
+      const currentIndex = songs.indexOf(currentSong);
+      if (currentIndex !== -1 && currentIndex < songs.length - 1) {
+        const nextSong = songs[currentIndex + 1];
+        setCurrentSong(nextSong);
+        setCurrentTime(0);
+        setTimeout(() => {
+          audioRef.current?.play();
+          setIsPlaying(true);
+          updateStats("playedSong", true);
+        }, 100);
+      } else {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      }
     };
 
     audio.addEventListener('timeupdate', updateTime);
@@ -136,7 +148,7 @@ export default function MusicPlayerWidget() {
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentSong, volume]);
+  }, [currentSong, volume, songs, updateStats]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -227,6 +239,51 @@ export default function MusicPlayerWidget() {
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  if (isMinimized && currentSong) {
+    return (
+      <div className="flex flex-col h-full gap-2 text-white">
+        <div className="text-sm text-[#39ff14] truncate">
+          {currentSong.replace(/\.[^/.]+$/, '')}
+        </div>
+
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-white text-[10px]">{formatTime(currentTime)}</span>
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            onChange={handleSeek}
+            className="flex-1 retro-slider"
+          />
+          <span className="text-white text-[10px]">{formatTime(duration)}</span>
+        </div>
+
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => playSong(currentSong)}
+          className="w-full"
+        >
+          {isPlaying ? '⏸ Pause' : '▶ Play'}
+        </Button>
+
+        <audio
+          ref={audioRef}
+          src={`/api/music/${encodeURIComponent(currentSong)}`}
+        />
+      </div>
+    );
+  }
+
+  if (isMinimized) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+        No song playing
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full gap-3 text-white">
