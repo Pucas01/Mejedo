@@ -1,14 +1,12 @@
 import express from "express";
 import fs from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
 import requireAuth from "../authMiddleware.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const router = express.Router();
-const LEADERBOARD_FILE = path.join(__dirname, '../config/speedrunLeaderboard.json');
+
+const CONFIG_DIR = path.join(process.cwd(), "config");
+const LEADERBOARD_FILE = path.join(CONFIG_DIR, "speedrunLeaderboard.json");
 
 // Get speedrun leaderboard
 router.get('/', async (req, res) => {
