@@ -63,6 +63,9 @@ export function WidgetProvider({ children, mascotVisible, onToggleMascot }) {
     } else if (type === 'youtube') {
       defaultWidth = 484;
       defaultHeight = 356;
+    } else if (type === 'pong') {
+      defaultWidth = 632;
+      defaultHeight = 500;
     }
 
     const newWidget = {
