@@ -29,6 +29,26 @@ const COMPLEX_WEBRINGS = [
   },
 ];
 
+// Static HTML webrings (rendered directly)
+const STATIC_WEBRINGS = [
+  {
+    name: "Rhythm Game Webring",
+    html: (
+      <div className="webWidget1">
+        <img src="https://julieyess.neocities.org/rhythmwebring/webSDVX.png" height="60px" alt="Rhythm Game Webring" />
+        <br />
+        <a href="https://julieyess.neocities.org/rhythmwebring/rhythmgamewebring?Pucas01-previous">←</a>
+        {" "}
+        <a href="https://julieyess.neocities.org/rhythmwebring/rhythmgamewebring?Pucas01-random">Random</a>
+        {" "}
+        <a href="https://julieyess.neocities.org/rhythmwebring/rhythmgamewebring">Home</a>
+        {" "}
+        <a href="https://julieyess.neocities.org/rhythmwebring/rhythmgamewebring?Pucas01-next">→</a>
+      </div>
+    ),
+  },
+];
+
 // Component to load a webring script properly
 function WebringWidget({ src, name, dataWidget }) {
   const containerRef = useRef(null);
@@ -71,6 +91,16 @@ function WebringWidget({ src, name, dataWidget }) {
     <div className="border border-[#39ff14] p-4">
       <h3 className="text-[#39ff14] font-bold mb-3">{name}</h3>
       <div ref={containerRef} style={{ textAlign: 'left' }} />
+    </div>
+  );
+}
+
+// Component for static HTML webrings
+function StaticWebringWidget({ name, html }) {
+  return (
+    <div className="border border-[#39ff14] p-4">
+      <h3 className="text-[#39ff14] font-bold mb-3">{name}</h3>
+      <div className="text-left">{html}</div>
     </div>
   );
 }
@@ -267,6 +297,13 @@ export default function Webring() {
                     containerId={ring.containerId}
                     css={ring.css}
                     scripts={ring.scripts}
+                  />
+                ))}
+                {STATIC_WEBRINGS.map((ring, index) => (
+                  <StaticWebringWidget
+                    key={`static-${index}`}
+                    name={ring.name}
+                    html={ring.html}
                   />
                 ))}
               </div>
