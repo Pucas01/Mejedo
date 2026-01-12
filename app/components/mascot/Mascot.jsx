@@ -30,6 +30,8 @@ const tips = [
   "Mischievous Function Jerk remix",
   "Have you seen the widgets?",
   "i put alot of time into that audio player",
+  "Check out my buttons!!",
+  "Fun fact there are about ããã¼ãªãã¾ããã¤ãï¼ amount of these lines",
 ];
 
 const shuffleArray = (array) => {

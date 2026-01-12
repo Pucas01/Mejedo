@@ -14,6 +14,9 @@ export default function ButtonsPage() {
     { url: "https://electric-tenshi.nekoweb.org/", img: "https://file.garden/Z3nf4eZzZUtRPfhK/stuff/wvdtkw.gif", alt: "the miku-site of nekoweb... not the first but certainly one of them" },
     { url: "https://layercake.moe", img: "https://layercake.moe/assets/images/buttons/mine/layercake3.gif", alt: "its a cake but like layered" },
     { url: "https://poz.pet", img: "https://poz.pet/88x31/powered-by-poz.png", alt: "Poz, gay person on the internet" },
+    { url: "https://medjed.nekoweb.org/", img: "https://medjed.nekoweb.org/assets/images/button.jpg", alt: "Medjed" },
+    { url: "https://julieyess.neocities.org/rhythmwebring/rhythmgamewebring", img: "https://julieyess.neocities.org/rhythmwebring/Opera1.png", alt: "Rythmgaming" },
+    { url: "https://archlinux.org/download/", img: "https://herz.moe/img/buttons/archlinux.gif", alt: "ArchLinux" },
     { img: "https://poz.pet/88x31/this-site-is-miku-approved.gif", alt: "AISHITE AISHITE AISHITE MOTO MOTO" },
   ];
 
@@ -97,6 +100,8 @@ export default function ButtonsPage() {
                   <img
                     src={button.img}
                     alt={button.alt}
+                    width="88"
+                    height="31"
                     className="pixelated transition-transform duration-200 ease-out hover:scale-125 cursor-pointer active:scale-95"
                     style={{ imageRendering: 'pixelated' }}
                   />
