@@ -25,6 +25,9 @@ export default function WidgetWindow({ widget }) {
       } else if (widget.type === 'youtube') {
         const module = await import('./widgets/YouTubeWidget');
         setWidgetContent(() => module.default);
+      } else if (widget.type === 'pong') {
+        const module = await import('./widgets/PongWidget');
+        setWidgetContent(() => module.default);
       }
     }
     loadWidget();
@@ -92,6 +95,8 @@ export default function WidgetWindow({ widget }) {
         return 'Music Player';
       case 'youtube':
         return 'Teto Mix';
+      case 'pong':
+        return 'Pong';
       default:
         return 'Widget';
     }
@@ -103,8 +108,8 @@ export default function WidgetWindow({ widget }) {
       style={{
         left: widget.position.x,
         top: widget.position.y,
-        width: isMinimized && widget.type === 'music' ? 300 : widget.size.width,
-        height: isMinimized && widget.type === 'music' ? 160 : widget.size.height,
+        width: isMinimized && widget.type === 'music' ? 300 : isMinimized && widget.type === 'pong' ? 320 : widget.size.width,
+        height: isMinimized && widget.type === 'music' ? 160 : isMinimized && widget.type === 'pong' ? 240 : widget.size.height,
         zIndex: widget.zIndex,
         cursor: isDragging ? "url('/cursors/Move.cur'), move" : "url('/cursors/Normal.cur'), auto"
       }}
@@ -116,12 +121,12 @@ export default function WidgetWindow({ widget }) {
         <WindowDecoration
           title={getTitle()}
           onClose={handleClose}
-          onMinimize={widget.type === 'music' ? handleMinimize : undefined}
+          onMinimize={widget.type === 'music' || widget.type === 'pong' ? handleMinimize : undefined}
           showControls={true}
         />
       </div>
 
-      <div className={`widget-content flex-1 overflow-auto font-jetbrains ${widget.type === 'youtube' ? 'p-0' : 'p-4'}`}>
+      <div className={`widget-content flex-1 font-jetbrains ${widget.type === 'youtube' ? 'p-0 overflow-hidden' : widget.type === 'pong' ? 'p-2 overflow-hidden' : 'p-4 overflow-auto'}`}>
         {WidgetContent ? (
           <WidgetContent widgetId={widget.id} isMinimized={isMinimized} />
         ) : (

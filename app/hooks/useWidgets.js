@@ -72,6 +72,10 @@ export function WidgetProvider({ children, mascotVisible, onToggleMascot }) {
       // Height: 320 (content) + 32 (header h-8) + 4 (border-2 top+bottom)
       defaultWidth = 484;
       defaultHeight = 356;
+    } else if (type === 'pong') {
+      // Canvas 600x400 + padding + border + header
+      defaultWidth = 632; // 600 + 16 (p-2 left+right) + 16
+      defaultHeight = 500; // 400 + header + padding + controls
     }
 
     const newWidget = {

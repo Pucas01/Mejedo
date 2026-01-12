@@ -102,6 +102,13 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: false,
   },
+  pong_scorer: {
+    id: "pong_scorer",
+    name: "Ping Pong",
+    description: "Score a point in pong, good job",
+    icon: "",
+    hidden: false,
+  },
   // Hidden achievements
   konami_master: {
     id: "konami_master",
@@ -178,6 +185,7 @@ export function AchievementProvider({ children }) {
     openedWidget: false,
     playedSong: false,
     openedTetoWidget: false,
+    scoredPongPoint: false,
   });
   const [pendingAchievement, setPendingAchievement] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -374,6 +382,13 @@ export function AchievementProvider({ children }) {
 
         // Check for teto watcher achievement
         setTimeout(() => unlockRef.current?.("teto_watcher"), 500);
+      }
+
+      if (key === "scoredPongPoint") {
+        updated.scoredPongPoint = true;
+
+        // Check for pong scorer achievement
+        setTimeout(() => unlockRef.current?.("pong_scorer"), 500);
       }
 
       return updated;

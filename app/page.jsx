@@ -249,7 +249,7 @@ function PageContent() {
           </span>
         </h1>
         {isAdmin && <span>Admin Mode</span>}
-        <div className="flex items-center justify-center gap-4 mt-1">
+        <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
           <button
             onClick={() => setAchievementsOpen(true)}
             className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
@@ -274,8 +274,8 @@ function PageContent() {
         </div>
       </header>
 
-      <nav className="flex justify-center gap-6 bg-[#090909] border-b-2 border-[#39ff14] py-4">
-        <div className="inline-flex gap-6 custom-dash pb-2">
+      <nav className="flex justify-center bg-[#090909] border-b-2 border-[#39ff14] py-4">
+        <div className="inline-flex flex-wrap justify-center gap-6 custom-dash pb-2">
           {["/about", "/projects", "/blog", "/collection", "/shitposts", "/guestbook", "/webring", "/buttons", "/admin"].map(
             (page) => (
               <button
