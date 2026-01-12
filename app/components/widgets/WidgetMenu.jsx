@@ -62,53 +62,52 @@ export default function WidgetMenu() {
   return (
     <div
       ref={menuRef}
-      className="fixed top-[68px] right-4 z-50 bg-[#121217] border-2 border-[#39ff14] shadow-lg animate-dropdown min-w-[280px]"
+      className="fixed top-[68px] right-4 z-50 bg-[#1a1a1f] border border-[#39ff14] shadow-[2px_2px_8px_rgba(0,0,0,0.5)] animate-dropdown min-w-[240px]"
     >
-      <div className="p-3 font-jetbrains">
-        <div className="space-y-1">
-          {availableWidgets.map(widget => {
-            const isOpen = Array.from(widgets.values()).some(w => w.type === widget.type);
-            return (
-              <button
-                key={widget.type}
-                onClick={() => handleToggleWidget(widget.type)}
-                className={`w-full text-left px-3 py-2 border border-[#39ff14] flex items-center gap-3 transition-all text-sm
-                  ${isOpen
-                    ? 'bg-[#39ff14]/20 hover:bg-[#39ff14]/30 active:bg-[#39ff14]/40'
-                    : 'hover:bg-[#39ff14]/10 active:bg-[#39ff14]/20'
-                  }`}
-              >
-                <span className="text-xl flex-shrink-0">{widget.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-white font-semibold">
-                    {widget.name}
-                    {isOpen && <span className="text-[#39ff14] ml-2 text-xs">(Active)</span>}
-                  </div>
+      <div className="py-1 font-jetbrains">
+        {availableWidgets.map(widget => {
+          const isOpen = Array.from(widgets.values()).some(w => w.type === widget.type);
+          return (
+            <button
+              key={widget.type}
+              onClick={() => handleToggleWidget(widget.type)}
+              className={`w-full text-left px-4 py-1.5 flex items-center gap-2 transition-colors text-sm border-l-2 border-r-2
+                ${isOpen
+                  ? 'bg-[#39ff14]/15 border-l-[#39ff14] border-r-[#39ff14]'
+                  : 'bg-transparent border-l-transparent border-r-transparent hover:bg-[#39ff14]/10 hover:border-l-[#39ff14]/50 hover:border-r-[#39ff14]/50'
+                }`}
+            >
+              <span className={`text-xs flex-shrink-0 ${isOpen ? 'text-[#39ff14]' : 'text-gray-500'}`}>▶</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-white">
+                  {widget.name}
                 </div>
-              </button>
-            );
-          })}
-
-          {/* Mascot Toggle Button */}
-          <button
-            onClick={onToggleMascot}
-            className={`w-full text-left px-3 py-2 border border-[#39ff14] flex items-center gap-3 transition-all text-sm
-              ${mascotVisible
-                ? 'bg-[#39ff14]/20 hover:bg-[#39ff14]/30 active:bg-[#39ff14]/40'
-                : 'hover:bg-[#39ff14]/10 active:bg-[#39ff14]/20'
-              }`}
-          >
-            <span className="text-xl flex-shrink-0"></span>
-            <div className="flex-1 min-w-0">
-              <div className="text-white font-semibold">
-                Toggle Futaba
-                <span className={`ml-2 text-xs ${mascotVisible ? 'text-[#39ff14]' : 'text-red-500'}`}>
-                  ({mascotVisible ? 'Visible' : 'Hidden'})
-                </span>
               </div>
+            </button>
+          );
+        })}
+
+        {/* Separator */}
+        <div className="h-px bg-[#39ff14]/20 mx-1 my-1"></div>
+
+        {/* Mascot Toggle Button */}
+        <button
+          onClick={onToggleMascot}
+          className={`w-full text-left px-4 py-1.5 flex items-center gap-2 transition-colors text-sm border-l-2 border-r-2
+            ${mascotVisible
+              ? 'bg-[#39ff14]/15 border-l-[#39ff14] border-r-[#39ff14]'
+              : 'bg-transparent border-l-transparent border-r-transparent hover:bg-[#39ff14]/10 hover:border-l-[#39ff14]/50 hover:border-r-[#39ff14]/50'
+            }`}
+        >
+          <span className={`text-xs flex-shrink-0 ${mascotVisible ? 'text-[#39ff14]' : 'text-red-500'}`}>
+            {mascotVisible ? '●' : '○'}
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="text-white">
+              Toggle Futaba
             </div>
-          </button>
-        </div>
+          </div>
+        </button>
       </div>
     </div>
   );
