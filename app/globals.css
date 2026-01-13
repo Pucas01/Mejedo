@@ -344,3 +344,12 @@ input[type="range"].retro-slider::-moz-range-thumb:active {
   border-color: #2a5c1a #7abc6a #7abc6a #2a5c1a;
   box-shadow: inset -1px -1px 0 0 #8acc7a, inset 1px 1px 0 0 #1a4c0a;
 }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
