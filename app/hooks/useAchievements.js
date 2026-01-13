@@ -109,6 +109,20 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: false,
   },
+  performance_watcher: {
+    id: "performance_watcher",
+    name: "She sounds awesome right?",
+    description: "Watch an Ado live performance",
+    icon: "",
+    hidden: false,
+  },
+  timeline_scroller: {
+    id: "timeline_scroller",
+    name: "Thats alot of tours",
+    description: "Scroll through Ado's tour timeline",
+    icon: "",
+    hidden: false,
+  },
   // Hidden achievements
   konami_master: {
     id: "konami_master",
@@ -186,6 +200,8 @@ export function AchievementProvider({ children }) {
     playedSong: false,
     openedTetoWidget: false,
     scoredPongPoint: false,
+    watchedAdoPerformance: false,
+    scrolledAdoTimeline: false,
   });
   const [pendingAchievement, setPendingAchievement] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -389,6 +405,20 @@ export function AchievementProvider({ children }) {
 
         // Check for pong scorer achievement
         setTimeout(() => unlockRef.current?.("pong_scorer"), 500);
+      }
+
+      if (key === "watchedAdoPerformance") {
+        updated.watchedAdoPerformance = true;
+
+        // Check for performance watcher achievement
+        setTimeout(() => unlockRef.current?.("performance_watcher"), 500);
+      }
+
+      if (key === "scrolledAdoTimeline") {
+        updated.scrolledAdoTimeline = true;
+
+        // Check for timeline scroller achievement
+        setTimeout(() => unlockRef.current?.("timeline_scroller"), 500);
       }
 
       return updated;

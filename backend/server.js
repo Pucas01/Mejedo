@@ -21,6 +21,11 @@ import discordRoute from "./routes/discord.js"
 import changelogRoute from "./routes/changelog.js"
 import musicRoute from "./routes/music.js"
 import speedrunLeaderboardRoute from "./routes/speedrunLeaderboard.js"
+import adoRoute from "./routes/ado.js"
+import adoToursRoute from "./routes/ado-tours.js"
+import adoToursScraperRoute from "./routes/ado-tours-scraper.js"
+import adoAwardsRoute from "./routes/ado-awards.js"
+import adoAwardsScraperRoute from "./routes/ado-awards-scraper.js"
 import requireAuth from "./authMiddleware.js"
 import session from "express-session"
 import cors from "cors";
@@ -69,6 +74,11 @@ app.use("/api/discord-presence", discordRoute);
 app.use("/api/changelog", changelogRoute);
 app.use("/api/music", musicRoute);
 app.use("/api/speedrun-leaderboard", speedrunLeaderboardRoute);
+app.use("/api/ado", adoRoute);
+app.use("/api/ado-tours", adoToursRoute);
+app.use("/api/ado-tours-scraper", adoToursScraperRoute);
+app.use("/api/ado-awards", adoAwardsRoute);
+app.use("/api/ado-awards-scraper", adoAwardsScraperRoute);
 
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 
