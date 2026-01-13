@@ -33,7 +33,6 @@ const pageImports = {
 };
 
 const FutabaOverlay = dynamic(() => import("./components/easteregg/futaba.jsx"));
-const RhythmGame = dynamic(() => import("./components/easteregg/RhythmGame.jsx"));
 const ArrowHint = dynamic(() => import("./components/easteregg/ArrowHint.jsx"));
 const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 const AchievementToast = dynamic(() => import("./components/achievements/AchievementToast.jsx"));
@@ -47,7 +46,6 @@ function PageContent() {
   const [transitioning, setTransitioning] = useState(false);
   const [popping, setPopping] = useState(null);
   const [open, setEgg] = useState(false);
-  const [rhythmGameOpen, setRhythmGameOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
   const [speedrunLeaderboardOpen, setSpeedrunLeaderboardOpen] = useState(false);
@@ -69,7 +67,6 @@ function PageContent() {
   };
 
   useKonamiCode(() => {
-    setRhythmGameOpen(true);
     unlock("konami_master");
   });
   
@@ -295,11 +292,6 @@ function PageContent() {
           onClose={() => setEgg(false)}
         />
 
-        <RhythmGame
-          show={rhythmGameOpen}
-          onClose={() => setRhythmGameOpen(false)}
-          onGameEnd={(finalScore) => updateStats("rhythmHighScore", finalScore)}
-        />
       </main>
 
       {mascotVisible && <Mascot />}
@@ -318,29 +310,7 @@ function PageContent() {
         onClose={() => setChangelogOpen(false)}
       />
 
-      {!rhythmGameOpen && <ArrowHint />}
-
-      {unlockedAchievements.konami_master && !rhythmGameOpen && (
-        <button
-          onClick={() => setRhythmGameOpen(true)}
-          className="fixed bottom-4 left-4 z-40 p-3 bg-[#121217] border-2 border-[#39ff14] hover:bg-[#39ff14] hover:text-black text-[#39ff14] transition-colors group"
-          title="Open Rhythm Game"
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 32 32"
-            className="group-hover:scale-110 transition-transform"
-          >
-            <polygon
-              points="16,2 30,16 22,16 22,30 10,30 10,16 2,16"
-              fill="currentColor"
-              stroke="currentColor"
-              strokeWidth="1"
-            />
-          </svg>
-        </button>
-      )}
+      <ArrowHint />
 
       <WidgetManager />
     </div>

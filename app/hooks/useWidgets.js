@@ -66,6 +66,9 @@ export function WidgetProvider({ children, mascotVisible, onToggleMascot }) {
     } else if (type === 'pong') {
       defaultWidth = 632;
       defaultHeight = 500;
+    } else if (type === 'rhythm') {
+      defaultWidth = 350;
+      defaultHeight = 580;
     }
 
     const newWidget = {
