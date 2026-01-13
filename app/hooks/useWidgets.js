@@ -76,6 +76,10 @@ export function WidgetProvider({ children, mascotVisible, onToggleMascot }) {
       // Canvas 600x400 + padding + border + header
       defaultWidth = 632; // 600 + 16 (p-2 left+right) + 16
       defaultHeight = 500; // 400 + header + padding + controls
+    } else if (type === 'rhythm') {
+      // Game area 300x400 + stats + controls + padding + border + header
+      defaultWidth = 350; // 300 (game) + padding + border
+      defaultHeight = 580; // 400 (game) + stats + controls + header
     }
 
     const newWidget = {

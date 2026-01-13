@@ -6,6 +6,7 @@ const availableWidgets = [
   { type: 'music', name: 'Music Player', icon: '', description: 'Play music from the server' },
   { type: 'youtube', name: 'Teto Mix', icon: '', description: 'Watch YouTube videos' },
   { type: 'pong', name: 'Pong', icon: '', description: 'Classic Pong game' },
+  { type: 'rhythm', name: 'Rhythm Game', icon: '🎵', description: 'FNF-style rhythm game' },
 ];
 
 export default function WidgetMenu() {

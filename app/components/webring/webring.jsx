@@ -27,6 +27,14 @@ const COMPLEX_WEBRINGS = [
       "https://electric-tenshi.nekoweb.org/vocaring/vocaring-widget.js",
     ],
   },
+  {
+    name: "Gamer Ring",
+    containerId: "gamer-ring",
+    scripts: [
+      "https://gamerring.neocities.org/js/variables.js",
+      "https://gamerring.neocities.org/js/widget-minimal.js",
+    ],
+  },
 ];
 
 // Static HTML webrings (rendered directly)

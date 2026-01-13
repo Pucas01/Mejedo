@@ -28,6 +28,9 @@ export default function WidgetWindow({ widget }) {
       } else if (widget.type === 'pong') {
         const module = await import('./widgets/PongWidget');
         setWidgetContent(() => module.default);
+      } else if (widget.type === 'rhythm') {
+        const module = await import('./widgets/RhythmGameWidget');
+        setWidgetContent(() => module.default);
       }
     }
     loadWidget();
@@ -97,6 +100,8 @@ export default function WidgetWindow({ widget }) {
         return 'Teto Mix';
       case 'pong':
         return 'Pong';
+      case 'rhythm':
+        return 'Rhythm Game';
       default:
         return 'Widget';
     }
@@ -126,7 +131,7 @@ export default function WidgetWindow({ widget }) {
         />
       </div>
 
-      <div className={`widget-content flex-1 font-jetbrains ${widget.type === 'youtube' ? 'p-0 overflow-hidden' : widget.type === 'pong' ? 'p-2 overflow-hidden' : 'p-4 overflow-auto'}`}>
+      <div className={`widget-content flex-1 font-jetbrains ${widget.type === 'youtube' ? 'p-0 overflow-hidden' : widget.type === 'pong' || widget.type === 'rhythm' ? 'p-2 overflow-hidden' : 'p-4 overflow-auto'}`}>
         {WidgetContent ? (
           <WidgetContent widgetId={widget.id} isMinimized={isMinimized} />
         ) : (
