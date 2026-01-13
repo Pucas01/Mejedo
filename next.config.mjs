@@ -18,6 +18,47 @@ const nextConfig = {
         source: "/api/:path*",
         destination: "http://127.0.0.1:4000/api/:path*", // proxy to Express
       },
+      // Client-side routing - rewrite all page routes to root
+      {
+        source: "/about",
+        destination: "/",
+      },
+      {
+        source: "/projects",
+        destination: "/",
+      },
+      {
+        source: "/guestbook",
+        destination: "/",
+      },
+      {
+        source: "/blog",
+        destination: "/",
+      },
+      {
+        source: "/shitposts",
+        destination: "/",
+      },
+      {
+        source: "/admin",
+        destination: "/",
+      },
+      {
+        source: "/collection",
+        destination: "/",
+      },
+      {
+        source: "/webring",
+        destination: "/",
+      },
+      {
+        source: "/buttons",
+        destination: "/",
+      },
+      {
+        source: "/ado",
+        destination: "/",
+      },
     ];
   },
 

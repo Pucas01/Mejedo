@@ -61,6 +61,15 @@ function PageContent() {
   const mainRef = useRef(null);
   const { unlock, updateStats, isLoaded, unlockedAchievements } = useAchievements();
 
+  // Read route from URL on mount (client-side only to avoid hydration mismatch)
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (pageComponents[path] && path !== "/about") {
+      setActive(path);
+      setPreloadedPages(new Set([path]));
+    }
+  }, []);
+
   // Toggle mascot and unlock achievement when hiding
   const toggleMascot = () => {
     setMascotVisible(prev => {
@@ -82,9 +91,9 @@ function PageContent() {
   // Track initial page visit on mount (only after localStorage is loaded)
   useEffect(() => {
     if (isLoaded) {
-      updateStats("visitedPages", "/about");
+      updateStats("visitedPages", active);
     }
-  }, [isLoaded, updateStats]);
+  }, [isLoaded, updateStats, active]);
 
   useEffect(() => {
     const ua = navigator.userAgent || window.opera;
@@ -92,6 +101,20 @@ function PageContent() {
       setIsMobile(true);
     }
   }, []);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (pageComponents[path]) {
+        setActive(path);
+        updateStats("visitedPages", path);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [updateStats]);
 
   // Preload a page component
   const preloadPage = useCallback(async (page) => {
@@ -193,6 +216,9 @@ function PageContent() {
 
     // Render the new page
     setActive(page);
+
+    // Update URL without page reload
+    window.history.pushState({}, '', page);
 
     // Track page visits for achievements
     updateStats("visitedPages", page);
