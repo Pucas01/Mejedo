@@ -58,6 +58,14 @@ function PageContent() {
   const mainRef = useRef(null);
   const { unlock, updateStats, isLoaded, unlockedAchievements } = useAchievements();
 
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (pageComponents[path] && path !== "/about") {
+      setActive(path);
+      setPreloadedPages(new Set([path]));
+    }
+  }, []);
+
   const toggleMascot = () => {
     setMascotVisible(prev => {
       const newValue = !prev;
@@ -74,9 +82,9 @@ function PageContent() {
   
   useEffect(() => {
     if (isLoaded) {
-      updateStats("visitedPages", "/about");
+      updateStats("visitedPages", active);
     }
-  }, [isLoaded, updateStats]);
+  }, [isLoaded, updateStats, active]);
 
   useEffect(() => {
     const ua = navigator.userAgent || window.opera;
@@ -84,6 +92,19 @@ function PageContent() {
       setIsMobile(true);
     }
   }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (pageComponents[path]) {
+        setActive(path);
+        updateStats("visitedPages", path);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [updateStats]);
 
   const preloadPage = useCallback(async (page) => {
     if (preloadedPages.has(page) || !pageImports[page]) return;
@@ -172,6 +193,8 @@ function PageContent() {
     await Promise.all([preloadPromise, minDelay]);
 
     setActive(page);
+
+    window.history.pushState({}, '', page);
 
     updateStats("visitedPages", page);
 
