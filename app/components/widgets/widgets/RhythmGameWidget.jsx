@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Button from "../../ui/Button";
+import { useAchievements } from "../../../hooks/useAchievements";
 
 const LANES = ["d", "f", "j", "k"];
 const LANE_COLORS = ["#c24b99", "#00ffff", "#12fa05", "#f9393f"];
@@ -24,6 +25,22 @@ const SONGS = {
     audioSrc: "/songs/lit-up.ogg",
     voiceSrc: "/songs/lit-up-voices.ogg",
     chartSrc: "/songs/lit-up-chart.json",
+  },
+  "dadbattle": {
+    name: "DadBattle (Pico Mix)",
+    artist: "TeraVex (ft. Saruky)",
+    duration: 89400,
+    audioSrc: "/songs/dadbattle.ogg",
+    voiceSrc: "/songs/dadbattle-voices.ogg",
+    chartSrc: "/songs/dadbattle-chart.json",
+  },
+  "ugh-erect": {
+    name: "Ugh Erect",
+    artist: "Kawai Sprite",
+    duration: 83647,
+    audioSrc: "/songs/ugh-erect.ogg",
+    voiceSrc: "/songs/ugh-erect-voices.ogg",
+    chartSrc: "/songs/ugh-erect-chart.json",
   },
   "2hot": {
     name: "2hot",
@@ -82,47 +99,29 @@ const HoldNoteTail = ({ color, height, held, progress, broken }) => (
         width: 16,
         height: Math.max(0, height - 10),
         background: broken
-          ? `linear-gradient(180deg, ${color}22 0%, ${color}44 100%)`
+          ? `linear-gradient(180deg, #ff5555 0%, #ff5555aa 100%)`
+          : held
+          ? `linear-gradient(180deg, ${color} 0%, ${color}aa 100%)`
           : `linear-gradient(180deg, ${color}22 0%, ${color}44 100%)`,
-        borderLeft: `2px solid ${broken ? "#ff555566" : `${color}66`}`,
-        borderRight: `2px solid ${broken ? "#ff555566" : `${color}66`}`,
+        borderLeft: `2px solid ${broken ? "#ff5555" : held ? color : `${color}66`}`,
+        borderRight: `2px solid ${broken ? "#ff5555" : held ? color : `${color}66`}`,
         position: "relative",
         overflow: "hidden",
         transition: "height 0.016s linear",
       }}
     >
-      {progress > 0 && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: -2,
-            right: -2,
-            height: `${Math.min(100, progress)}%`,
-            background: broken
-              ? `linear-gradient(180deg, #ff5555 0%, #ff5555aa 100%)`
-              : `linear-gradient(180deg, ${color} 0%, ${color}aa 100%)`,
-            borderLeft: `2px solid ${broken ? "#ff5555" : color}`,
-            borderRight: `2px solid ${broken ? "#ff5555" : color}`,
-            boxShadow: held && !broken ? `0 0 8px ${color}` : "none",
-          }}
-        />
-      )}
     </div>
     {height > 10 && (
       <div
         style={{
           width: 20,
           height: 10,
-          background: broken
-            ? "#ff555544"
-            : (held && progress >= 95 ? color : `${color}44`),
+          background: broken ? "#ff555544" : held ? color : `${color}44`,
           borderRadius: "0 0 4px 4px",
-          borderLeft: `2px solid ${broken ? "#ff555566" : (held && progress >= 95 ? color : `${color}66`)}`,
-          borderRight: `2px solid ${broken ? "#ff555566" : (held && progress >= 95 ? color : `${color}66`)}`,
-          borderBottom: `2px solid ${broken ? "#ff555566" : (held && progress >= 95 ? color : `${color}66`)}`,
+          borderLeft: `2px solid ${broken ? "#ff555566" : held ? color : `${color}66`}`,
+          borderRight: `2px solid ${broken ? "#ff555566" : held ? color : `${color}66`}`,
+          borderBottom: `2px solid ${broken ? "#ff555566" : held ? color : `${color}66`}`,
           borderTop: "none",
-          boxShadow: held && progress >= 95 && !broken ? `0 0 8px ${color}` : "none",
         }}
       />
     )}
@@ -157,6 +156,7 @@ const PixelReceptor = ({ keyLabel, color, pressed, lane }) => (
 );
 
 export default function RhythmGameWidget({ widgetId }) {
+  const { updateStats } = useAchievements();
   const [notes, setNotes] = useState([]);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
@@ -169,6 +169,7 @@ export default function RhythmGameWidget({ widgetId }) {
   const [hitEffects, setHitEffects] = useState([]);
   const [selectedSong, setSelectedSong] = useState("lit-up");
   const [chartData, setChartData] = useState(null);
+  const [botplay, setBotplay] = useState(false);
 
   const gameLoopRef = useRef(null);
   const startTimeRef = useRef(null);
@@ -330,6 +331,8 @@ export default function RhythmGameWidget({ widgetId }) {
           if (voiceRef.current) {
             voiceRef.current.pause();
           }
+          const finalScore = Math.floor(scoreRef.current / 2);
+          updateStats("rhythmHighScore", finalScore);
           return;
         }
 
@@ -361,6 +364,56 @@ export default function RhythmGameWidget({ widgetId }) {
         }
 
         const pixelsToMove = deltaMs * NOTE_SPEED_PER_MS;
+
+        if (botplay) {
+          setNotes((prev) => {
+            const hitLanes = new Set();
+            let notesHit = 0;
+            const updated = prev.map((note) => {
+              if (!note.hit && !hitLanes.has(note.lane) && Math.abs(note.y - HIT_ZONE_Y) <= PERFECT_WINDOW) {
+                hitLanes.add(note.lane);
+                notesHit++;
+                const points = 100;
+
+                scoreRef.current += points;
+
+                setFeedback({ type: "perfect", lane: note.lane });
+                addHitEffect(note.lane, "perfect");
+                setTimeout(() => setFeedback(null), 200);
+
+                setPressedLanes((prev) => ({ ...prev, [note.lane]: true }));
+                pressedLanesRef.current[note.lane] = true;
+
+                if (!note.hold) {
+                  setTimeout(() => {
+                    setPressedLanes((prev) => ({ ...prev, [note.lane]: false }));
+                    pressedLanesRef.current[note.lane] = false;
+                  }, 100);
+                }
+
+                return { ...note, hit: true, holdHit: note.hold > 0 };
+              }
+
+              if (note.hold > 0 && note.hit && note.holdHit && !note.holdBroken) {
+                pressedLanesRef.current[note.lane] = true;
+                setPressedLanes((prev) => ({ ...prev, [note.lane]: true }));
+              }
+
+              return note;
+            });
+
+            if (notesHit > 0) {
+              setScore(scoreRef.current);
+              setCombo((c) => {
+                const newCombo = c + notesHit;
+                setMaxCombo((m) => Math.max(m, newCombo));
+                return newCombo;
+              });
+            }
+
+            return updated;
+          });
+        }
 
         setNotes((prev) => {
           const updated = prev
@@ -470,6 +523,8 @@ export default function RhythmGameWidget({ widgetId }) {
         return;
       }
 
+      if (botplay) return;
+
       e.preventDefault();
       pressedLanesRef.current[lane] = true;
       setPressedLanes((prev) => ({ ...prev, [lane]: true }));
@@ -492,11 +547,9 @@ export default function RhythmGameWidget({ widgetId }) {
 
         if (hitNote) {
           const points = hitType === "perfect" ? 100 : 50;
-          const multiplier = 1 + Math.floor(combo / 10) * 0.1;
-          const newPoints = Math.floor(points * multiplier);
           setScore((s) => {
-            scoreRef.current = s + newPoints;
-            return s + newPoints;
+            scoreRef.current = s + points;
+            return s + points;
           });
           setCombo((c) => {
             const newCombo = c + 1;
@@ -519,6 +572,8 @@ export default function RhythmGameWidget({ widgetId }) {
     };
 
     const handleKeyUp = (e) => {
+      if (botplay) return;
+
       const lane = LANES.indexOf(e.key.toLowerCase());
       if (lane !== -1) {
         pressedLanesRef.current[lane] = false;
@@ -533,7 +588,7 @@ export default function RhythmGameWidget({ widgetId }) {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [gameState, combo, addHitEffect]);
+  }, [gameState, addHitEffect, botplay]);
 
   useEffect(() => {
     if (gameState !== "menu") return;
@@ -586,6 +641,18 @@ export default function RhythmGameWidget({ widgetId }) {
         </div>
 
         <div className="mt-auto space-y-3 pt-3">
+          <button
+            onClick={() => setBotplay(!botplay)}
+            className={`w-full p-2 border-2 transition-colors flex items-center justify-between text-sm ${
+              botplay
+                ? "border-[#ffd700] bg-[#ffd700]/10 text-[#ffd700]"
+                : "border-gray-600 hover:border-[#39ff14] text-gray-300 hover:text-[#39ff14]"
+            }`}
+          >
+            <span>BOTPLAY</span>
+            <span className="text-xs">[{botplay ? "ON" : "OFF"}]</span>
+          </button>
+
           <Button
             variant="primary"
             size="md"
@@ -632,16 +699,16 @@ export default function RhythmGameWidget({ widgetId }) {
 
       <div className="flex justify-between items-center text-xs bg-[#1a1a1f] border border-[#39ff14]/30 p-2">
         <div className="text-[#39ff14]">
-          SCORE: <span className="text-white">{Math.floor(score).toString().padStart(6, "0")}</span>
+          SCORE: <span className="text-white">{Math.floor(score / 2).toString().padStart(6, "0")}</span>
         </div>
         <div className="text-[#ffd700]">
-          COMBO: <span className="text-white">{combo}</span>
-          {combo >= 10 && (
-            <span className="ml-1 text-[#D73DA3]">
-              x{(1 + Math.floor(combo / 10) * 0.1).toFixed(1)}
-            </span>
-          )}
+          COMBO: <span className="text-white">{Math.floor(combo / 2)}</span>
         </div>
+        {botplay && (
+          <div className="text-[#ffd700] animate-pulse">
+            [BOT]
+          </div>
+        )}
         <div className="text-gray-400">
           TIME: <span className="text-white">{formatTime(timeLeft)}s</span>
         </div>
@@ -778,7 +845,7 @@ export default function RhythmGameWidget({ widgetId }) {
               {currentSong.name}
             </div>
             <div className="text-white mb-1">
-              FINAL SCORE: <span className="text-[#39ff14]">{Math.floor(score)}</span>
+              FINAL SCORE: <span className="text-[#39ff14]">{Math.floor(score / 2)}</span>
             </div>
             <div className="text-gray-400 text-sm mb-4">
               MAX COMBO: <span className="text-[#ffd700]">{maxCombo}</span>

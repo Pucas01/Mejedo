@@ -19,7 +19,7 @@ export const ACHIEVEMENTS = {
   rhythm_master: {
     id: "rhythm_master",
     name: "Rhythm games and stuff",
-    description: "Score over 1000 points in the rhythm game",
+    description: "Score over 10000 points in the rhythm game",
     icon: "",
     hidden: false,
   },
@@ -334,7 +334,7 @@ export function AchievementProvider({ children }) {
       if (key === "rhythmHighScore" && value > prev.rhythmHighScore) {
         updated.rhythmHighScore = value;
 
-        if (value >= 1000) {
+        if (value >= 10000) {
           setTimeout(() => unlockRef.current?.("rhythm_master"), 500);
         }
       }
