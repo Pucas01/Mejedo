@@ -96,9 +96,9 @@ function WebringWidget({ src, name, dataWidget }) {
   }, [src, dataWidget]);
 
   return (
-    <div className="border border-[#39ff14] p-4">
-      <h3 className="text-[#39ff14] font-bold mb-3">{name}</h3>
-      <div ref={containerRef} style={{ textAlign: 'left' }} />
+    <div className="bg-[#121217] border-2 border-[#39ff14] p-4 transition-all hover:border-[#39ff14] hover:shadow-[0_0_15px_rgba(57,255,20,0.3)] h-full flex flex-col items-center justify-center">
+      <h3 className="text-[#39ff14] font-bold mb-3 text-lg text-center w-full">{name}</h3>
+      <div ref={containerRef} style={{ textAlign: 'center' }} className="flex-1 flex items-center justify-center w-full" />
     </div>
   );
 }
@@ -106,9 +106,9 @@ function WebringWidget({ src, name, dataWidget }) {
 // Component for static HTML webrings
 function StaticWebringWidget({ name, html }) {
   return (
-    <div className="border border-[#39ff14] p-4">
-      <h3 className="text-[#39ff14] font-bold mb-3">{name}</h3>
-      <div className="text-left">{html}</div>
+    <div className="bg-[#121217] border-2 border-[#39ff14] p-4 transition-all hover:border-[#39ff14] hover:shadow-[0_0_15px_rgba(57,255,20,0.3)] h-full flex flex-col items-center justify-center">
+      <h3 className="text-[#39ff14] font-bold mb-3 text-lg text-center w-full">{name}</h3>
+      <div className="text-center flex-1 flex items-center justify-center w-full">{html}</div>
     </div>
   );
 }
@@ -185,9 +185,9 @@ function ComplexWebringWidget({ name, containerId, css, scripts }) {
   }, [containerId, css, scripts]);
 
   return (
-    <div className="border border-[#39ff14] p-4">
-      <h3 className="text-[#39ff14] font-bold mb-3">{name}</h3>
-      <div ref={containerRef} className="[&>*]:ml-0 [&>*]:mr-auto" />
+    <div className="bg-[#121217] border-2 border-[#39ff14] p-4 transition-all hover:border-[#39ff14] hover:shadow-[0_0_15px_rgba(57,255,20,0.3)] h-full flex flex-col items-center justify-center">
+      <h3 className="text-[#39ff14] font-bold mb-3 text-lg text-center w-full">{name}</h3>
+      <div ref={containerRef} className="[&>*]:mx-auto flex-1 flex items-center justify-center w-full" />
     </div>
   );
 }
@@ -228,11 +228,11 @@ export default function Webring() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 p-4 text-xl min-h-screen text-white justify-start">
-      {/* Info terminal */}
-      <div className="bg-[#121217] min-h-[200px] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
+    <div className="flex flex-col gap-6 p-4 text-xl min-h-screen text-white justify-start">
+      {/* Info terminal - compact version */}
+      <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
         <WindowDecoration title="Webring - webrings.txt" showControls={true} />
-        <div className="p-8 flex-1 relative">
+        <div className="p-6 flex-1 relative">
           <Sticker
             src="/stickers/futaba-jacket.png"
             position="top-left"
@@ -253,9 +253,9 @@ export default function Webring() {
             </div>
           )}
           {doneInfo && (
-            <div className="space-y-2 mt-2">
-              <header className="text-2xl text-[#FFFFFF]">Webrings</header>
-              <p className="text-gray-400">
+            <div className="space-y-2">
+              <header className="text-3xl font-bold text-[#39ff14]">Webrings</header>
+              <p className="text-gray-400 text-base">
                 This is where i place all my webrings, cool right? yeah i know.
               </p>
             </div>
@@ -274,6 +274,13 @@ export default function Webring() {
             rotation={8}
             offset={{ x: 20, y: 20 }}
           />
+          <Sticker
+            src="/stickers/futaba-jumping.png"
+            position="top-right"
+            size={65}
+            rotation={5}
+            offset={{ x: 25, y: -15 }}
+          />
           {!doneList && (
             <div className="text-xl flex flex-wrap">
               <span className="text-[#39ff14]">pucas01</span>
@@ -288,8 +295,8 @@ export default function Webring() {
           )}
           {doneList && (
             <>
-              <p className="text-2xl mb-4">Webrings I'm part of:</p>
-              <div className="space-y-6">
+              <p className="text-2xl mb-6 text-white border-b-2 border-[#39ff14] pb-2">Webrings I'm part of:</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {WEBRING_SCRIPTS.map((ring, index) => (
                   <WebringWidget
                     key={`simple-${index}`}
