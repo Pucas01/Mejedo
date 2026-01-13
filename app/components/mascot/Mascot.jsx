@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { useAchievements } from "../../hooks/useAchievements";
 
 const tips = [
@@ -43,7 +43,7 @@ const shuffleArray = (array) => {
   return shuffled;
 };
 
-export default function Mascot() {
+function Mascot() {
   const [frame, setFrame] = useState(0);
   const [bubbleState, setBubbleState] = useState("hidden");
   const [currentTip, setCurrentTip] = useState("");
@@ -237,3 +237,5 @@ export default function Mascot() {
     </div>
   );
 }
+
+export default memo(Mascot);

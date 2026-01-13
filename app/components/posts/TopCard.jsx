@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import Image from "next/image";
 import Button from "../ui/Button";
 
@@ -48,7 +48,7 @@ const SourceBadge = ({ source }) => {
   }
 };
 
-export default function TopCard({ post }) {
+function TopCard({ post }) {
   const { title, thumbnail, url, source, meta } = post;
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -104,3 +104,5 @@ export default function TopCard({ post }) {
     </div>
   );
 }
+
+export default memo(TopCard);

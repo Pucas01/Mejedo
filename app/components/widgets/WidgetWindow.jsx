@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import WindowDecoration from "../window/WindowDecoration";
 import ResizeHandles from "./ResizeHandles";
 import { useWidgets } from "../../hooks/useWidgets";
@@ -8,7 +8,7 @@ const widgetRegistry = {
   music: null,
 };
 
-export default function WidgetWindow({ widget }) {
+function WidgetWindow({ widget }) {
   const { updatePosition, updateSize, bringToFront, closeWidget, minimizeWidget } = useWidgets();
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -136,3 +136,5 @@ export default function WidgetWindow({ widget }) {
     </div>
   );
 }
+
+export default memo(WidgetWindow);
