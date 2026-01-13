@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, createContext, useContext, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, createContext, useContext, useRef } from "react";
 
 // Achievement definitions
 export const ACHIEVEMENTS = {
@@ -425,18 +425,21 @@ export function AchievementProvider({ children }) {
     });
   }, []);
 
-  const value = {
-    achievements: ACHIEVEMENTS,
-    unlockedAchievements,
-    stats,
-    pendingAchievement,
-    unlock,
-    clearPendingAchievement,
-    updateStats,
-    isLoaded,
-    unlockedCount: Object.keys(unlockedAchievements).length,
-    totalCount: Object.keys(ACHIEVEMENTS).length,
-  };
+  const value = useMemo(
+    () => ({
+      achievements: ACHIEVEMENTS,
+      unlockedAchievements,
+      stats,
+      pendingAchievement,
+      unlock,
+      clearPendingAchievement,
+      updateStats,
+      isLoaded,
+      unlockedCount: Object.keys(unlockedAchievements).length,
+      totalCount: Object.keys(ACHIEVEMENTS).length,
+    }),
+    [unlockedAchievements, stats, pendingAchievement, unlock, clearPendingAchievement, updateStats, isLoaded]
+  );
 
   return (
     <AchievementContext.Provider value={value}>

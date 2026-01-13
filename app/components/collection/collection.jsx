@@ -55,8 +55,8 @@ export default function CollectionPage() {
   };
 
   useEffect(() => {
-    fetchConsoles();
-    fetchManga();
+    // Parallelize the fetches instead of sequential
+    Promise.all([fetchConsoles(), fetchManga()]);
   }, []);
 
   return (

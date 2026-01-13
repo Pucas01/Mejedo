@@ -40,9 +40,9 @@ const FutabaOverlay = dynamic(() => import("./components/easteregg/futaba.jsx"))
 const ArrowHint = dynamic(() => import("./components/easteregg/ArrowHint.jsx"));
 const Mascot = dynamic(() => import("./components/mascot/Mascot.jsx"));
 const AchievementToast = dynamic(() => import("./components/achievements/AchievementToast.jsx"));
-const AchievementsModal = dynamic(() => import("./components/achievements/AchievementsModal.jsx"));
-const ChangelogModal = dynamic(() => import("./components/changelog/ChangelogModal.jsx"));
-const SpeedrunLeaderboard = dynamic(() => import("./components/speedrun/SpeedrunLeaderboard.jsx"));
+const AchievementsModal = dynamic(() => import("./components/achievements/AchievementsModal.jsx"), { ssr: false });
+const ChangelogModal = dynamic(() => import("./components/changelog/ChangelogModal.jsx"), { ssr: false });
+const SpeedrunLeaderboard = dynamic(() => import("./components/speedrun/SpeedrunLeaderboard.jsx"), { ssr: false });
 const WidgetManager = dynamic(() => import("./components/widgets/WidgetManager.jsx"));
 
 // Inner component that uses achievements
@@ -236,7 +236,7 @@ function PageContent() {
 
   if (isMobile) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen p-4 bg-[url(/LaptopSHQ.png)] bg-cover text-white gap-4">
+      <div className="flex flex-col items-center justify-center h-screen p-4 bg-[url(/LaptopSHQ.webp)] bg-cover text-white gap-4">
         <div className="p-6 text-center bg-[#090909] text-[#39ff14] items-center justify-center flex-col flex border-[#39ff14] border-2">
         <p className="w-full text-xl text-center p-2 text-[#39ff14]">
           The website doesn't support mobile yet
@@ -260,7 +260,7 @@ function PageContent() {
 
   return (
     <WidgetProvider mascotVisible={mascotVisible} onToggleMascot={toggleMascot}>
-    <div className="flex flex-col min-h-screen bg-[url(/LaptopSHQ.png)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-[url(/LaptopSHQ.webp)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
       <header className="p-4 pb-0 text-center bg-[#090909] text-[#39ff14]">
         <h1 className="text-4xl font-bold flex items-center justify-center gap-2">
           <span

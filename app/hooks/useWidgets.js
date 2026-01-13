@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, createContext, useContext, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, createContext, useContext, useRef } from "react";
 import { useAchievements } from "./useAchievements";
 
 const STORAGE_KEY = "mejedo_widgets";
@@ -183,25 +183,43 @@ export function WidgetProvider({ children, mascotVisible, onToggleMascot }) {
     });
   }, []);
 
-  const value = {
-    widgets,
-    draggingWidget,
-    resizingWidget,
-    menuOpen,
-    isLoaded,
-    mascotVisible,
-    createWidget,
-    closeWidget,
-    minimizeWidget,
-    restoreWidget,
-    bringToFront,
-    updatePosition,
-    updateSize,
-    setDraggingWidget,
-    setResizingWidget,
-    setMenuOpen,
-    onToggleMascot,
-  };
+  const value = useMemo(
+    () => ({
+      widgets,
+      draggingWidget,
+      resizingWidget,
+      menuOpen,
+      isLoaded,
+      mascotVisible,
+      createWidget,
+      closeWidget,
+      minimizeWidget,
+      restoreWidget,
+      bringToFront,
+      updatePosition,
+      updateSize,
+      setDraggingWidget,
+      setResizingWidget,
+      setMenuOpen,
+      onToggleMascot,
+    }),
+    [
+      widgets,
+      draggingWidget,
+      resizingWidget,
+      menuOpen,
+      isLoaded,
+      mascotVisible,
+      createWidget,
+      closeWidget,
+      minimizeWidget,
+      restoreWidget,
+      bringToFront,
+      updatePosition,
+      updateSize,
+      onToggleMascot,
+    ]
+  );
 
   return (
     <WidgetContext.Provider value={value}>
