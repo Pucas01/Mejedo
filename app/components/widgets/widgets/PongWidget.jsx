@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAchievements } from '../../../hooks/useAchievements';
+import { useTheme } from '../../../hooks/useTheme';
 import Button from '../../ui/Button';
 
 const CANVAS_WIDTH = 600;
@@ -14,6 +15,7 @@ const INITIAL_BALL_SPEED = 4;
 export default function PongWidget({ isMinimized }) {
   const canvasRef = useRef(null);
   const { updateStats } = useAchievements();
+  const { theme } = useTheme();
   const [gameState, setGameState] = useState('menu');
   const [score, setScore] = useState({ player: 0, ai: 0 });
   const [highScore, setHighScore] = useState(0);
@@ -151,7 +153,7 @@ export default function PongWidget({ isMinimized }) {
     ctx.fillStyle = '#121217';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    ctx.strokeStyle = '#39ff14';
+    ctx.strokeStyle = theme.colors.primary;
     ctx.setLineDash([10, 10]);
     ctx.beginPath();
     ctx.moveTo(CANVAS_WIDTH / 2, 0);
@@ -159,7 +161,7 @@ export default function PongWidget({ isMinimized }) {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    ctx.fillStyle = '#39ff14';
+    ctx.fillStyle = theme.colors.primary;
     ctx.fillRect(0, state.playerY, PADDLE_WIDTH, PADDLE_HEIGHT);
 
     ctx.fillStyle = '#ff5555';
@@ -169,7 +171,7 @@ export default function PongWidget({ isMinimized }) {
     ctx.fillRect(state.ballX, state.ballY, BALL_SIZE, BALL_SIZE);
 
     ctx.font = '48px monospace';
-    ctx.fillStyle = '#39ff14';
+    ctx.fillStyle = theme.colors.primary;
     ctx.fillText(score.player.toString(), CANVAS_WIDTH / 4, 60);
     ctx.fillStyle = '#ff5555';
     ctx.fillText(score.ai.toString(), (CANVAS_WIDTH / 4) * 3, 60);
@@ -226,7 +228,7 @@ export default function PongWidget({ isMinimized }) {
           ref={canvasRef}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
-          className="border border-[#39ff14] bg-[#121217]"
+          className={`border ${theme.colors.border} bg-[#121217]`}
           style={{ width: '270px', height: '180px' }}
         />
         <p className="text-gray-500 text-xs">{score.player} - {score.ai}</p>
@@ -238,11 +240,11 @@ export default function PongWidget({ isMinimized }) {
     <div className="flex flex-col items-center justify-start h-full gap-4 text-white pt-4">
       {gameState === 'menu' && (
         <div className="text-center space-y-4">
-          <h2 className="text-4xl text-[#39ff14] font-bold">PONG</h2>
+          <h2 className={`text-4xl ${theme.colors.text} font-bold`}>PONG</h2>
           <p className="text-gray-400 text-lg">Use Arrow Keys to move</p>
           <p className="text-gray-400 text-lg">First to 10 wins!</p>
           {highScore > 0 && (
-            <p className="text-[#39ff14] text-xl">High Score: {highScore}</p>
+            <p className={`${theme.colors.text} text-xl`}>High Score: {highScore}</p>
           )}
           <Button
             variant="primary"
@@ -257,7 +259,7 @@ export default function PongWidget({ isMinimized }) {
       {gameState === 'paused' && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl text-[#39ff14] font-bold">PAUSED</h2>
+            <h2 className={`text-4xl ${theme.colors.text} font-bold`}>PAUSED</h2>
             <p className="text-gray-400 text-lg">Press SPACE to resume</p>
             <Button
               variant="danger"
@@ -273,17 +275,17 @@ export default function PongWidget({ isMinimized }) {
       {gameState === 'gameOver' && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl text-[#39ff14] font-bold">GAME OVER</h2>
+            <h2 className={`text-4xl ${theme.colors.text} font-bold`}>GAME OVER</h2>
             <p className="text-2xl">
               {score.player > score.ai ? (
-                <span className="text-[#39ff14]">YOU WIN!</span>
+                <span className={theme.colors.text}>YOU WIN!</span>
               ) : (
                 <span className="text-[#ff5555]">YOU LOSE!</span>
               )}
             </p>
             <p className="text-xl text-white">Final Score: {score.player} - {score.ai}</p>
             {score.player === highScore && score.player > 0 && (
-              <p className="text-[#39ff14] text-xl font-bold">NEW HIGH SCORE!</p>
+              <p className={`${theme.colors.text} text-xl font-bold`}>NEW HIGH SCORE!</p>
             )}
             <Button
               variant="primary"
@@ -300,7 +302,7 @@ export default function PongWidget({ isMinimized }) {
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
-        className="border-2 border-[#39ff14] bg-[#121217]"
+        className={`border-2 ${theme.colors.border} bg-[#121217]`}
       />
 
       {gameState === 'playing' && (
