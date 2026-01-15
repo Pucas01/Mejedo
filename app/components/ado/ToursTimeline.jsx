@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import WindowDecoration from "../window/WindowDecoration.jsx";
-import Sticker from "../stickers/Sticker";
 import Button from "../ui/Button";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
@@ -85,7 +84,7 @@ export default function ToursTimeline() {
   // Intersection observer for typing animation
   useEffect(() => {
     const observerOptions = {
-      threshold: 0.1,
+      threshold: 1.0, // Only trigger when entire terminal is in view
       rootMargin: "0px"
     };
 
@@ -114,12 +113,12 @@ export default function ToursTimeline() {
       // First, ensure we're at the start (left)
       timelineRef.current.scrollLeft = 0;
 
-      // Then animate to the right after a short delay with custom slower animation
+      // Then animate to the right after a short delay
       setTimeout(() => {
         if (timelineRef.current) {
           const start = 0;
-          const end = timelineRef.current.scrollWidth;
-          const duration = 2000; // 2 seconds for slower animation
+          const end = timelineRef.current.scrollWidth - timelineRef.current.clientWidth;
+          const duration = 2000; // 2 seconds for smooth scroll
           const startTime = performance.now();
 
           const animateScroll = (currentTime) => {
@@ -128,10 +127,12 @@ export default function ToursTimeline() {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
 
-            // Ease out quad - gentle deceleration at the end
-            const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+            // Ease in-out cubic - smooth acceleration and deceleration
+            const easeInOutCubic = progress < 0.5
+              ? 4 * progress * progress * progress
+              : 1 - Math.pow(-2 * progress + 2, 3) / 2;
 
-            timelineRef.current.scrollLeft = start + (end - start) * easeOutQuad;
+            timelineRef.current.scrollLeft = start + (end - start) * easeInOutCubic;
 
             if (progress < 1) {
               requestAnimationFrame(animateScroll);
@@ -140,7 +141,7 @@ export default function ToursTimeline() {
 
           requestAnimationFrame(animateScroll);
         }
-      }, 300);
+      }, 400);
     }
   }, [doneTours, tours]);
 
@@ -274,19 +275,12 @@ export default function ToursTimeline() {
   }, [toursInView]);
 
   return (
-    <div ref={toursRef} className="bg-[#121217] min-h-[370px] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
-      <WindowDecoration title="Ado - ~/tours" showControls={true} />
+    <div ref={toursRef} className="bg-[#121217] min-h-[370px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
+      <WindowDecoration title="Ado - ~/tours" showControls={true} theme="ado" />
       <div className="p-8 flex-1 relative">
-        <Sticker
-          src="/stickers/futaba-keyboard.png"
-          position="top-right"
-          size={80}
-          rotation={-5}
-          offset={{ x: 10, y: -15 }}
-        />
         {!doneTours && (
           <div className="text-xl flex flex-wrap">
-            <span className="text-[#39ff14]">pucas01</span>
+            <span className="text-[#4169e1]">pucas01</span>
             <span className="text-white">@</span>
             <span className="text-[#D73DA3]">PucasArch</span>
             <span className="text-white">:</span>
@@ -299,7 +293,7 @@ export default function ToursTimeline() {
         {doneTours && (
           <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
-              <header className="text-2xl text-[#39ff14] font-bold">
+              <header className="text-2xl text-[#4169e1] font-bold">
                 Tours & Concerts
               </header>
               {isAdmin && (
@@ -334,7 +328,7 @@ export default function ToursTimeline() {
             ) : (
               <div
                 ref={timelineRef}
-                className="relative overflow-x-auto pb-8 scrollbar-hide border-2 border-[#39ff14]/20 hover:border-[#39ff14]/40 transition-colors p-4"
+                className="relative overflow-x-auto pb-8 scrollbar-hide border-2 border-[#4169e1]/20 hover:border-[#4169e1]/40 transition-colors p-4"
                 style={{ cursor: "url('/cursors/Normal.cur'), auto" }}
                 onMouseDown={handleMouseDown}
                 onMouseLeave={handleMouseLeave}
@@ -342,23 +336,23 @@ export default function ToursTimeline() {
                 onMouseMove={handleMouseMove}
               >
                 {/* Horizontal timeline line */}
-                <div className="absolute left-0 right-0 top-10 h-0.5 bg-[#39ff14]/30" style={{ width: `${tours.length * 350}px` }}></div>
+                <div className="absolute left-0 right-0 top-10 h-0.5 bg-[#4169e1]/30" style={{ width: `${tours.length * 350}px` }}></div>
 
                 <div className="flex gap-8 min-w-max">
                   {tours.map((tour, index) => (
                     <div key={tour.id} className="relative flex flex-col items-center" style={{ width: '320px' }}>
                       {/* Timeline dot */}
-                      <div className="w-4 h-4 bg-[#39ff14] rounded-full border-4 border-[#121217] relative z-10 mb-6"></div>
+                      <div className="w-4 h-4 bg-[#4169e1] rounded-full border-4 border-[#121217] relative z-10 mb-6"></div>
 
                       {editingTour?.id === tour.id ? (
-                        <div className="bg-[#1a1a1f] border-2 border-[#39ff14] p-4 space-y-3 w-full">
+                        <div className="bg-[#1a1a1f] border-2 border-[#4169e1] p-4 space-y-3 w-full">
                           <input
                             type="text"
                             value={editingTour.tourName}
                             onChange={(e) =>
                               setEditingTour({ ...editingTour, tourName: e.target.value })
                             }
-                            className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                            className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                             placeholder="Tour/Event Name"
                           />
                           <input
@@ -367,7 +361,7 @@ export default function ToursTimeline() {
                             onChange={(e) =>
                               setEditingTour({ ...editingTour, date: e.target.value })
                             }
-                            className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                            className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                             placeholder="Date"
                           />
                           <input
@@ -376,7 +370,7 @@ export default function ToursTimeline() {
                             onChange={(e) =>
                               setEditingTour({ ...editingTour, venue: e.target.value })
                             }
-                            className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                            className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                             placeholder="Venue"
                           />
                           <input
@@ -385,7 +379,7 @@ export default function ToursTimeline() {
                             onChange={(e) =>
                               setEditingTour({ ...editingTour, location: e.target.value })
                             }
-                            className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                            className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                             placeholder="Location (City, Country)"
                           />
                           <input
@@ -394,7 +388,7 @@ export default function ToursTimeline() {
                             onChange={(e) =>
                               setEditingTour({ ...editingTour, notes: e.target.value })
                             }
-                            className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                            className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                             placeholder="Notes (optional)"
                           />
                           <div className="flex gap-2">
@@ -415,11 +409,11 @@ export default function ToursTimeline() {
                           </div>
                         </div>
                       ) : (
-                        <div className="bg-[#1a1a1f]/50 border border-[#39ff14]/30 p-4 hover:border-[#39ff14] transition-colors w-full flex flex-col">
+                        <div className="bg-[#1a1a1f]/50 border border-[#4169e1]/30 p-4 hover:border-[#4169e1] transition-colors w-full flex flex-col">
                           <div className="flex justify-between items-start gap-2 mb-2">
                             {/* Date Badge */}
-                            <div className="inline-block bg-[#39ff14]/10 border border-[#39ff14] px-3 py-1">
-                              <span className="text-[#39ff14] text-xs font-mono">
+                            <div className="inline-block bg-[#4169e1]/10 border border-[#4169e1] px-3 py-1">
+                              <span className="text-[#4169e1] text-xs font-mono">
                                 {tour.date && (() => {
                                   // Check if notes contain multi-year info like "Tour ran from 2022 to 2023"
                                   const multiYearMatch = tour.notes?.match(/Tour ran from (\d{4}) to (\d{4})/);
@@ -454,14 +448,14 @@ export default function ToursTimeline() {
                           </div>
 
                           {/* Tour Name */}
-                          <h4 className="text-[#39ff14] font-bold text-base mb-2">
+                          <h4 className="text-[#4169e1] font-bold text-base mb-2">
                             {tour.tourName}
                           </h4>
 
                           {/* Venue & Location */}
                           {tour.venue && (
                             <p className="text-gray-300 text-xs flex items-start gap-1">
-                              <span className="text-[#39ff14]">📍</span>
+                              <span className="text-[#4169e1]">📍</span>
                               <span>{tour.venue}</span>
                             </p>
                           )}
@@ -471,7 +465,7 @@ export default function ToursTimeline() {
 
                           {/* Notes */}
                           {tour.notes && (
-                            <p className="text-gray-400 text-xs mt-2 italic border-l-2 border-[#39ff14]/30 pl-2">
+                            <p className="text-gray-400 text-xs mt-2 italic border-l-2 border-[#4169e1]/30 pl-2">
                               {tour.notes}
                             </p>
                           )}

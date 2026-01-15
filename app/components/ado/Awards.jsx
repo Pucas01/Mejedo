@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import WindowDecoration from "../window/WindowDecoration.jsx";
-import Sticker from "../stickers/Sticker";
 import Button from "../ui/Button";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 
@@ -188,19 +187,12 @@ export default function Awards() {
   const years = Object.keys(awardsByYear).sort((a, b) => b - a);
 
   return (
-    <div ref={awardsRef} className="bg-[#121217] min-h-[400px] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
-      <WindowDecoration title="Ado - ~/awards" showControls={true} />
+    <div ref={awardsRef} className="bg-[#121217] min-h-[400px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
+      <WindowDecoration title="Ado - ~/awards" showControls={true} theme="ado" />
       <div className="p-8 flex-1 relative">
-        <Sticker
-          src="/stickers/futaba-pointing.png"
-          position="top-right"
-          size={70}
-          rotation={-10}
-          offset={{ x: 15, y: -10 }}
-        />
         {!doneAwards && (
           <div className="text-xl flex flex-wrap">
-            <span className="text-[#39ff14]">pucas01</span>
+            <span className="text-[#4169e1]">pucas01</span>
             <span className="text-white">@</span>
             <span className="text-[#D73DA3]">PucasArch</span>
             <span className="text-white">:</span>
@@ -213,7 +205,7 @@ export default function Awards() {
         {doneAwards && (
           <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
-              <header className="text-2xl text-[#39ff14] font-bold">
+              <header className="text-2xl text-[#4169e1] font-bold">
                 Awards & Nominations
               </header>
               {isAdmin && (
@@ -248,20 +240,20 @@ export default function Awards() {
             ) : (
               <div className="space-y-4">
                 {years.map((year) => (
-                  <div key={year} className="border border-[#39ff14]/30 p-3">
-                    <h3 className="text-lg text-[#39ff14] font-bold mb-2">{year}</h3>
+                  <div key={year} className="border border-[#4169e1]/30 p-3">
+                    <h3 className="text-lg text-[#4169e1] font-bold mb-2">{year}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {awardsByYear[year].map((award) => (
                         <div key={award.id}>
                           {editingAward?.id === award.id ? (
-                            <div className="bg-[#1a1a1f] border-2 border-[#39ff14] p-3 space-y-2 col-span-full">
+                            <div className="bg-[#1a1a1f] border-2 border-[#4169e1] p-3 space-y-2 col-span-full">
                               <input
                                 type="number"
                                 value={editingAward.year}
                                 onChange={(e) =>
                                   setEditingAward({ ...editingAward, year: parseInt(e.target.value) })
                                 }
-                                className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                                className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                                 placeholder="Year"
                               />
                               <input
@@ -270,7 +262,7 @@ export default function Awards() {
                                 onChange={(e) =>
                                   setEditingAward({ ...editingAward, ceremony: e.target.value })
                                 }
-                                className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                                className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                                 placeholder="Ceremony"
                               />
                               <input
@@ -279,7 +271,7 @@ export default function Awards() {
                                 onChange={(e) =>
                                   setEditingAward({ ...editingAward, category: e.target.value })
                                 }
-                                className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                                className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                                 placeholder="Category"
                               />
                               <input
@@ -288,7 +280,7 @@ export default function Awards() {
                                 onChange={(e) =>
                                   setEditingAward({ ...editingAward, work: e.target.value })
                                 }
-                                className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                                className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                                 placeholder="Work/Song"
                               />
                               <input
@@ -297,7 +289,7 @@ export default function Awards() {
                                 onChange={(e) =>
                                   setEditingAward({ ...editingAward, result: e.target.value })
                                 }
-                                className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                                className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                                 placeholder="Result (Won/Nominated)"
                               />
                               <label className="flex items-center gap-2 text-white">
@@ -329,18 +321,18 @@ export default function Awards() {
                               </div>
                             </div>
                           ) : (
-                            <div className={`bg-[#1a1a1f]/50 border p-2 flex justify-between items-start gap-2 ${award.won ? 'border-[#39ff14]' : 'border-[#39ff14]/30'}`}>
+                            <div className={`bg-[#1a1a1f]/50 border p-2 flex justify-between items-start gap-2 ${award.won ? 'border-[#4169e1]' : 'border-[#4169e1]/30'}`}>
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-[#39ff14] font-bold text-sm truncate">
+                                <h4 className="text-[#4169e1] font-bold text-sm truncate">
                                   {award.ceremony}
                                 </h4>
                                 <p className="text-gray-300 text-xs">{award.category}</p>
                                 {award.work && (
                                   <p className="text-gray-400 text-xs mt-0.5">
-                                    <span className="text-[#39ff14]">Work:</span> {award.work}
+                                    <span className="text-[#4169e1]">Work:</span> {award.work}
                                   </p>
                                 )}
-                                <p className={`text-xs mt-0.5 ${award.won ? 'text-[#39ff14] font-semibold' : 'text-gray-500'}`}>
+                                <p className={`text-xs mt-0.5 ${award.won ? 'text-[#4169e1] font-semibold' : 'text-gray-500'}`}>
                                   {award.result || (award.won ? "Won" : "Nominated")}
                                 </p>
                               </div>

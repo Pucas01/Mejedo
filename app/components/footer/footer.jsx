@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useTheme } from "../../hooks/useTheme";
 
 export default function Footer() {
+  const { theme } = useTheme();
   const date = new Date();
   const year = date.getFullYear();
 
@@ -83,7 +85,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="w-full bg-[rgba(9,9,9,0.9)] border-t-2 border-[#39ff14] text-[#39ff14] text-sm flex flex-col items-center py-3 select-none">
+    <footer className={`w-full bg-[rgba(9,9,9,0.9)] border-t-2 ${theme.colors.border} ${theme.colors.text} text-sm flex flex-col items-center py-3 select-none`}>
       <div className="flex items-center gap-2">
         <img src={counterUrl} alt="Site Counter" />
       </div>

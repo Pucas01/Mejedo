@@ -2,11 +2,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useCurrentUser } from "../../../hooks/CurrentUser";
 import { useAchievements } from "../../../hooks/useAchievements";
+import { useTheme } from "../../../hooks/useTheme";
 import Button from "../../ui/Button";
 
 export default function MusicPlayerWidget({ isMinimized }) {
   const { isAdmin } = useCurrentUser();
   const { updateStats } = useAchievements();
+  const { theme } = useTheme();
   const [songs, setSongs] = useState([]);
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -100,9 +102,15 @@ export default function MusicPlayerWidget({ isMinimized }) {
 
         const barHeight = bars[i];
 
-        // Green color
-        const green = Math.floor((barHeight / canvas.height) * 100 + 100);
-        ctx.fillStyle = `rgb(${green}, ${155 + green}, ${green})`;
+        // Theme color for bars
+        const intensity = (barHeight / canvas.height);
+        // Convert theme primary color to RGB and apply intensity
+        const hex = theme.colors.primary.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        const brighten = Math.floor(intensity * 100 + 100);
+        ctx.fillStyle = `rgb(${Math.min(255, r + brighten)}, ${Math.min(255, g + brighten)}, ${Math.min(255, b + brighten)})`;
 
         // Draw bar on the right side (from center outward)
         const xRight = centerX + (barCount - i - 1) * (barWidth + 1);
@@ -262,7 +270,7 @@ export default function MusicPlayerWidget({ isMinimized }) {
     return (
       <div className="flex flex-col h-full gap-2 text-white">
         {/* Compact Now Playing */}
-        <div className="text-sm text-[#39ff14] truncate">
+        <div className={`text-sm ${theme.colors.text} truncate`}>
           {currentSong.replace(/\.[^/.]+$/, '')}
         </div>
 
@@ -313,22 +321,22 @@ export default function MusicPlayerWidget({ isMinimized }) {
     <div className="flex flex-col h-full gap-3 text-white">
       {/* Upload section (admin only) */}
       {isAdmin && (
-        <div className="border border-[#39ff14] p-2">
-          <label className="text-[#39ff14] text-sm mb-1 block">Upload Music (Admin)</label>
+        <div className={`border ${theme.colors.border} p-2`}>
+          <label className={`${theme.colors.text} text-sm mb-1 block`}>Upload Music (Admin)</label>
           <input
             type="file"
             accept="audio/*"
             onChange={handleFileUpload}
             disabled={uploading}
-            className="text-sm text-white file:mr-2 file:py-1 file:px-2 file:border-0 file:bg-[#39ff14] file:text-black file:cursor-pointer"
+            className={`text-sm text-white file:mr-2 file:py-1 file:px-2 file:border-0 ${theme.colors.bg} file:text-black file:cursor-pointer`}
           />
-          {uploading && <p className="text-xs text-[#39ff14] mt-1">Uploading...</p>}
+          {uploading && <p className={`text-xs ${theme.colors.text} mt-1`}>Uploading...</p>}
         </div>
       )}
 
       {/* Song list */}
-      <div className="flex-1 overflow-auto border border-[#39ff14] p-2">
-        <div className="text-[#39ff14] text-sm mb-2">Playlist ({songs.length})</div>
+      <div className={`flex-1 overflow-auto border ${theme.colors.border} p-2`}>
+        <div className={`${theme.colors.text} text-sm mb-2`}>Playlist ({songs.length})</div>
         {songs.length === 0 ? (
           <p className="text-gray-400 text-sm">No songs available</p>
         ) : (
@@ -336,9 +344,20 @@ export default function MusicPlayerWidget({ isMinimized }) {
             {songs.map((song) => (
               <div
                 key={song}
-                className={`flex items-center justify-between p-1 text-sm border border-[#39ff14] ${
-                  currentSong === song ? 'bg-[#39ff14]/20' : 'hover:bg-[#39ff14]/10'
-                }`}
+                className={`flex items-center justify-between p-1 text-sm border ${theme.colors.border}`}
+                style={{
+                  backgroundColor: currentSong === song ? `${theme.colors.primary}33` : 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentSong !== song) {
+                    e.currentTarget.style.backgroundColor = `${theme.colors.primary}1a`;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentSong !== song) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
               >
                 <button
                   onClick={() => playSong(song)}
@@ -363,8 +382,8 @@ export default function MusicPlayerWidget({ isMinimized }) {
 
       {/* Player controls */}
       {currentSong && (
-        <div className="border border-[#39ff14] p-2 space-y-2">
-          <div className="text-sm text-[#39ff14]">
+        <div className={`border ${theme.colors.border} p-2 space-y-2`}>
+          <div className={`text-sm ${theme.colors.text}`}>
             Now Playing: {currentSong.replace(/\.[^/.]+$/, '')}
           </div>
 
@@ -373,7 +392,7 @@ export default function MusicPlayerWidget({ isMinimized }) {
             ref={canvasRef}
             width={400}
             height={60}
-            className="w-full border border-[#39ff14] bg-[#121217]"
+            className={`w-full border ${theme.colors.border} bg-[#121217]`}
           />
 
           {/* Progress bar */}
@@ -392,7 +411,7 @@ export default function MusicPlayerWidget({ isMinimized }) {
 
           {/* Volume control */}
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-[#39ff14]">Volume:</span>
+            <span className={theme.colors.text}>Volume:</span>
             <input
               type="range"
               min="0"

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTheme } from "../../hooks/useTheme";
+
 /**
  * Windows 95/98 style button component that matches the window decoration aesthetic
  *
@@ -22,6 +24,7 @@ export default function Button({
   className = "",
   ...props
 }) {
+  const { theme } = useTheme();
   // Base styles - Windows 95/98 beveled look
   const baseStyles = `
     relative
@@ -53,19 +56,15 @@ export default function Button({
       active:shadow-[inset_-1px_-1px_0_0_#dfdfdf,inset_1px_1px_0_0_#000000]
     `,
     primary: `
-      bg-gradient-to-b from-[#5a9c4a] to-[#4a7c3a]
+      ${theme.button.gradient}
+      ${theme.button.hover}
+      ${theme.button.borderTop}
+      ${theme.button.borderBottom}
+      ${theme.button.shadow}
+      ${theme.button.activeTop}
+      ${theme.button.activeBottom}
+      ${theme.button.activeShadow}
       text-white
-      border-t-[#7abc6a]
-      border-l-[#7abc6a]
-      border-r-[#2a5c1a]
-      border-b-[#2a5c1a]
-      hover:from-[#6aac5a] hover:to-[#5a9c4a]
-      shadow-[inset_1px_1px_0_0_#8acc7a,inset_-1px_-1px_0_0_#1a4c0a]
-      active:border-t-[#2a5c1a]
-      active:border-l-[#2a5c1a]
-      active:border-r-[#7abc6a]
-      active:border-b-[#7abc6a]
-      active:shadow-[inset_-1px_-1px_0_0_#8acc7a,inset_1px_1px_0_0_#1a4c0a]
     `,
     danger: `
       bg-gradient-to-b from-[#e85d5d] to-[#c62828]

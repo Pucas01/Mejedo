@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import WindowDecoration from "../window/WindowDecoration.jsx";
-import Sticker from "../stickers/Sticker";
 import Button from "../ui/Button";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
@@ -184,19 +183,26 @@ export default function Ado() {
   return (
     <div className="flex flex-col gap-4 p-4 text-xl min-h-screen text-white justify-start">
       {/* Info terminal */}
-      <div ref={infoRef} className="bg-[#121217] min-h-[540px] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
-        <WindowDecoration title="Ado - info.txt" showControls={true} />
+      <div ref={infoRef} className="bg-[#121217] min-h-[540px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
+        <WindowDecoration title="Ado - info.txt" showControls={true} theme="ado" />
         <div className="p-8 flex-1 relative">
-          <Sticker
-            src="/stickers/futaba-pointing.png"
-            position="top-right"
-            size={70}
-            rotation={10}
-            offset={{ x: 20, y: -20 }}
-          />
+          {doneInfo && (
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundImage: 'url(/ado/ado_notsit.webp)',
+                backgroundPosition: 'right center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'contain',
+                opacity: 0.3,
+                maskImage: 'linear-gradient(to left, black 5%, black 5%, transparent 50%)',
+
+              }}
+            />
+          )}
           {!doneInfo && (
             <div className="text-xl flex flex-wrap">
-              <span className="text-[#39ff14]">pucas01</span>
+              <span className="text-[#4169e1]">pucas01</span>
               <span className="text-white">@</span>
               <span className="text-[#D73DA3]">PucasArch</span>
               <span className="text-white">:</span>
@@ -207,17 +213,17 @@ export default function Ado() {
             </div>
           )}
           {doneInfo && (
-            <div className="space-y-4 mt-2">
-              <header className="text-3xl text-[#39ff14] font-bold">Ado (アド)</header>
+            <div className="space-y-4 mt-2 max-w-[60%] relative z-10">
+              <header className="text-3xl text-[#4169e1] font-bold">Ado (アド)</header>
               <div className="text-gray-300 space-y-3 text-lg leading-relaxed">
                 <p>
-                  <span className="text-[#39ff14]">Born:</span> October 24, 2002
+                  <span className="text-[#4169e1]">Born:</span> October 24, 2002
                 </p>
                 <p>
-                  <span className="text-[#39ff14]">Origin:</span> Tokyo, Japan
+                  <span className="text-[#4169e1]">Origin:</span> Tokyo, Japan
                 </p>
                 <p>
-                  <span className="text-[#39ff14]">Genres:</span> J-Pop, Rock, Electronic
+                  <span className="text-[#4169e1]">Genres:</span> J-Pop, Rock, Electronic
                 </p>
                 <p className="pt-2">
                   Ado is a Japanese singer. In 2020, at the age of 17, she made her debut with the
@@ -238,7 +244,7 @@ export default function Ado() {
                     href="https://en.wikipedia.org/wiki/Ado_(singer)"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-[#39ff14] underline decoration-wavy underline-offset-2"
+                    className="text-gray-400 hover:text-[#4169e1] underline decoration-wavy underline-offset-2"
                   >
                     Wikipedia - Ado (singer)
                   </a>
@@ -256,19 +262,12 @@ export default function Ado() {
       <Awards />
 
       {/* Performances section */}
-      <div ref={performancesRef} className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
-          <WindowDecoration title="Ado - ~/performances" showControls={true} />
+      <div ref={performancesRef} className="bg-[#121217] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
+          <WindowDecoration title="Ado - ~/performances" showControls={true} theme="ado" />
           <div className="p-8 flex-1 relative">
-            <Sticker
-              src="/stickers/futaba-jacket.png"
-              position="bottom-left"
-              size={75}
-              rotation={-8}
-              offset={{ x: -20, y: 20 }}
-            />
             {!donePerformances && (
               <div className="text-xl flex flex-wrap">
-                <span className="text-[#39ff14]">pucas01</span>
+                <span className="text-[#4169e1]">pucas01</span>
                 <span className="text-white">@</span>
                 <span className="text-[#D73DA3]">PucasArch</span>
                 <span className="text-white">:</span>
@@ -281,7 +280,7 @@ export default function Ado() {
             {donePerformances && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center mb-4">
-                  <header className="text-2xl text-[#39ff14] font-bold">
+                  <header className="text-2xl text-[#4169e1] font-bold">
                     Live Performances
                   </header>
                   {isAdmin && (
@@ -303,7 +302,7 @@ export default function Ado() {
                       {performances.map((perf) => (
                         <div
                           key={perf.id}
-                          className="border-2 border-[#39ff14] bg-[#1a1a1f] p-4 relative"
+                          className="border-2 border-[#4169e1] bg-[#1a1a1f] p-4 relative"
                         >
                           {editingPerformance?.id === perf.id ? (
                             <div className="space-y-3">
@@ -313,7 +312,7 @@ export default function Ado() {
                                 onChange={(e) =>
                                   setEditingPerformance({ ...editingPerformance, title: e.target.value })
                                 }
-                                className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                                className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                                 placeholder="Title"
                               />
                               <input
@@ -322,7 +321,7 @@ export default function Ado() {
                                 onChange={(e) =>
                                   setEditingPerformance({ ...editingPerformance, videoId: e.target.value })
                                 }
-                                className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                                className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                                 placeholder="YouTube Video ID"
                               />
                               <input
@@ -331,7 +330,7 @@ export default function Ado() {
                                 onChange={(e) =>
                                   setEditingPerformance({ ...editingPerformance, description: e.target.value })
                                 }
-                                className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                                className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                                 placeholder="Description"
                               />
                               <input
@@ -340,7 +339,7 @@ export default function Ado() {
                                 onChange={(e) =>
                                   setEditingPerformance({ ...editingPerformance, year: e.target.value })
                                 }
-                                className="w-full bg-[#0a0a0f] border border-[#39ff14] text-white p-2 text-sm"
+                                className="w-full bg-[#0a0a0f] border border-[#4169e1] text-white p-2 text-sm"
                                 placeholder="Year"
                               />
                               <div className="flex gap-2">
@@ -377,7 +376,7 @@ export default function Ado() {
                                       className="w-full h-full object-cover"
                                     />
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/20 transition-colors">
-                                      <svg className="w-16 h-16 text-[#39ff14]" fill="currentColor" viewBox="0 0 24 24">
+                                      <svg className="w-16 h-16 text-[#4169e1]" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M8 5v14l11-7z"/>
                                       </svg>
                                     </div>
@@ -388,7 +387,7 @@ export default function Ado() {
                                   </div>
                                 )}
                               </div>
-                              <h3 className="text-[#39ff14] font-bold text-lg mb-1">{perf.title}</h3>
+                              <h3 className="text-[#4169e1] font-bold text-lg mb-1">{perf.title}</h3>
                               <p className="text-gray-400 text-sm mb-1">{perf.description}</p>
                               <p className="text-gray-500 text-xs">{perf.year}</p>
                               {isAdmin && (
@@ -422,12 +421,13 @@ export default function Ado() {
                         onClick={() => setSelectedVideo(null)}
                       >
                         <div
-                          className="bg-[#121217] border-2 border-[#39ff14] max-w-5xl w-full animate-slideUp"
+                          className="bg-[#121217] border-2 border-[#4169e1] max-w-5xl w-full animate-slideUp"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <WindowDecoration
                             title={selectedVideo.title}
                             showControls={true}
+                            theme="ado"
                             onClose={() => setSelectedVideo(null)}
                           />
                           <div className="p-4">
@@ -455,38 +455,38 @@ export default function Ado() {
                 )}
 
                 {/* External Links */}
-                <div className="border-t-2 border-[#39ff14] pt-6 mt-8">
-                  <h3 className="text-xl text-[#39ff14] font-bold mb-3">External Links</h3>
+                <div className="border-t-2 border-[#4169e1] pt-6 mt-8">
+                  <h3 className="text-xl text-[#4169e1] font-bold mb-3">External Links</h3>
                   <div className="text-gray-300 space-y-2 text-base">
                     <p>
-                      <span className="text-[#39ff14]">YouTube:</span>{" "}
+                      <span className="text-[#4169e1]">YouTube:</span>{" "}
                       <a
                         href="https://www.youtube.com/@Ado1024"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-white hover:text-[#39ff14] underline decoration-wavy underline-offset-4"
+                        className="text-white hover:text-[#4169e1] underline decoration-wavy underline-offset-4"
                       >
                         @Ado1024
                       </a>
                     </p>
                     <p>
-                      <span className="text-[#39ff14]">Spotify:</span>{" "}
+                      <span className="text-[#4169e1]">Spotify:</span>{" "}
                       <a
                         href="https://open.spotify.com/artist/6mEQK9m2krja6X1cfsAjfl"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-white hover:text-[#39ff14] underline decoration-wavy underline-offset-4"
+                        className="text-white hover:text-[#4169e1] underline decoration-wavy underline-offset-4"
                       >
                         Ado
                       </a>
                     </p>
                     <p>
-                      <span className="text-[#39ff14]">Twitter:</span>{" "}
+                      <span className="text-[#4169e1]">Twitter:</span>{" "}
                       <a
                         href="https://twitter.com/ado1024imokenp"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-white hover:text-[#39ff14] underline decoration-wavy underline-offset-4"
+                        className="text-white hover:text-[#4169e1] underline decoration-wavy underline-offset-4"
                       >
                         @ado1024imokenp
                       </a>

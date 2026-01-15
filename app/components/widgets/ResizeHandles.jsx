@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useWidgets } from "../../hooks/useWidgets";
+import { useTheme } from "../../hooks/useTheme";
 
 const MIN_WIDTH = 300;
 const MIN_HEIGHT = 200;
@@ -31,6 +32,7 @@ const positions = {
 
 export default function ResizeHandles({ widgetId, widget }) {
   const { updateSize, updatePosition } = useWidgets();
+  const { theme } = useTheme();
   const [resizing, setResizing] = useState(null);
   const startState = useRef({ x: 0, y: 0, width: 0, height: 0, posX: 0, posY: 0 });
 
@@ -173,8 +175,17 @@ export default function ResizeHandles({ widgetId, widget }) {
       {directions.map(direction => (
         <div
           key={direction}
-          className={`absolute ${positions[direction]} hover:bg-[#39ff14]/20 transition-colors`}
-          style={{ cursor: cursors[direction] }}
+          className={`absolute ${positions[direction]} transition-colors`}
+          style={{
+            cursor: cursors[direction],
+            backgroundColor: 'transparent'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = `${theme.colors.primary}33`;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
           onMouseDown={(e) => handleMouseDown(e, direction)}
         />
       ))}

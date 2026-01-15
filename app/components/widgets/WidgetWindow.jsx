@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, memo } from "react";
 import WindowDecoration from "../window/WindowDecoration";
 import ResizeHandles from "./ResizeHandles";
 import { useWidgets } from "../../hooks/useWidgets";
+import { useTheme } from "../../hooks/useTheme";
 
 // Widget registry
 const widgetRegistry = {
@@ -11,6 +12,7 @@ const widgetRegistry = {
 
 function WidgetWindow({ widget }) {
   const { updatePosition, updateSize, bringToFront, closeWidget, minimizeWidget } = useWidgets();
+  const { theme } = useTheme();
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const [WidgetContent, setWidgetContent] = useState(null);
@@ -109,7 +111,7 @@ function WidgetWindow({ widget }) {
 
   return (
     <div
-      className={`fixed bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col animate-slideUp ${isDragging ? 'select-none' : ''}`}
+      className={`fixed bg-[#121217] border-2 ${theme.colors.border} shadow-lg flex flex-col animate-slideUp ${isDragging ? 'select-none' : ''}`}
       style={{
         left: widget.position.x,
         top: widget.position.y,
@@ -128,6 +130,7 @@ function WidgetWindow({ widget }) {
           onClose={handleClose}
           onMinimize={widget.type === 'music' || widget.type === 'pong' ? handleMinimize : undefined}
           showControls={true}
+          theme={theme.name}
         />
       </div>
 

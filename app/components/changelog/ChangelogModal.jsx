@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
+import { useTheme } from "../../hooks/useTheme";
 import WindowDecoration from "../window/WindowDecoration.jsx";
 import Button from "../ui/Button";
 
@@ -12,6 +13,7 @@ export default function ChangelogModal({ show, onClose }) {
   const [isAdding, setIsAdding] = useState(false);
   const { isAdmin } = useCurrentUser();
   const { unlock } = useAchievements();
+  const { theme } = useTheme();
 
   const fetchChangelog = () => {
     fetch("/api/changelog")
@@ -99,16 +101,16 @@ export default function ChangelogModal({ show, onClose }) {
         if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
+      <div className={`bg-[#121217] border-2 ${theme.colors.border} shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp`}>
         {/* Window Decoration */}
-        <WindowDecoration title="Changelog - CHANGELOG.md" onClose={handleClose} />
+        <WindowDecoration title="Changelog - CHANGELOG.md" onClose={handleClose} theme={theme.name} />
 
         {/* Terminal Header */}
         {isAdmin && (
-        <div className="px-6 py-3 bg-[#090909] border-b border-[#39ff14]/30">
+        <div className={`px-6 py-3 bg-[#090909] border-b ${theme.colors.border}/30`}>
           <div className="font-mono flex items-center justify-between">
             <div>
-              <span className="text-[#39ff14]">pucas01</span>
+              <span className={theme.colors.text}>pucas01</span>
               <span className="text-white">@</span>
               <span className="text-[#D73DA3]">PucasArch</span>
               <span className="text-white">:</span>
@@ -120,7 +122,7 @@ export default function ChangelogModal({ show, onClose }) {
                 onClick={() => setIsAdding(true)}
                 variant="default"
                 size="sm"
-                className="text-gray-500 hover:text-[#39ff14] font-mono transition-colors"
+                className={`text-gray-500 ${theme.colors.hover} font-mono transition-colors`}
               >
                 [+ Add Version]
               </Button>
@@ -136,7 +138,7 @@ export default function ChangelogModal({ show, onClose }) {
             <div className="text-center text-gray-400">No changelog entries found</div>
           ) : (
             versions.map((version, idx) => (
-              <div key={idx} className="border-l-2 border-[#39ff14] pl-4 relative group">
+              <div key={idx} className={`border-l-2 ${theme.colors.border} pl-4 relative group`}>
                 {/* Admin controls */}
                 {isAdmin && (
                   <div className="absolute -right-2 top-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -161,7 +163,7 @@ export default function ChangelogModal({ show, onClose }) {
 
                 {/* Version header */}
                 <div className="flex items-baseline gap-3 mb-2">
-                  <h3 className="text-[#39ff14] text-xl font-bold">
+                  <h3 className={`${theme.colors.text} text-xl font-bold`}>
                     v{version.version}
                   </h3>
                   <span className="text-gray-500 text-sm">{version.date}</span>
@@ -174,7 +176,7 @@ export default function ChangelogModal({ show, onClose }) {
                     <ul className="list-none space-y-1 text-gray-300">
                       {version.added.map((item, i) => (
                         <li key={i} className="pl-4">
-                          <span className="text-[#39ff14]">→</span> {item}
+                          <span className={theme.colors.text}>→</span> {item}
                         </li>
                       ))}
                     </ul>
@@ -187,7 +189,7 @@ export default function ChangelogModal({ show, onClose }) {
                     <ul className="list-none space-y-1 text-gray-300">
                       {version.changed.map((item, i) => (
                         <li key={i} className="pl-4">
-                          <span className="text-[#39ff14]">→</span> {item}
+                          <span className={theme.colors.text}>→</span> {item}
                         </li>
                       ))}
                     </ul>
@@ -200,7 +202,7 @@ export default function ChangelogModal({ show, onClose }) {
                     <ul className="list-none space-y-1 text-gray-300">
                       {version.fixed.map((item, i) => (
                         <li key={i} className="pl-4">
-                          <span className="text-[#39ff14]">→</span> {item}
+                          <span className={theme.colors.text}>→</span> {item}
                         </li>
                       ))}
                     </ul>
@@ -213,7 +215,7 @@ export default function ChangelogModal({ show, onClose }) {
                     <ul className="list-none space-y-1 text-gray-300">
                       {version.removed.map((item, i) => (
                         <li key={i} className="pl-4">
-                          <span className="text-[#39ff14]">→</span> {item}
+                          <span className={theme.colors.text}>→</span> {item}
                         </li>
                       ))}
                     </ul>
@@ -225,7 +227,7 @@ export default function ChangelogModal({ show, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 bg-[#090909] border-t border-[#39ff14]/30 text-center text-gray-500 text-sm">
+        <div className={`px-6 py-3 bg-[#090909] border-t ${theme.colors.border}/30 text-center text-gray-500 text-sm`}>
           Stay updated with the latest changes!
         </div>
       </div>
@@ -234,6 +236,7 @@ export default function ChangelogModal({ show, onClose }) {
 }
 
 function VersionEditor({ version, onSave, onCancel }) {
+  const { theme } = useTheme();
   const [formData, setFormData] = useState(
     version || {
       version: "",
@@ -273,22 +276,15 @@ function VersionEditor({ version, onSave, onCancel }) {
       alert("Version number is required");
       return;
     }
-    console.log("Submitting changelog data:", formData);
     onSave(formData);
   };
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 animate-fadeIn">
-      <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
-        {/* Window Decoration */}
-        <WindowDecoration
-          title={version ? "Edit Version" : "New Version"}
-          onClose={onCancel}
-        />
+      <div className={`bg-[#121217] border-2 ${theme.colors.border} shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp`}>
+        <WindowDecoration title={version ? "Edit Version" : "New Version"} onClose={onCancel} theme={theme.name}/>
 
-        {/* Form */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {/* Version and Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-gray-400 text-sm mb-1 block">Version</label>
@@ -296,7 +292,7 @@ function VersionEditor({ version, onSave, onCancel }) {
                 type="text"
                 value={formData.version}
                 onChange={(e) => setFormData({ ...formData, version: e.target.value })}
-                className="w-full bg-[#090909] border border-[#39ff14] text-white px-3 py-2 focus:outline-none focus:border-[#39ff14]"
+                className={`w-full bg-[#090909] border ${theme.colors.border} text-white px-3 py-2 focus:outline-none`}
                 placeholder="2.0.4"
               />
             </div>
@@ -306,31 +302,24 @@ function VersionEditor({ version, onSave, onCancel }) {
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full bg-[#090909] border border-[#39ff14] text-white px-3 py-2 focus:outline-none focus:border-[#39ff14]"
+                className={`w-full bg-[#090909] border ${theme.colors.border} text-white px-3 py-2 focus:outline-none`}
               />
             </div>
           </div>
 
-          {/* Categories */}
           {[
-            { key: "added", label: "Things added", color: "green-400" },
-            { key: "changed", label: "Stuff changed", color: "blue-400" },
-            { key: "fixed", label: "Bugs Fixed", color: "yellow-400" },
-            { key: "removed", label: "Stuff removed", color: "red-400" },
+            { key: "added", label: "Things added", color: "text-green-400" },
+            { key: "changed", label: "Stuff changed", color: "text-blue-400" },
+            { key: "fixed", label: "Bugs Fixed", color: "text-yellow-400" },
+            { key: "removed", label: "Stuff removed", color: "text-red-400" },
           ].map(({ key, label, color }) => (
             <div key={key}>
-              <label className={`text-${color} font-semibold mb-2 block`}>{label}</label>
+              <label className={`${color} font-semibold mb-2 block`}>{label}</label>
               <div className="space-y-2">
                 {formData[key].map((item, idx) => (
                   <div key={idx} className="flex items-center gap-2">
                     <span className="text-gray-300 flex-1">{item}</span>
-                    <Button
-                      onClick={() => handleRemoveItem(key, idx)}
-                      variant="danger"
-                      size="sm"
-                    >
-                      [X]
-                    </Button>
+                    <Button onClick={() => handleRemoveItem(key, idx)} variant="danger" size="sm">[X]</Button>
                   </div>
                 ))}
                 <div className="flex gap-2">
@@ -338,44 +327,30 @@ function VersionEditor({ version, onSave, onCancel }) {
                     type="text"
                     value={newItems[key]}
                     onChange={(e) => setNewItems({ ...newItems, [key]: e.target.value })}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleAddItem(key);
-                      }
-                    }}
-                    className="flex-1 bg-[#090909] border border-gray-600 text-white px-3 py-2 focus:outline-none focus:border-[#39ff14]"
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddItem(key))}
+                    className={`flex-1 bg-[#090909] border border-gray-600 text-white px-3 py-2 focus:outline-none focus:${theme.colors.border}`}
                     placeholder="Add item..."
                   />
-                  <Button
+                  <button
                     onClick={() => handleAddItem(key)}
-                    variant="primary"
+                    className={`px-4 py-2 text-white font-bold transition-all ${theme.button.gradient} ${theme.button.hover} border-t-2 border-l-2 ${theme.button.borderTop} border-r-2 border-b-2 ${theme.button.borderBottom} ${theme.button.shadow} ${theme.button.activeTop} ${theme.button.activeBottom} ${theme.button.activeShadow}`}
                   >
                     Add
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-3 bg-[#090909] border-t border-[#39ff14]/30 flex justify-end gap-3">
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onCancel();
-            }}
-            variant="default"
-          >
-            Cancel
-          </Button>
-          <Button
+        <div className={`px-6 py-3 bg-[#090909] border-t ${theme.colors.border}/30 flex justify-end gap-3`}>
+          <button onClick={onCancel} className="text-gray-400 hover:text-white px-4 py-2 transition-colors">Cancel</button>
+          <button
             onClick={handleSubmit}
-            variant="primary"
+            className={`px-6 py-2 text-white font-bold transition-all ${theme.button.gradient} ${theme.button.hover} border-t-2 border-l-2 ${theme.button.borderTop} border-r-2 border-b-2 ${theme.button.borderBottom} ${theme.button.shadow} ${theme.button.activeTop} ${theme.button.activeBottom} ${theme.button.activeShadow}`}
           >
-            Save
-          </Button>
+            Save Version
+          </button>
         </div>
       </div>
     </div>

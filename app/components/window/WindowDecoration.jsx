@@ -1,8 +1,29 @@
 "use client";
 import { useAchievements } from "../../hooks/useAchievements";
 
-export default function WindowDecoration({ title = "Terminal", onClose, onMinimize, showControls = true }) {
+// Theme configurations
+const themes = {
+  futaba: {
+    border: "border-[#39ff14]",
+    text: "text-[#39ff14]",
+  },
+  ado: {
+    border: "border-[#4169e1]",
+    text: "text-[#4169e1]",
+  },
+};
+
+export default function WindowDecoration({
+  title = "Terminal",
+  onClose,
+  onMinimize,
+  showControls = true,
+  theme = "futaba" // Default theme
+}) {
   const { unlock } = useAchievements();
+
+  // Get theme colors, fallback to futaba if theme doesn't exist
+  const themeColors = themes[theme] || themes.futaba;
 
   const handleCloseClick = () => {
     if (onClose) {
@@ -21,13 +42,13 @@ export default function WindowDecoration({ title = "Terminal", onClose, onMinimi
 
   return (
     <div
-  className="
-    relative flex items-center justify-between h-8 min-h-8 bg-gradient-to-b from-[#404045] via-[#2a2a2e] to-[#1e1e22] border-b-2 border-[#39ff14] px-3 overflow-hidden">
+      className={`relative flex items-center justify-between h-8 min-h-8 bg-gradient-to-b from-[#404045] via-[#2a2a2e] to-[#1e1e22] border-b-2 ${themeColors.border} px-3 overflow-hidden`}
+    >
       {/* Glossy shine effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/5 to-transparent pointer-events-none" style={{ height: '60%' }} />
 
       <div className="flex items-center gap-2 relative z-10">
-        <div className="text-[#39ff14] text-sm font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{title}</div>
+        <div className={`${themeColors.text} text-sm font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]`}>{title}</div>
       </div>
 
       {showControls && (

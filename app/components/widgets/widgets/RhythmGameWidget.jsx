@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Button from "../../ui/Button";
 import { useAchievements } from "../../../hooks/useAchievements";
+import { useTheme } from '../../../hooks/useTheme';
 
 const LANES = ["d", "f", "j", "k"];
 const LANE_COLORS = ["#c24b99", "#00ffff", "#12fa05", "#f9393f"]; // FNF colors: purple, cyan, green, red
@@ -18,6 +19,8 @@ const NOTE_TRAVEL_TIME_MS = 800;
 
 // Arrow directions for each lane (left, down, up, right)
 const ARROW_ROTATIONS = [270, 180, 0, 90];
+
+
 
 // Available songs
 const SONGS = {
@@ -189,6 +192,7 @@ export default function RhythmGameWidget({ widgetId }) {
   const chartNotesRef = useRef([]);
   const nextNoteIndexRef = useRef(0);
   const audioStartedRef = useRef(false);
+  const { theme } = useTheme();
 
   // Distance notes travel from spawn to hit zone
   const NOTE_TRAVEL_DISTANCE = GAME_HEIGHT - HIT_ZONE_Y + NOTE_HEIGHT;
@@ -683,8 +687,8 @@ export default function RhythmGameWidget({ widgetId }) {
               onClick={() => setSelectedSong(key)}
               className={`w-full p-3 text-left border-2 transition-colors ${
                 selectedSong === key
-                  ? "border-[#39ff14] bg-[#39ff14]/10 text-[#39ff14]"
-                  : "border-gray-600 hover:border-[#39ff14] text-gray-300 hover:text-[#39ff14]"
+                  ? `${theme.colors.border} ${theme.colors.text}`
+                  : `border-gray-600 hover:${theme.colors.border} text-gray-300 hover:${theme.colors.text}`
               }`}
             >
               <div className="font-bold">{song.name}</div>
@@ -699,7 +703,7 @@ export default function RhythmGameWidget({ widgetId }) {
             className={`w-full p-2 border-2 transition-colors flex items-center justify-between text-sm ${
               botplay
                 ? "border-[#ffd700] bg-[#ffd700]/10 text-[#ffd700]"
-                : "border-gray-600 hover:border-[#39ff14] text-gray-300 hover:text-[#39ff14]"
+                : `border-gray-600 hover:${theme.colors.border} text-gray-300 ${theme.colors.hover}`
             }`}
           >
             <span>BOTPLAY</span>
@@ -727,7 +731,7 @@ export default function RhythmGameWidget({ widgetId }) {
   if (gameState === "loading") {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-[#39ff14] animate-pulse">Loading...</div>
+        <div className={`${theme.colors.text} animate-pulse`}>Loading...</div>
       </div>
     );
   }
@@ -736,7 +740,7 @@ export default function RhythmGameWidget({ widgetId }) {
   if (gameState === "countdown") {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-[#39ff14] text-8xl font-bold animate-pulse">
+        <div className={`${theme.colors.text} text-8xl font-bold animate-pulse`}>
           {countdownValue > 0 ? countdownValue : "GO!"}
         </div>
       </div>
@@ -754,8 +758,8 @@ export default function RhythmGameWidget({ widgetId }) {
       )}
 
       {/* Stats bar */}
-      <div className="flex justify-between items-center text-xs bg-[#1a1a1f] border border-[#39ff14]/30 p-2">
-        <div className="text-[#39ff14]">
+      <div className={`flex justify-between items-center text-xs bg-[#1a1a1f] border ${theme.colors.border}/30 p-2`}>
+        <div className={theme.colors.text}>
           SCORE: <span className="text-white">{Math.floor(score / 2).toString().padStart(6, "0")}</span>
         </div>
         <div className="text-[#ffd700]">
@@ -773,7 +777,7 @@ export default function RhythmGameWidget({ widgetId }) {
 
       {/* Game Area */}
       <div
-        className="relative overflow-hidden bg-[#0a0a0a] border border-[#39ff14]/30 mx-auto"
+        className={`relative overflow-hidden bg-[#0a0a0a] border ${theme.colors.border}/30 mx-auto`}
         style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}
       >
         {/* Lane backgrounds on press */}
@@ -908,14 +912,14 @@ export default function RhythmGameWidget({ widgetId }) {
         {/* Game Over */}
         {gameState === "ended" && (
           <div className="absolute inset-0 bg-[#121217]/95 flex flex-col items-center justify-center">
-            <div className="text-[#39ff14] text-xl font-bold mb-4 border-b border-[#39ff14] pb-2 px-4">
+            <div className={`${theme.colors.text} text-xl font-bold mb-4 border-b ${theme.colors.border} pb-2 px-4`}>
               SONG_COMPLETE
             </div>
             <div className="text-gray-400 text-sm mb-2">
               {currentSong.name}
             </div>
             <div className="text-white mb-1">
-              FINAL SCORE: <span className="text-[#39ff14]">{Math.floor(score / 2)}</span>
+              FINAL SCORE: <span className={theme.colors.text}>{Math.floor(score / 2)}</span>
             </div>
             <div className="text-gray-400 text-sm mb-4">
               MAX COMBO: <span className="text-[#ffd700]">{maxCombo}</span>
@@ -941,7 +945,7 @@ export default function RhythmGameWidget({ widgetId }) {
       </div>
 
       {/* Controls footer */}
-      <div className="text-center text-gray-500 text-xs bg-[#1a1a1f] border border-[#39ff14]/30 p-2">
+      <div className={`text-center text-gray-500 text-xs bg-[#1a1a1f] border ${theme.colors.border}/30 p-2`}>
         <span className="text-[#c24b99]">D</span>
         <span className="text-[#00ffff]"> F</span>
         <span className="text-[#12fa05]"> J</span>

@@ -7,6 +7,7 @@ import { useCurrentUser } from "./hooks/CurrentUser.js";
 import { useKonamiCode } from "./hooks/useKonamiCode.js";
 import { AchievementProvider, useAchievements } from "./hooks/useAchievements.js";
 import { WidgetProvider } from "./hooks/useWidgets.js";
+import { useTheme } from "./hooks/useTheme.js";
 
 // Dynamic imports with preload capability
 const pageComponents = {
@@ -60,6 +61,7 @@ function PageContent() {
   const { currentUser, isAdmin } = useCurrentUser();
   const mainRef = useRef(null);
   const { unlock, updateStats, isLoaded, unlockedAchievements } = useAchievements();
+  const { theme } = useTheme();
 
   // Read route from URL on mount (client-side only to avoid hydration mismatch)
   useEffect(() => {
@@ -261,7 +263,7 @@ function PageContent() {
   return (
     <WidgetProvider mascotVisible={mascotVisible} onToggleMascot={toggleMascot}>
     <div className="flex flex-col min-h-screen bg-[url(/LaptopSHQ.webp)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
-      <header className="p-4 pb-0 text-center bg-[#090909] text-[#39ff14]">
+      <header className={`p-4 pb-0 text-center bg-[#090909] ${theme.colors.text}`}>
         <h1 className="text-4xl font-bold flex items-center justify-center gap-2">
           <span
             className="cursor-pointer"
@@ -277,21 +279,21 @@ function PageContent() {
         <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
           <button
             onClick={() => setAchievementsOpen(true)}
-            className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
+            className={`text-xl cursor-pointer text-gray-500 ${theme.colors.hover} transition-colors`}
             title="View Achievements"
           >
             Achievements
           </button>
           <button
             onClick={() => setSpeedrunLeaderboardOpen(true)}
-            className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
+            className={`text-xl cursor-pointer text-gray-500 ${theme.colors.hover} transition-colors`}
             title="View Speedrun Leaderboard"
           >
             Speedruns
           </button>
           <button
             onClick={() => setChangelogOpen(true)}
-            className="text-xl cursor-pointer text-gray-500 hover:text-[#39ff14] transition-colors"
+            className={`text-xl cursor-pointer text-gray-500 ${theme.colors.hover} transition-colors`}
             title="View Changelog"
           >
             Changelog
@@ -299,7 +301,7 @@ function PageContent() {
         </div>
       </header>
 
-      <nav className="flex justify-center bg-[#090909] border-b-2 border-[#39ff14] py-4">
+      <nav className={`flex justify-center bg-[#090909] border-b-2 ${theme.colors.border} py-4`}>
         <div className="inline-flex flex-wrap justify-center gap-6 custom-dash pb-2">
           {["/about", "/projects", "/blog", "/collection", "/shitposts", "/guestbook", "/webring", "/buttons", "/ado", "/admin"].map(
             (page) => (
@@ -309,8 +311,8 @@ function PageContent() {
                 onMouseEnter={() => handleMouseEnter(page)}
                 className={`tracking-wide text-2xl px-2 cursor-pointer ${
                   active === page
-                    ? "text-[#39ff14] border-b-1 border-[#39ff14]"
-                    : "text-gray-400 hover:text-[#39ff14]"
+                    ? `${theme.colors.text} border-b-1 ${theme.colors.border}`
+                    : `text-gray-400 ${theme.colors.hover}`
                 } ${popping === page ? "animate-pulse" : ""}`}
               >
                 {page}
@@ -345,7 +347,7 @@ function PageContent() {
 
       </main>
 
-      {mascotVisible && <Mascot />}
+      {mascotVisible && active !== "/ado" && <Mascot />}
 
       <AchievementToast />
       <AchievementsModal

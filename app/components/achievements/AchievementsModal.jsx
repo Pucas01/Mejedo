@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import { useAchievements, ACHIEVEMENTS } from "../../hooks/useAchievements";
 import WindowDecoration from "../window/WindowDecoration.jsx";
+import { useTheme } from '../../hooks/useTheme';
 
 export default function AchievementsModal({ show, onClose }) {
   const { unlockedAchievements, unlockedCount, totalCount } = useAchievements();
+  const { theme } = useTheme();
 
   if (!show) return null;
 
@@ -23,19 +25,19 @@ export default function AchievementsModal({ show, onClose }) {
         if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[600px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
+      <div className={`bg-[#121217] border-2 ${theme.colors.border} shadow-lg max-w-[600px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp`}>
         {/* Window Decoration */}
-        <WindowDecoration title="Achievements - trophies.txt" onClose={handleClose} />
+        <WindowDecoration title="Achievements - trophies.txt" onClose={handleClose} theme={theme.name}/>
 
         {/* Progress */}
         <div className="px-6 py-3 bg-[#090909]">
           <div className="flex justify-between text-sm mb-2">
             <span className="text-gray-400">Progress</span>
-            <span className="text-[#39ff14]">{unlockedCount}/{totalCount}</span>
+            <span className={theme.colors.text}>{unlockedCount}/{totalCount}</span>
           </div>
-          <div className="h-2 bg-[#39ff14]/20 overflow-hidden">
+          <div className={`h-2 ${theme.colors.bg}/20 overflow-hidden`}>
             <div
-              className="h-full bg-[#39ff14] transition-all duration-500"
+              className={`h-full ${theme.colors.bg} transition-all duration-500`}
               style={{ width: `${(unlockedCount / totalCount) * 100}%` }}
             />
           </div>
@@ -47,14 +49,14 @@ export default function AchievementsModal({ show, onClose }) {
           {unlockedList.map((achievement) => (
             <div
               key={achievement.id}
-              className="flex items-center gap-4 p-3 border border-[#39ff14] bg-[#39ff14]/5"
+              className={`flex items-center gap-4 p-3 border ${theme.colors.border} ${theme.colors.bg}/10`}
             >
               <div className="text-2xl w-10 text-center">{achievement.icon}</div>
               <div className="flex-1">
-                <div className="text-[#39ff14] font-bold">{achievement.name}</div>
+                <div className={`${theme.colors.text} font-bold`}>{achievement.name}</div>
                 <div className="text-gray-400 text-sm">{achievement.description}</div>
               </div>
-              <div className="text-[#39ff14]"></div>
+              <div className={theme.colors.text}></div>
             </div>
           ))}
 
@@ -81,7 +83,7 @@ export default function AchievementsModal({ show, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 bg-[#090909] border-t border-[#39ff14]/30 text-center text-gray-500 text-sm">
+        <div className={`px-6 py-3 bg-[#090909] border-t ${theme.colors.border}/30 text-center text-gray-500 text-sm`}>
           Dude lock the fuck in and get those achievements!
         </div>
       </div>
