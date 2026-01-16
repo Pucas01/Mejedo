@@ -123,6 +123,13 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: false,
   },
+  miku_fan: {
+    id: "miku_fan",
+    name: "Hatsune Miku Enthusiast",
+    description: "Im singing miku miku",
+    icon: "",
+    hidden: false,
+  },
   // Hidden achievements
   konami_master: {
     id: "konami_master",
@@ -202,6 +209,7 @@ export function AchievementProvider({ children }) {
     scoredPongPoint: false,
     watchedAdoPerformance: false,
     scrolledAdoTimeline: false,
+    viewedMikuProfile: false,
   });
   const [pendingAchievement, setPendingAchievement] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -419,6 +427,13 @@ export function AchievementProvider({ children }) {
 
         // Check for timeline scroller achievement
         setTimeout(() => unlockRef.current?.("timeline_scroller"), 500);
+      }
+
+      if (key === "viewedMikuProfile") {
+        updated.viewedMikuProfile = true;
+
+        // Check for miku fan achievement
+        setTimeout(() => unlockRef.current?.("miku_fan"), 500);
       }
 
       return updated;

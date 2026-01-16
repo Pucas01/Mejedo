@@ -5,11 +5,13 @@ import WindowDecoration from "../window/WindowDecoration.jsx";
 import Button from "../ui/Button";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
+import { useTheme } from "../../hooks/useTheme";
 import ToursTimeline from "./ToursTimeline.jsx";
 import Awards from "./Awards.jsx";
 import Discography from "./Discography.jsx";
 
-export default function Ado() {
+export default function AdoContent({ idol }) {
+  const { theme } = useTheme();
   const [infoCmd, setInfoCmd] = useState("");
   const [doneInfo, setDoneInfo] = useState(false);
   const [performancesCmd, setPerformancesCmd] = useState("");
@@ -182,10 +184,10 @@ export default function Ado() {
 
 
   return (
-    <div className="flex flex-col gap-4 p-4 text-xl min-h-screen text-white justify-start">
+    <div className="flex flex-col gap-4 text-xl min-h-screen text-white justify-start">
       {/* Info terminal */}
       <div ref={infoRef} className="bg-[#121217] min-h-[540px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
-        <WindowDecoration title="Ado - info.txt" showControls={true} theme="ado" />
+        <WindowDecoration title="Ado - info.txt" showControls={true} theme={theme.name} />
         <div className="p-8 flex-1 relative">
           {doneInfo && (
             <div
@@ -267,7 +269,7 @@ export default function Ado() {
 
       {/* Performances section */}
       <div ref={performancesRef} className="bg-[#121217] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
-          <WindowDecoration title="Ado - ~/performances" showControls={true} theme="ado" />
+          <WindowDecoration title="Ado - ~/performances" showControls={true} theme={theme.name} />
           <div className="p-8 flex-1 relative">
             {!donePerformances && (
               <div className="text-xl flex flex-wrap">
@@ -431,7 +433,7 @@ export default function Ado() {
                           <WindowDecoration
                             title={selectedVideo.title}
                             showControls={true}
-                            theme="ado"
+                            theme={theme.name}
                             onClose={() => setSelectedVideo(null)}
                           />
                           <div className="p-4">

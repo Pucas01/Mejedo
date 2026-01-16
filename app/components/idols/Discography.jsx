@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import WindowDecoration from "../window/WindowDecoration.jsx";
 import Button from "../ui/Button";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
+import { useTheme } from "../../hooks/useTheme";
 
-export default function Discography() {
+export default function Discography({ idolId = "ado" }) {
+  const { theme } = useTheme();
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
   const [discographyCmd, setDiscographyCmd] = useState("");
@@ -19,25 +21,39 @@ export default function Discography() {
   const discographyRef = useRef(null);
   const [discographyInView, setDiscographyInView] = useState(false);
 
-  const discographyCommand = "ls -la ~/ado/discography/";
+  const discographyCommand = `ls -la ~/${idolId}/discography/`;
+
+  // Get theme color based on idol
+  const themeColor = idolId === "miku" ? "#39c5bb" : "#4169e1";
+  const themeName = idolId === "miku" ? "miku" : "ado";
 
   // Fetch discography from API
   const fetchDiscography = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/ado-discography");
+      const res = await fetch(`/api/${idolId}-discography`);
       const data = await res.json();
-      setAlbums(data);
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setAlbums(data);
+      } else {
+        console.error("Invalid discography data:", data);
+        setAlbums([]);
+      }
     } catch (err) {
       console.error("Failed to load discography:", err);
+      setAlbums([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    setAlbums([]); // Reset albums when idol changes
+    setDoneDiscography(false); // Reset animation
+    setDiscographyInView(false); // Reset intersection observer
     fetchDiscography();
-  }, []);
+  }, [idolId]);
 
   // Intersection observer for typing animation
   useEffect(() => {
@@ -88,7 +104,7 @@ export default function Discography() {
 
     setRefreshing(true);
     try {
-      const res = await fetch("/api/ado-discography/refresh", {
+      const res = await fetch(`/api/${idolId}-discography/refresh`, {
         method: "POST",
         credentials: "include",
       });
@@ -121,12 +137,12 @@ export default function Discography() {
   const displayedAlbums = expanded ? filteredAlbums : filteredAlbums.slice(0, displayLimit);
 
   return (
-    <div ref={discographyRef} className="bg-[#121217] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
-      <WindowDecoration title="Ado - ~/discography" showControls={true} theme="ado" />
+    <div ref={discographyRef} className="bg-[#121217] border-2 shadow-lg relative flex flex-col overflow-hidden" style={{ borderColor: themeColor, '--theme-color': themeColor }}>
+      <WindowDecoration title={`${idolId.charAt(0).toUpperCase() + idolId.slice(1)} - ~/discography`} showControls={true} theme={theme.name} />
       <div className="p-8 flex-1 relative">
         {!doneDiscography && (
           <div className="text-xl flex flex-wrap">
-            <span className="text-[#4169e1]">pucas01</span>
+            <span style={{ color: themeColor }}>pucas01</span>
             <span className="text-white">@</span>
             <span className="text-[#D73DA3]">PucasArch</span>
             <span className="text-white">:</span>
@@ -139,12 +155,12 @@ export default function Discography() {
         {doneDiscography && (
           <div className="space-y-6">
             <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-              <header className="text-2xl text-[#4169e1] font-bold">
+              <header className="text-2xl text-[var(--theme-color)] font-bold">
                 Discography
               </header>
               <div className="flex gap-2 items-center flex-wrap">
                 {/* Filter buttons */}
-                <div className="flex gap-1 border border-[#4169e1]/30 p-1">
+                <div className="flex gap-1 border border-[var(--theme-color)]/30 p-1">
                   <Button
                     variant={filter === "all" ? "primary" : "default"}
                     size="sm"
@@ -184,7 +200,7 @@ export default function Discography() {
             {loading ? (
               <div className="flex items-center justify-center h-64 text-white">
                 <div className="flex flex-col items-center gap-2">
-                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#4169e1]"></div>
+                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[var(--theme-color)]"></div>
                   <p className="text-sm">Loading discography...</p>
                 </div>
               </div>
@@ -202,7 +218,7 @@ export default function Discography() {
                       href={album.spotifyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group bg-[#1a1a1f] border border-[#4169e1]/20 hover:border-[#4169e1] transition-all flex flex-col"
+                      className="group bg-[#1a1a1f] border border-[var(--theme-color)]/20 hover:border-[var(--theme-color)] transition-all flex flex-col"
                     >
                       {/* Album Cover */}
                       <div className="aspect-square bg-black relative overflow-hidden">
@@ -218,7 +234,7 @@ export default function Discography() {
                           </div>
                         )}
                         {/* Type badge */}
-                        <div className="absolute top-1 right-1 bg-[#4169e1]/90 px-1.5 py-0.5 flex items-center justify-center">
+                        <div className="absolute top-1 right-1 bg-[var(--theme-color)]/90 px-1.5 py-0.5 flex items-center justify-center">
                           <span className="text-white text-[10px] font-bold uppercase text-center">
                             {album.type === "album" ? "Album" : "Single"}
                           </span>
@@ -227,7 +243,7 @@ export default function Discography() {
 
                       {/* Album Info */}
                       <div className="p-2 flex-1 flex flex-col items-center text-center">
-                        <h4 className="text-[#4169e1] text-xs font-bold line-clamp-2 group-hover:text-white transition-colors mb-1">
+                        <h4 className="text-[var(--theme-color)] text-xs font-bold line-clamp-2 group-hover:text-white transition-colors mb-1">
                           {album.name}
                         </h4>
                         <p className="text-gray-500 text-[10px]">
@@ -254,14 +270,14 @@ export default function Discography() {
             )}
 
             {/* Spotify Attribution */}
-            <div className="border-t border-[#4169e1]/30 pt-4 mt-6">
+            <div className="border-t border-[var(--theme-color)]/30 pt-4 mt-6">
               <p className="text-gray-500 text-xs">
                 Discography powered by{" "}
                 <a
                   href="https://open.spotify.com/artist/6mEQK9m2krja6X1cfsAjfl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#4169e1] hover:underline"
+                  className="text-[var(--theme-color)] hover:underline"
                 >
                   Spotify
                 </a>

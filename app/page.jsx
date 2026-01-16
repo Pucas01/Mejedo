@@ -20,7 +20,8 @@ const pageComponents = {
   "/collection": dynamic(() => import("./components/collection/collection.jsx")),
   "/webring": dynamic(() => import("./components/webring/webring.jsx")),
   "/buttons": dynamic(() => import("./components/buttons/buttons.jsx")),
-  "/ado": dynamic(() => import("./components/ado/ado.jsx")),
+  "/ado": dynamic(() => import("./components/idols/idols.jsx")),
+  "/idols": dynamic(() => import("./components/idols/idols.jsx")),
 };
 
 // Import functions for preloading
@@ -34,7 +35,8 @@ const pageImports = {
   "/collection": () => import("./components/collection/collection.jsx"),
   "/webring": () => import("./components/webring/webring.jsx"),
   "/buttons": () => import("./components/buttons/buttons.jsx"),
-  "/ado": () => import("./components/ado/ado.jsx"),
+  "/ado": () => import("./components/idols/idols.jsx"),
+  "/idols": () => import("./components/idols/idols.jsx"),
 };
 
 const FutabaOverlay = dynamic(() => import("./components/easteregg/futaba.jsx"));
@@ -304,20 +306,23 @@ function PageContent() {
       <nav className={`flex justify-center bg-[#090909] border-b-2 ${theme.colors.border} py-4`}>
         <div className="inline-flex flex-wrap justify-center gap-6 custom-dash pb-2">
           {["/about", "/projects", "/blog", "/collection", "/shitposts", "/guestbook", "/webring", "/buttons", "/ado", "/admin"].map(
-            (page) => (
-              <button
-                key={page}
-                onClick={() => NavClick(page)}
-                onMouseEnter={() => handleMouseEnter(page)}
-                className={`tracking-wide text-2xl px-2 cursor-pointer ${
-                  active === page
-                    ? `${theme.colors.text} border-b-1 ${theme.colors.border}`
-                    : `text-gray-400 ${theme.colors.hover}`
-                } ${popping === page ? "animate-pulse" : ""}`}
-              >
-                {page}
-              </button>
-            )
+            (page) => {
+              const pageLabel = page === "/ado" ? "/idols" : page;
+              return (
+                <button
+                  key={page}
+                  onClick={() => NavClick(page)}
+                  onMouseEnter={() => handleMouseEnter(page)}
+                  className={`tracking-wide text-2xl px-2 cursor-pointer ${
+                    active === page
+                      ? `${theme.colors.text} border-b-1 ${theme.colors.border}`
+                      : `text-gray-400 ${theme.colors.hover}`
+                  } ${popping === page ? "animate-pulse" : ""}`}
+                >
+                  {pageLabel}
+                </button>
+              );
+            }
           )}
         </div>
       </nav>

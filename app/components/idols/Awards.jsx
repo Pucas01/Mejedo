@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import WindowDecoration from "../window/WindowDecoration.jsx";
 import Button from "../ui/Button";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
+import { useTheme } from "../../hooks/useTheme";
 
 export default function Awards() {
+  const { theme } = useTheme();
   const [awards, setAwards] = useState([]);
   const [editingAward, setEditingAward] = useState(null);
   const [awardsCmd, setAwardsCmd] = useState("");
@@ -188,7 +190,7 @@ export default function Awards() {
 
   return (
     <div ref={awardsRef} className="bg-[#121217] min-h-[800px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
-      <WindowDecoration title="Ado - ~/awards" showControls={true} theme="ado" />
+      <WindowDecoration title="Ado - ~/awards" showControls={true} theme={theme.name} />
       <div className="p-8 flex-1 relative">
         {!doneAwards && (
           <div className="text-xl flex flex-wrap">

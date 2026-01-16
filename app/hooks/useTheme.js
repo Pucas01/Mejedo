@@ -45,11 +45,32 @@ export const themes = {
       activeShadow: "active:shadow-[inset_-1px_-1px_0_0_#8aaffa,inset_1px_1px_0_0_#1a3f74]",
     },
   },
+  miku: {
+    name: "miku",
+    colors: {
+      primary: "#39c5bb",      // Teal/cyan
+      border: "border-[#39c5bb]",
+      text: "text-[#39c5bb]",
+      hover: "hover:text-[#39c5bb]",
+      bg: "bg-[#39c5bb]",
+    },
+    button: {
+      gradient: "bg-gradient-to-b from-[#4ac5bb] to-[#2aa59b]",
+      hover: "hover:from-[#5ad5cb] hover:to-[#3ab5ab]",
+      borderTop: "border-t-[#6ae5db] border-l-[#6ae5db]",
+      borderBottom: "border-r-[#1a958b] border-b-[#1a958b]",
+      shadow: "shadow-[inset_1px_1px_0_0_#7af5eb,inset_-1px_-1px_0_0_#0a857b]",
+      activeTop: "active:border-t-[#1a958b] active:border-l-[#1a958b]",
+      activeBottom: "active:border-r-[#6ae5db] active:border-b-[#6ae5db]",
+      activeShadow: "active:shadow-[inset_-1px_-1px_0_0_#7af5eb,inset_1px_1px_0_0_#0a857b]",
+    },
+  },
 };
 
 const ThemeContext = createContext({
   theme: themes.futaba,
   themeName: "futaba",
+  setThemeName: () => {},
 });
 
 export function ThemeProvider({ children }) {
@@ -58,8 +79,8 @@ export function ThemeProvider({ children }) {
 
   // Automatically set theme based on current page
   useEffect(() => {
-    // Check if we're on the Ado page
-    if (pathname === "/ado") {
+    // Check if we're on the Idols page (previously Ado)
+    if (pathname === "/ado" || pathname === "/idols") {
       setThemeName("ado");
     } else {
       setThemeName("futaba");
@@ -94,6 +115,19 @@ export function ThemeProvider({ children }) {
         thumbHoverMid: '#6a8fd4',
         thumbHoverEnd: '#5a7fc4',
         progressFill: '#4a6fb4'
+      },
+      miku: {
+        thumbGradientStart: '#5ad5cb',
+        thumbGradientMid: '#4ac5bb',
+        thumbGradientEnd: '#3ab5ab',
+        thumbBorderLight: '#6ae5db',
+        thumbBorderDark: '#1a958b',
+        thumbShadowLight: '#7af5eb',
+        thumbShadowDark: '#0a857b',
+        thumbHoverStart: '#6ae5db',
+        thumbHoverMid: '#5ad5cb',
+        thumbHoverEnd: '#4ac5bb',
+        progressFill: '#3ab5ab'
       }
     };
 
@@ -116,7 +150,7 @@ export function ThemeProvider({ children }) {
   const theme = themes[themeName] || themes.futaba;
 
   return (
-    <ThemeContext.Provider value={{ theme, themeName }}>
+    <ThemeContext.Provider value={{ theme, themeName, setThemeName }}>
       {children}
     </ThemeContext.Provider>
   );

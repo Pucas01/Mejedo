@@ -11,6 +11,10 @@ const themes = {
     border: "border-[#4169e1]",
     text: "text-[#4169e1]",
   },
+  miku: {
+    border: "border-[#39c5bb]",
+    text: "text-[#39c5bb]",
+  },
 };
 
 export default function WindowDecoration({

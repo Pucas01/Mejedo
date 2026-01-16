@@ -5,8 +5,10 @@ import WindowDecoration from "../window/WindowDecoration.jsx";
 import Button from "../ui/Button";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
+import { useTheme } from "../../hooks/useTheme";
 
 export default function ToursTimeline() {
+  const { theme } = useTheme();
   const [tours, setTours] = useState([]);
   const [editingTour, setEditingTour] = useState(null);
   const [toursCmd, setToursCmd] = useState("");
@@ -276,7 +278,7 @@ export default function ToursTimeline() {
 
   return (
     <div ref={toursRef} className="bg-[#121217] min-h-[370px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
-      <WindowDecoration title="Ado - ~/tours" showControls={true} theme="ado" />
+      <WindowDecoration title="Ado - ~/tours" showControls={true} theme={theme.name} />
       <div className="p-8 flex-1 relative">
         {!doneTours && (
           <div className="text-xl flex flex-wrap">
@@ -454,18 +456,18 @@ export default function ToursTimeline() {
 
                           {/* Venue & Location */}
                           {tour.venue && (
-                            <p className="text-gray-300 text-xs flex items-start gap-1">
+                            <p className="text-white text-xs flex items-start gap-1">
                               <span className="text-[#4169e1]">📍</span>
                               <span>{tour.venue}</span>
                             </p>
                           )}
                           {tour.location && (
-                            <p className="text-gray-400 text-xs ml-4">{tour.location}</p>
+                            <p className="text-gray-300 text-xs ml-4">{tour.location}</p>
                           )}
 
                           {/* Notes */}
                           {tour.notes && (
-                            <p className="text-gray-400 text-xs mt-2 italic border-l-2 border-[#4169e1]/30 pl-2">
+                            <p className="text-gray-300 text-xs mt-2 italic border-l-2 border-[#4169e1]/30 pl-2">
                               {tour.notes}
                             </p>
                           )}
