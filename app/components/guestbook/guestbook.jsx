@@ -43,7 +43,7 @@ export default function GuestBook() {
     const url = isAdmin ? "/api/guestbook/admin" : "/api/guestbook";
     const res = await fetch(url);
     const data = await res.json();
-    setMessages(data.reverse());
+    setMessages(data);
   };
 
   useEffect(() => {
