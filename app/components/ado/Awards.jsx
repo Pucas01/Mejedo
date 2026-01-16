@@ -187,7 +187,7 @@ export default function Awards() {
   const years = Object.keys(awardsByYear).sort((a, b) => b - a);
 
   return (
-    <div ref={awardsRef} className="bg-[#121217] min-h-[400px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
+    <div ref={awardsRef} className="bg-[#121217] min-h-[800px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
       <WindowDecoration title="Ado - ~/awards" showControls={true} theme="ado" />
       <div className="p-8 flex-1 relative">
         {!doneAwards && (

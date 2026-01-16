@@ -4,6 +4,10 @@ process.env.FORCE_COLOR = '3';
 process.env.COLORTERM = 'truecolor';
 process.env.TERM = 'xterm-256color';
 
+// Suppress GLib warnings from image processing libraries
+process.env.G_MESSAGES_DEBUG = '';
+process.env.VIPS_WARNING = '0';
+
 import express from "express";
 import spotifyRoute from "./routes/spotify.js"
 import nintendoRoute from "./routes/nintendo.js"
@@ -26,6 +30,7 @@ import adoToursRoute from "./routes/ado-tours.js"
 import adoToursScraperRoute from "./routes/ado-tours-scraper.js"
 import adoAwardsRoute from "./routes/ado-awards.js"
 import adoAwardsScraperRoute from "./routes/ado-awards-scraper.js"
+import adoDiscographyRoute from "./routes/ado-discography.js"
 import requireAuth from "./authMiddleware.js"
 import session from "express-session"
 import cors from "cors";
@@ -79,6 +84,7 @@ app.use("/api/ado-tours", adoToursRoute);
 app.use("/api/ado-tours-scraper", adoToursScraperRoute);
 app.use("/api/ado-awards", adoAwardsRoute);
 app.use("/api/ado-awards-scraper", adoAwardsScraperRoute);
+app.use("/api/ado-discography", adoDiscographyRoute);
 
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 

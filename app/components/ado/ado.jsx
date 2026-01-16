@@ -7,6 +7,7 @@ import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
 import ToursTimeline from "./ToursTimeline.jsx";
 import Awards from "./Awards.jsx";
+import Discography from "./Discography.jsx";
 
 export default function Ado() {
   const [infoCmd, setInfoCmd] = useState("");
@@ -260,6 +261,9 @@ export default function Ado() {
 
       {/* Awards component */}
       <Awards />
+
+      {/* Discography component */}
+      <Discography />
 
       {/* Performances section */}
       <div ref={performancesRef} className="bg-[#121217] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
