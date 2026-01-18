@@ -2,22 +2,103 @@ import express from "express"
 import bcrypt from "bcryptjs"
 import {db} from "../dbHelper.js"
 import requireAuth from "../authMiddleware.js"
+import fs from "fs"
+import path from "path"
+
 const router = express.Router();
-const SALT_ROUNDS = 10; 
+const SALT_ROUNDS = 10;
+const DISCORD_CONFIG_FILE = path.join(process.cwd(), "config", "discord-webhook.json");
 
 // This is some reused user code from another project
+
+// Discord notification for failed login
+const sendFailedLoginNotification = async (username, password, ip) => {
+  try {
+    if (!fs.existsSync(DISCORD_CONFIG_FILE)) {
+      return;
+    }
+
+    const config = JSON.parse(fs.readFileSync(DISCORD_CONFIG_FILE));
+    if (!config.webhookUrl || !config.enabled) {
+      return;
+    }
+
+    const embed = {
+      title: "Failed Login Attempt",
+      color: 0xff6b6b, // Red/orange
+      fields: [
+        {
+          name: "Username Attempted",
+          value: username || "N/A",
+          inline: true
+        },
+        {
+          name: "Password Attempted",
+          value: password ? `\`${password}\`` : "N/A",
+          inline: true
+        },
+        {
+          name: "IP Address",
+          value: ip || "Unknown",
+          inline: false
+        },
+        {
+          name: "Timestamp",
+          value: new Date().toLocaleString(),
+          inline: true
+        }
+      ],
+      footer: {
+        text: "Security Alert • Login Failed"
+      }
+    };
+
+    await fetch(config.webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        content: config.userId ? `<@${config.userId}>` : undefined,
+        username: "PucasBot Security",
+        avatar_url: "https://galaxypfp.com/wp-content/uploads/2025/10/futaba-pfp.webp",
+        embeds: [embed]
+      })
+    });
+
+    console.log("Discord failed login notification sent successfully");
+  } catch (error) {
+    console.error("Failed to send Discord login notification:", error.message);
+  }
+};
 
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
   if (!username || !password)
     return res.status(400).json({ error: "Username and password required" });
 
+  // Get IP address
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
   db.get("SELECT * FROM users WHERE username = ?", [username], async (err, user) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!user) return res.status(401).json({ error: "Invalid username or password" });
+
+    if (!user) {
+      // Send notification for non-existent user
+      sendFailedLoginNotification(username, password, ip).catch(err =>
+        console.error("Discord failed login notification error:", err)
+      );
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ error: "Invalid username or password" });
+    if (!match) {
+      // Send notification for wrong password
+      sendFailedLoginNotification(username, password, ip).catch(err =>
+        console.error("Discord failed login notification error:", err)
+      );
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
 
     req.session.user = { id: user.id, username: user.username, role: user.role };
     res.json({ success: true, user: req.session.user });
