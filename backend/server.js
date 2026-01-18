@@ -33,15 +33,35 @@ import adoAwardsScraperRoute from "./routes/ado-awards-scraper.js"
 import adoDiscographyRoute from "./routes/ado-discography.js"
 import mikuDiscographyRoute from "./routes/miku-discography.js"
 import hoyolabRoute from "./routes/hoyolab.js"
+import discordWebhookConfigRoute from "./routes/discord-webhook-config.js"
 import requireAuth from "./authMiddleware.js"
 import session from "express-session"
 import cors from "cors";
 import * as crypto from 'crypto';
 import { fileURLToPath } from "url";
 import path from "path";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Initialize config directory and files
+const CONFIG_DIR = path.join(process.cwd(), "config");
+if (!fs.existsSync(CONFIG_DIR)) {
+  fs.mkdirSync(CONFIG_DIR, { recursive: true });
+}
+
+// Create discord-webhook.json if it doesn't exist
+const DISCORD_WEBHOOK_FILE = path.join(CONFIG_DIR, "discord-webhook.json");
+if (!fs.existsSync(DISCORD_WEBHOOK_FILE)) {
+  const defaultConfig = {
+    webhookUrl: "",
+    userId: "",
+    enabled: false
+  };
+  fs.writeFileSync(DISCORD_WEBHOOK_FILE, JSON.stringify(defaultConfig, null, 2));
+  console.log("Created default discord-webhook.json config file");
+}
 
 const SESSION_SECRET = crypto.randomBytes(64).toString("hex");
 const PORT = 4000
@@ -89,6 +109,7 @@ app.use("/api/ado-awards-scraper", adoAwardsScraperRoute);
 app.use("/api/ado-discography", adoDiscographyRoute);
 app.use("/api/miku-discography", mikuDiscographyRoute);
 app.use("/api/hoyolab", hoyolabRoute);
+app.use("/api/discord-webhook-config", requireAuth, discordWebhookConfigRoute);
 
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 

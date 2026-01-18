@@ -5,8 +5,8 @@ import path from "path";
 import requireAuth from "../authMiddleware.js";
 
 const router = express.Router();
-const DATA_FILE = path.join(process.cwd(), "backend", "config", "hoyolab.json");
-const CONFIG_DIR = path.join(process.cwd(), "backend", "config");
+const DATA_FILE = path.join(process.cwd(), "config", "hoyolab.json");
+const CONFIG_DIR = path.join(process.cwd(), "config");
 
 // Ensure config directory exists
 if (!fs.existsSync(CONFIG_DIR)) {

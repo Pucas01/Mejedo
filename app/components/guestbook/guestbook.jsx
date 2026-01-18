@@ -16,6 +16,10 @@ export default function GuestBook() {
   const [website, setWebsite] = useState("");
   const [message, setMessage] = useState("");
   const [replyText, setReplyText] = useState({});
+  const [discordWebhookUrl, setDiscordWebhookUrl] = useState("");
+  const [discordUserId, setDiscordUserId] = useState("");
+  const [discordEnabled, setDiscordEnabled] = useState(false);
+  const [showDiscordSettings, setShowDiscordSettings] = useState(false);
 
   const ensureProtocol = (url) => {
     if (!url) return url;
@@ -52,7 +56,46 @@ export default function GuestBook() {
 
   useEffect(() => {
     fetchMessages();
+    if (isAdmin) {
+      fetchDiscordConfig();
+    }
   }, [isAdmin]);
+
+  const fetchDiscordConfig = async () => {
+    try {
+      const res = await fetch("/api/discord-webhook-config");
+      if (res.ok) {
+        const data = await res.json();
+        setDiscordWebhookUrl(data.webhookUrl || "");
+        setDiscordUserId(data.userId || "");
+        setDiscordEnabled(data.enabled || false);
+      }
+    } catch (err) {
+      console.error("Failed to fetch Discord config:", err);
+    }
+  };
+
+  const saveDiscordConfig = async () => {
+    try {
+      const res = await fetch("/api/discord-webhook-config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          webhookUrl: discordWebhookUrl,
+          userId: discordUserId,
+          enabled: discordEnabled
+        }),
+      });
+      if (res.ok) {
+        alert("Discord webhook settings saved!");
+      } else {
+        alert("Failed to save Discord webhook settings");
+      }
+    } catch (err) {
+      console.error("Failed to save Discord config:", err);
+      alert("Error saving Discord webhook settings");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -101,6 +144,74 @@ export default function GuestBook() {
 
   return (
     <div className="flex flex-col p-4 gap-4 text-xl font-jetbrains">
+
+      {isAdmin && (
+        <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
+          <WindowDecoration title="Kitty - Discord-Webhook-Config.json" showControls={true} />
+          <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-[#39ff14] font-bold">Discord Webhook Settings</p>
+              <Button
+                onClick={() => setShowDiscordSettings(!showDiscordSettings)}
+                variant="primary"
+                size="sm"
+              >
+                {showDiscordSettings ? "Hide" : "Show"}
+              </Button>
+            </div>
+
+            {showDiscordSettings && (
+              <div className="space-y-3">
+                <div className="flex flex-col gap-2">
+                  <label className="text-white text-sm">Webhook URL:</label>
+                  <input
+                    type="text"
+                    value={discordWebhookUrl}
+                    onChange={(e) => setDiscordWebhookUrl(e.target.value)}
+                    placeholder="https://discord.com/api/webhooks/..."
+                    className="bg-[#121217] border border-[#39ff14] px-2 py-1 text-sm"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-white text-sm">Your Discord User ID (for ping):</label>
+                  <input
+                    type="text"
+                    value={discordUserId}
+                    onChange={(e) => setDiscordUserId(e.target.value)}
+                    placeholder="123456789012345678"
+                    className="bg-[#121217] border border-[#39ff14] px-2 py-1 text-sm"
+                  />
+                  <p className="text-gray-400 text-xs">
+                    Enable Developer Mode in Discord, right-click your name, and select "Copy User ID"
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="discordEnabled"
+                    checked={discordEnabled}
+                    onChange={(e) => setDiscordEnabled(e.target.checked)}
+                    className="accent-[#39ff14]"
+                  />
+                  <label htmlFor="discordEnabled" className="text-white text-sm">
+                    Enable Discord notifications
+                  </label>
+                </div>
+
+                <Button onClick={saveDiscordConfig} variant="primary" size="sm">
+                  Save Settings
+                </Button>
+
+                <p className="text-gray-400 text-xs mt-2">
+                  Get notified in Discord when someone posts to the guestbook
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 min-w-[400px] bg-[#121217] border-2 border-[#39ff14] shadow-lg flex flex-col relative">
         <WindowDecoration title="Kitty - docs.pucas01.com" showControls={true} />
