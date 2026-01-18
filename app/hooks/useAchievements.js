@@ -128,6 +128,13 @@ export const ACHIEVEMENTS = {
     icon: "",
     hidden: false,
   },
+  zzz_viewer: {
+    id: "zzz_viewer",
+    name: "Zenless Zero Zone",
+    description: "View my ZZZ stats????",
+    icon: "",
+    hidden: false,
+  },
   konami_master: {
     id: "konami_master",
     name: "Konami Code",
@@ -206,6 +213,7 @@ export function AchievementProvider({ children }) {
     watchedAdoPerformance: false,
     scrolledAdoTimeline: false,
     viewedMikuProfile: false,
+    viewedZZZStats: false,
   });
   const [pendingAchievement, setPendingAchievement] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -403,6 +411,12 @@ export function AchievementProvider({ children }) {
         updated.viewedMikuProfile = true;
 
         setTimeout(() => unlockRef.current?.("miku_fan"), 500);
+      }
+
+      if (key === "viewedZZZStats") {
+        updated.viewedZZZStats = true;
+
+        setTimeout(() => unlockRef.current?.("zzz_viewer"), 500);
       }
 
       return updated;
