@@ -8,6 +8,7 @@ const availableWidgets = [
   { type: 'youtube', name: 'Teto Mix', icon: '', description: 'Watch YouTube videos' },
   { type: 'pong', name: 'Pong', icon: '', description: 'Classic Pong game' },
   { type: 'rhythm', name: 'Rhythm Game', icon: '🎵', description: 'FNF-style rhythm game' },
+  { type: 'hoyolab', name: 'HoYoLab - ZZZ', icon: '🎮', description: 'Zenless Zone Zero stats' },
 ];
 
 export default function WidgetMenu() {

@@ -32,6 +32,7 @@ import adoAwardsRoute from "./routes/ado-awards.js"
 import adoAwardsScraperRoute from "./routes/ado-awards-scraper.js"
 import adoDiscographyRoute from "./routes/ado-discography.js"
 import mikuDiscographyRoute from "./routes/miku-discography.js"
+import hoyolabRoute from "./routes/hoyolab.js"
 import requireAuth from "./authMiddleware.js"
 import session from "express-session"
 import cors from "cors";
@@ -87,6 +88,7 @@ app.use("/api/ado-awards", adoAwardsRoute);
 app.use("/api/ado-awards-scraper", adoAwardsScraperRoute);
 app.use("/api/ado-discography", adoDiscographyRoute);
 app.use("/api/miku-discography", mikuDiscographyRoute);
+app.use("/api/hoyolab", hoyolabRoute);
 
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 

@@ -33,6 +33,9 @@ function WidgetWindow({ widget }) {
       } else if (widget.type === 'rhythm') {
         const module = await import('./widgets/RhythmGameWidget');
         setWidgetContent(() => module.default);
+      } else if (widget.type === 'hoyolab') {
+        const module = await import('./widgets/HoYoLabWidget');
+        setWidgetContent(() => module.default);
       }
     }
     loadWidget();
@@ -104,6 +107,8 @@ function WidgetWindow({ widget }) {
         return 'Pong';
       case 'rhythm':
         return 'Rhythm Game';
+      case 'hoyolab':
+        return 'HoYoLab - ZZZ';
       default:
         return 'Widget';
     }

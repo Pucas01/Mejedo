@@ -39,7 +39,7 @@ In 2022, her song "New Genesis" was used as the theme song for the anime film On
 Miku's popularity has resulted in her involvement in commercial advertising campaigns and the release of various themed merchandise. Her music has been used in multiple rhythm games and she has been featured in concerts as a projected hologram. Hatsune Miku has become a cultural phenomenon, inspiring countless songs, artworks, and performances worldwide.`,
     externalLinks: [
       { name: "Official Site", url: "https://ec.crypton.co.jp/pages/prod/virtualsinger/cv01" },
-      { name: "Spotify", url: "https://open.spotify.com/artist/4oslVJbo2HrGQzz8m3z4bm" },
+      { name: "Spotify", url: "https://open.spotify.com/artist/6pNgnvzBa6Bthsv8SrZJYl?si=092271bcd88b431f" },
       { name: "Twitter", url: "https://twitter.com/cfm_miku" },
     ],
     backgroundImage: "/miku/miku.webp",

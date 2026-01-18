@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import WindowDecoration from "../window/WindowDecoration.jsx";
 import Button from "../ui/Button";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
@@ -183,10 +184,53 @@ export default function AdoContent({ idol }) {
   }, [doneInfo, performancesInView]);
 
 
+  // Render modal using portal
+  const modalContent = selectedVideo && typeof document !== 'undefined' && createPortal(
+    <div
+      className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-fadeIn"
+      onClick={() => setSelectedVideo(null)}
+    >
+      <div
+        className="bg-[#121217] border-2 border-[#4169e1] max-w-5xl w-full animate-slideUp"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <WindowDecoration
+          title={selectedVideo.title}
+          showControls={true}
+          theme={theme.name}
+          onClose={() => setSelectedVideo(null)}
+        />
+        <div className="p-4">
+          <div className="aspect-video bg-black">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${selectedVideo.videoId}?autoplay=1`}
+              title={selectedVideo.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+          <div className="mt-4 text-gray-300">
+            <p className="text-lg">{selectedVideo.description}</p>
+            <p className="text-sm text-gray-500 mt-2">Released: {selectedVideo.year}</p>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+
   return (
-    <div className="flex flex-col gap-4 text-xl min-h-screen text-white justify-start">
-      {/* Info terminal */}
-      <div ref={infoRef} className="bg-[#121217] min-h-[540px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
+    <>
+      {/* Video player modal - rendered via portal to document.body */}
+      {modalContent}
+
+      <div className="flex flex-col gap-4 text-xl min-h-screen text-white justify-start">
+        {/* Info terminal */}
+        <div ref={infoRef} className="bg-[#121217] min-h-[540px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
         <WindowDecoration title="Ado - info.txt" showControls={true} theme={theme.name} />
         <div className="p-8 flex-1 relative">
           {doneInfo && (
@@ -419,44 +463,6 @@ export default function AdoContent({ idol }) {
                         </div>
                       ))}
                     </div>
-
-                    {/* Video player modal */}
-                    {selectedVideo && (
-                      <div
-                        className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-fadeIn"
-                        onClick={() => setSelectedVideo(null)}
-                      >
-                        <div
-                          className="bg-[#121217] border-2 border-[#4169e1] max-w-5xl w-full animate-slideUp"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <WindowDecoration
-                            title={selectedVideo.title}
-                            showControls={true}
-                            theme={theme.name}
-                            onClose={() => setSelectedVideo(null)}
-                          />
-                          <div className="p-4">
-                            <div className="aspect-video bg-black">
-                              <iframe
-                                width="100%"
-                                height="100%"
-                                src={`https://www.youtube.com/embed/${selectedVideo.videoId}?autoplay=1`}
-                                title={selectedVideo.title}
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                                className="w-full h-full"
-                              />
-                            </div>
-                            <div className="mt-4 text-gray-300">
-                              <p className="text-lg">{selectedVideo.description}</p>
-                              <p className="text-sm text-gray-500 mt-2">Released: {selectedVideo.year}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </>
                 )}
 
@@ -503,6 +509,7 @@ export default function AdoContent({ idol }) {
             )}
           </div>
         </div>
-    </div>
+      </div>
+    </>
   );
 }
