@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const router = express.Router();
-const MUSIC_DIR = path.join(__dirname, "../../public/uploads/music");
+const MUSIC_DIR = path.join(__dirname, "../../../public/uploads/music");
 
 // Ensure music directory exists
 if (!fs.existsSync(MUSIC_DIR)) {
