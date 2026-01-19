@@ -1,15 +1,15 @@
 import express from "express";
-import { getAccessToken } from "./spotifyAuth.js";
+import { getAccessToken } from "../integrations/spotifyAuth.js";
 import fs from "fs";
 import path from "path";
 
 const router = express.Router();
 
-// Ado's Spotify Artist ID
-const ADO_ARTIST_ID = "6mEQK9m2krja6X1cfsAjfl";
+// Hatsune Miku's Spotify Artist ID
+const MIKU_ARTIST_ID = "6pNgnvzBa6Bthsv8SrZJYl";
 
 // Cache file
-const CACHE_FILE = path.join(process.cwd(), "config", "ado-discography.json");
+const CACHE_FILE = path.join(process.cwd(), "config", "miku-discography.json");
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 // Helper to read cache
@@ -40,7 +40,7 @@ function writeCache(albums) {
   }
 }
 
-// GET /api/ado-discography - Get Ado's albums from Spotify
+// GET /api/miku-discography - Get Miku's albums from Spotify
 router.get("/", async (req, res) => {
   try {
     // Check cache first
@@ -53,14 +53,15 @@ router.get("/", async (req, res) => {
 
     // Fetch albums from Spotify
     const response = await fetch(
-      `https://api.spotify.com/v1/artists/${ADO_ARTIST_ID}/albums?include_groups=album,single&market=JP&limit=50`,
+      `https://api.spotify.com/v1/artists/${MIKU_ARTIST_ID}/albums?include_groups=album,single&limit=50`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
     );
 
     if (!response.ok) {
-      throw new Error(`Spotify API error: ${response.status}`);
+      console.error(`Spotify API error for Miku (${MIKU_ARTIST_ID}): ${response.status}`);
+      return res.json([]);
     }
 
     const data = await response.json();
@@ -85,12 +86,12 @@ router.get("/", async (req, res) => {
 
     res.json(albums);
   } catch (err) {
-    console.error("Failed to fetch Ado discography:", err);
-    res.status(500).json({ error: err.message });
+    console.error("Failed to fetch Miku discography:", err);
+    res.status(500).json([]);
   }
 });
 
-// POST /api/ado-discography/refresh - Force refresh cache (admin only)
+// POST /api/miku-discography/refresh - Force refresh cache (admin only)
 router.post("/refresh", async (req, res) => {
   try {
     // Delete cache file to force refresh
@@ -102,14 +103,15 @@ router.post("/refresh", async (req, res) => {
 
     // Fetch fresh data
     const response = await fetch(
-      `https://api.spotify.com/v1/artists/${ADO_ARTIST_ID}/albums?include_groups=album,single&market=JP&limit=50`,
+      `https://api.spotify.com/v1/artists/${MIKU_ARTIST_ID}/albums?include_groups=album,single&limit=50`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
     );
 
     if (!response.ok) {
-      throw new Error(`Spotify API error: ${response.status}`);
+      console.error(`Spotify API error for Miku (${MIKU_ARTIST_ID}): ${response.status}`);
+      return res.json([]);
     }
 
     const data = await response.json();

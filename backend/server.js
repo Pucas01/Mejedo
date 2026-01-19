@@ -9,32 +9,42 @@ process.env.G_MESSAGES_DEBUG = '';
 process.env.VIPS_WARNING = '0';
 
 import express from "express";
-import spotifyRoute from "./routes/spotify.js"
-import nintendoRoute from "./routes/nintendo.js"
-import guestbook from "./routes/guestbook.js"
-import counter from "./routes/moeCounter.js"
-import users from "./routes/users.js"
-import projectsRouter from "./routes/projects.js";
-import shitpostsRouter from "./routes/shitposts.js";
-import uploadRouter from "./routes/imageUpload.js";
-import blogpostsRouter from "./routes/blogposts.js";
-import collections from "./routes/collection.js";
-import collectionsManga from "./routes/collectionManga.js"
-import versionsRoute from "./routes/versions.js"
-import discordRoute from "./routes/discord.js"
-import changelogRoute from "./routes/changelog.js"
-import musicRoute from "./routes/music.js"
-import speedrunLeaderboardRoute from "./routes/speedrunLeaderboard.js"
-import adoRoute from "./routes/ado.js"
-import adoToursRoute from "./routes/ado-tours.js"
-import adoToursScraperRoute from "./routes/ado-tours-scraper.js"
-import adoAwardsRoute from "./routes/ado-awards.js"
-import adoAwardsScraperRoute from "./routes/ado-awards-scraper.js"
-import adoDiscographyRoute from "./routes/ado-discography.js"
-import mikuDiscographyRoute from "./routes/miku-discography.js"
-import hoyolabRoute from "./routes/hoyolab.js"
-import discordWebhookConfigRoute from "./routes/discord-webhook-config.js"
+
+// Auth routes
+import users from "./routes/auth/users.js"
 import requireAuth from "./authMiddleware.js"
+
+// Content routes
+import guestbook from "./routes/content/guestbook.js"
+import projectsRouter from "./routes/content/projects.js";
+import shitpostsRouter from "./routes/content/shitposts.js";
+import blogpostsRouter from "./routes/content/blogposts.js";
+import collections from "./routes/content/collection.js";
+import collectionsManga from "./routes/content/collectionManga.js"
+import changelogRoute from "./routes/content/changelog.js"
+import speedrunLeaderboardRoute from "./routes/content/speedrunLeaderboard.js"
+
+// Integration routes
+import spotifyRoute from "./routes/integrations/spotify.js"
+import nintendoRoute from "./routes/integrations/nintendo.js"
+import discordRoute from "./routes/integrations/discord.js"
+import hoyolabRoute from "./routes/integrations/hoyolab.js"
+import discordWebhookConfigRoute from "./routes/integrations/discord-webhook-config.js"
+
+// Ado routes
+import adoRoute from "./routes/ado/ado.js"
+import adoToursRoute from "./routes/ado/ado-tours.js"
+import adoToursScraperRoute from "./routes/ado/ado-tours-scraper.js"
+import adoAwardsRoute from "./routes/ado/ado-awards.js"
+import adoAwardsScraperRoute from "./routes/ado/ado-awards-scraper.js"
+import adoDiscographyRoute from "./routes/ado/ado-discography.js"
+import mikuDiscographyRoute from "./routes/ado/miku-discography.js"
+
+// Utility routes
+import counter from "./routes/utils/moeCounter.js"
+import uploadRouter from "./routes/utils/imageUpload.js";
+import versionsRoute from "./routes/utils/versions.js"
+import musicRoute from "./routes/utils/music.js"
 import session from "express-session"
 import cors from "cors";
 import * as crypto from 'crypto';

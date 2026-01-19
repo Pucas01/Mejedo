@@ -1,7 +1,7 @@
 import express from "express"
 import bcrypt from "bcryptjs"
-import {db} from "../dbHelper.js"
-import requireAuth from "../authMiddleware.js"
+import {db} from "../../dbHelper.js"
+import requireAuth from "../../authMiddleware.js"
 import fs from "fs"
 import path from "path"
 

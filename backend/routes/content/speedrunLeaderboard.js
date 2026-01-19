@@ -1,7 +1,7 @@
 import express from "express";
 import fs from "fs/promises";
 import path from "path";
-import requireAuth from "../authMiddleware.js";
+import requireAuth from "../../authMiddleware.js";
 
 const router = express.Router();
 
