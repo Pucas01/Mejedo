@@ -49,6 +49,7 @@ import musicRoute from "./routes/utils/music.js"
 // Discord bot
 import DiscordBot from "./routes/discord-bot/bot.js"
 import discordBotConfigRoute from "./routes/discord-bot/config.js"
+import wordStatsApiRoute from "./routes/discord-bot/wordStatsApi.js"
 
 import session from "express-session"
 import cors from "cors";
@@ -139,6 +140,7 @@ app.use("/api/miku-discography", mikuDiscographyRoute);
 app.use("/api/hoyolab", hoyolabRoute);
 app.use("/api/discord-webhook-config", requireAuth, discordWebhookConfigRoute);
 app.use("/api/discord-bot-config", discordBotConfigRoute);
+app.use("/api/word-stats", wordStatsApiRoute);
 
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 

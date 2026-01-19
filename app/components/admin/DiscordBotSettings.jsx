@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import Button from "../ui/Button";
 import WindowDecoration from "../window/WindowDecoration";
+import WordStatsModal from "./WordStatsModal";
 
 export default function DiscordBotSettings() {
   const [config, setConfig] = useState({
     token: "",
     clientId: "",
     guildId: "",
+    recapChannelId: "",
     enabled: false
   });
   const [webhookConfig, setWebhookConfig] = useState({
@@ -20,6 +22,7 @@ export default function DiscordBotSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [showWordStatsModal, setShowWordStatsModal] = useState(false);
 
   useEffect(() => {
     fetchConfig();
@@ -293,6 +296,22 @@ export default function DiscordBotSettings() {
             </p>
           </div>
 
+          <div>
+            <label className="block text-[#39ff14] text-sm font-bold mb-2">
+              Word Stats Recap Channel ID (Optional)
+            </label>
+            <input
+              type="text"
+              value={config.recapChannelId}
+              onChange={(e) => setConfig({ ...config, recapChannelId: e.target.value })}
+              className="w-full bg-[#1a1a1f] border border-[#39ff14] text-white px-3 py-2 font-mono"
+              placeholder="Channel ID for weekly word stats recap"
+            />
+            <p className="text-gray-400 text-xs mt-1">
+              Right-click a channel → Copy Channel ID. Weekly word stats will be posted here every Sunday.
+            </p>
+          </div>
+
           {/* Enable/Disable Toggle */}
           <div className="flex items-center gap-3 bg-[#1a1a1f] border border-[#39ff14] p-3">
             <input
@@ -347,6 +366,21 @@ export default function DiscordBotSettings() {
               Restart Bot
             </Button>
           </div>
+        </div>
+
+        {/* Word Stats Section */}
+        <div className="border-t-2 border-[#39ff14] pt-6 space-y-4">
+          <h3 className="text-[#39ff14] font-bold text-lg">Word Stats</h3>
+          <p className="text-gray-400 text-sm">
+            Manage word tracking statistics across servers
+          </p>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => setShowWordStatsModal(true)}
+          >
+            Open Word Stats Manager
+          </Button>
         </div>
 
         {/* Webhook Notifications Section */}
@@ -418,20 +452,13 @@ export default function DiscordBotSettings() {
           </div>
         )}
 
-        {/* Setup Instructions */}
-        <div className="bg-[#1a1a1f] border border-[#39ff14] p-4 space-y-2 text-sm">
-          <h3 className="text-[#39ff14] font-bold">Setup Instructions</h3>
-          <ol className="list-decimal list-inside space-y-1 text-gray-300">
-            <li>Create a bot at <a href="https://discord.com/developers/applications" target="_blank" rel="noopener noreferrer" className="text-[#39ff14] underline">Discord Developer Portal</a></li>
-            <li>Copy the bot token and client ID from your application</li>
-            <li>Paste them into the fields above</li>
-            <li>(Optional) Add your server ID for faster command updates during development</li>
-            <li>Enable the bot and save configuration</li>
-            <li>Click "Start Bot" to launch the bot without restarting the backend</li>
-            <li>Invite the bot using: <code className="text-[#39ff14]">https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands</code></li>
-          </ol>
-        </div>
       </div>
+
+      {/* Word Stats Modal */}
+      <WordStatsModal
+        show={showWordStatsModal}
+        onClose={() => setShowWordStatsModal(false)}
+      />
     </div>
   );
 }

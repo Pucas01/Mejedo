@@ -22,6 +22,7 @@ router.get("/", requireAuth, (req, res) => {
       token: config.token ? "***SET***" : "",
       clientId: config.clientId || "",
       guildId: config.guildId || "",
+      recapChannelId: config.recapChannelId || "",
       enabled: config.enabled || false
     };
 
@@ -35,7 +36,7 @@ router.get("/", requireAuth, (req, res) => {
 // PUT /api/discord-bot-config - Update bot configuration (admin only)
 router.put("/", requireAuth, (req, res) => {
   try {
-    const { token, clientId, guildId, enabled } = req.body;
+    const { token, clientId, guildId, recapChannelId, enabled } = req.body;
 
     // Read existing config
     let config = {};
@@ -51,6 +52,7 @@ router.put("/", requireAuth, (req, res) => {
 
     if (clientId !== undefined) config.clientId = clientId;
     if (guildId !== undefined) config.guildId = guildId;
+    if (recapChannelId !== undefined) config.recapChannelId = recapChannelId;
     if (enabled !== undefined) config.enabled = enabled;
 
     // Write updated config

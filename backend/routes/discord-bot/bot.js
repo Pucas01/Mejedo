@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits, Collection, REST, Routes } from 'discord.js'
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { registerWordTracking, startWeeklyRecap, stopWeeklyRecap } from './wordTracker.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +25,7 @@ class DiscordBot {
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildPresences,
+        GatewayIntentBits.MessageContent,
       ],
       presence: {
         status: 'online',
@@ -44,6 +46,10 @@ class DiscordBot {
 
       // Register slash commands
       await this.registerSlashCommands(config);
+
+      // Initialize word tracking
+      registerWordTracking(this.client);
+      startWeeklyRecap(this.client, config);
     } catch (error) {
       console.error('Failed to login Discord bot:', error);
     }
@@ -155,6 +161,7 @@ class DiscordBot {
   async stop() {
     if (this.client) {
       console.log('Stopping Discord bot...');
+      stopWeeklyRecap();
       await this.client.destroy();
       this.client = null;
       this.commands.clear();
