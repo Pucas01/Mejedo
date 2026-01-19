@@ -258,7 +258,7 @@ Supported: MP3, WAV, OGG, WebM, AAC, FLAC, M4A
 
 **DELETE** `/api/music/:filename` (Admin) - Delete music file
 
-Storage: `public/uploads/music/`
+Storage: `backend/public/uploads/music/` (Note: different from other uploads which are in project root `/public/uploads/`)
 
 ## External Integrations
 
