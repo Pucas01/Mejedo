@@ -1,7 +1,7 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
-import requireAuth from "../authMiddleware.js";
+import requireAuth from "../../authMiddleware.js";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);

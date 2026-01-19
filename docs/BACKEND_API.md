@@ -21,6 +21,10 @@ pm2 start ecosystem.config.js
 
 ## Architecture
 
+the folder structure is acounting for it being /projectdir/backend
+and the frontend is /projectdir/frontend
+the config folder is then located at /projectdir/backend/config
+
 - **Server**: Express.js on port 4000
 - **Database**: SQLite3 (`config/medjed.db`) - users only
 - **Data Storage**: JSON files in `config/` directory

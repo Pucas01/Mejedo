@@ -2,7 +2,7 @@ import express from "express";
 import { Hoyolab, ZenlessZoneZero } from "node-hoyolab";
 import fs from "fs";
 import path from "path";
-import requireAuth from "../authMiddleware.js";
+import requireAuth from "../../authMiddleware.js";
 
 const router = express.Router();
 const DATA_FILE = path.join(process.cwd(), "config", "hoyolab.json");

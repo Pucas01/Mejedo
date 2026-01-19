@@ -1,5 +1,5 @@
 import express from "express";
-import { getAccessToken } from "./spotifyAuth.js";
+import { getAccessToken } from "../integrations/spotifyAuth.js";
 import fs from "fs";
 import path from "path";
 
