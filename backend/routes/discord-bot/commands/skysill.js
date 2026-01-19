@@ -6,24 +6,19 @@ export default {
     .setDescription('Replies with something!'),
 
   async execute(interaction) {
-    await interaction.reply('Readying the 50/50.');
+    const spinner = ['|', '/', '-', '\\'];
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await interaction.editReply('Readying the 50/50..');
+    await interaction.reply('Readying the 50/50... |');
+    for (let i = 0; i < 6; i++) {
+      await delay(250);
+      await interaction.editReply(`Readying the 50/50... ${spinner[(i + 1) % 4]}`);
+    }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await interaction.editReply('Readying the 50/50...');
-
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await interaction.editReply('Pulling.');
-
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await interaction.editReply('Pulling..');
-
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await interaction.editReply('Pulling...');
-
-    await new Promise(resolve => setTimeout(resolve, 500));
+    for (let i = 0; i < 8; i++) {
+      await delay(200);
+      await interaction.editReply(`Pulling... ${spinner[i % 4]}`);
+    }
 
     const messages = [
       'I fricking hate skysill!',

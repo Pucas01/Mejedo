@@ -12,18 +12,12 @@ const changelogPath = path.join(CONFIG_DIR, "changelog.json");
 
 router.get("/", (req, res) => {
   try {
-    console.log("Changelog path:", changelogPath);
-    console.log("File exists:", fs.existsSync(changelogPath));
-
     if (!fs.existsSync(changelogPath)) {
-      console.log("Changelog file not found, returning empty array");
       return res.json([]);
     }
 
     const data = fs.readFileSync(changelogPath, "utf8");
-    console.log("Raw data:", data);
     const changelog = JSON.parse(data);
-    console.log("Parsed changelog:", changelog);
     res.json(changelog);
   } catch (error) {
     console.error("Error reading changelog:", error);

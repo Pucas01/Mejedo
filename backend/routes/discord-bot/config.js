@@ -20,6 +20,7 @@ router.get("/", requireAuth, (req, res) => {
       token: config.token ? "***SET***" : "",
       clientId: config.clientId || "",
       guildId: config.guildId || "",
+      recapChannelId: config.recapChannelId || "",
       enabled: config.enabled || false
     };
 
@@ -32,7 +33,7 @@ router.get("/", requireAuth, (req, res) => {
 
 router.put("/", requireAuth, (req, res) => {
   try {
-    const { token, clientId, guildId, enabled } = req.body;
+    const { token, clientId, guildId, recapChannelId, enabled } = req.body;
 
     let config = {};
     if (fs.existsSync(CONFIG_FILE)) {
@@ -45,6 +46,7 @@ router.put("/", requireAuth, (req, res) => {
 
     if (clientId !== undefined) config.clientId = clientId;
     if (guildId !== undefined) config.guildId = guildId;
+    if (recapChannelId !== undefined) config.recapChannelId = recapChannelId;
     if (enabled !== undefined) config.enabled = enabled;
 
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
