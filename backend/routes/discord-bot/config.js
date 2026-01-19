@@ -2,6 +2,7 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import requireAuth from "../../authMiddleware.js";
+import { startDiscordBot, stopDiscordBot, getBotStatus } from "../../server.js";
 
 const router = express.Router();
 const CONFIG_FILE = path.join(process.cwd(), "config", "discord-bot.json");
@@ -75,16 +76,49 @@ router.get("/status", requireAuth, (req, res) => {
     }
 
     const config = JSON.parse(fs.readFileSync(CONFIG_FILE, "utf-8"));
+    const botStatus = getBotStatus();
 
     res.json({
       configured: !!(config.token && config.clientId),
       enabled: config.enabled || false,
-      running: config.enabled && config.token && config.clientId,
+      running: botStatus.running,
       hasGuildId: !!config.guildId
     });
   } catch (error) {
     console.error("Failed to get bot status:", error);
     res.status(500).json({ error: "Failed to get status" });
+  }
+});
+
+router.post("/start", requireAuth, async (req, res) => {
+  try {
+    const result = await startDiscordBot();
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to start bot:", error);
+    res.status(500).json({ success: false, error: "Failed to start bot" });
+  }
+});
+
+router.post("/stop", requireAuth, async (req, res) => {
+  try {
+    const result = await stopDiscordBot();
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to stop bot:", error);
+    res.status(500).json({ success: false, error: "Failed to stop bot" });
+  }
+});
+
+router.post("/restart", requireAuth, async (req, res) => {
+  try {
+    await stopDiscordBot();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const result = await startDiscordBot();
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to restart bot:", error);
+    res.status(500).json({ success: false, error: "Failed to restart bot" });
   }
 });
 

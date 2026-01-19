@@ -133,12 +133,58 @@ app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
 
+let discordBotInstance = null;
+
+export async function startDiscordBot() {
+  const botConfig = JSON.parse(fs.readFileSync(DISCORD_BOT_FILE, 'utf-8'));
+
+  if (!botConfig.enabled) {
+    console.log('Discord bot is disabled in config.');
+    return { success: false, message: 'Bot is disabled in config' };
+  }
+
+  if (discordBotInstance && discordBotInstance.isRunning()) {
+    console.log('Discord bot is already running.');
+    return { success: false, message: 'Bot is already running' };
+  }
+
+  try {
+    discordBotInstance = new DiscordBot();
+    await discordBotInstance.initialize(botConfig);
+    console.log('Discord bot started successfully');
+    return { success: true, message: 'Bot started successfully' };
+  } catch (err) {
+    console.error('Failed to initialize Discord bot:', err);
+    discordBotInstance = null;
+    return { success: false, message: 'Failed to start bot: ' + err.message };
+  }
+}
+
+export async function stopDiscordBot() {
+  if (!discordBotInstance) {
+    return { success: false, message: 'Bot is not running' };
+  }
+
+  try {
+    await discordBotInstance.stop();
+    discordBotInstance = null;
+    return { success: true, message: 'Bot stopped successfully' };
+  } catch (err) {
+    console.error('Failed to stop Discord bot:', err);
+    return { success: false, message: 'Failed to stop bot: ' + err.message };
+  }
+}
+
+export function getBotStatus() {
+  return {
+    running: discordBotInstance ? discordBotInstance.isRunning() : false,
+    instance: discordBotInstance
+  };
+}
+
 const botConfig = JSON.parse(fs.readFileSync(DISCORD_BOT_FILE, 'utf-8'));
 if (botConfig.enabled) {
-  const discordBot = new DiscordBot();
-  discordBot.initialize(botConfig).catch(err => {
-    console.error('Failed to initialize Discord bot:', err);
-  });
+  startDiscordBot();
 } else {
   console.log('Discord bot is disabled in config.');
 }
