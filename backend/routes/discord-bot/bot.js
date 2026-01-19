@@ -83,7 +83,7 @@ class DiscordBot {
     });
 
     this.client.on('interactionCreate', async (interaction) => {
-      if (!interaction.isChatInputCommand()) return;
+      if (!interaction.isChatInputCommand() && !interaction.isMessageContextMenuCommand()) return;
 
       const command = this.commands.get(interaction.commandName);
 
