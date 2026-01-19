@@ -65,6 +65,63 @@ export default function DiscordBotSettings() {
     }
   }
 
+  async function handleStartBot() {
+    setMessage("");
+    try {
+      const res = await fetch("/api/discord-bot-config/start", {
+        method: "POST",
+        credentials: "include"
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage("✔ " + data.message);
+      } else {
+        setMessage("✗ " + data.message);
+      }
+      await fetchStatus();
+    } catch (error) {
+      setMessage(`✗ Error: ${error.message}`);
+    }
+  }
+
+  async function handleStopBot() {
+    setMessage("");
+    try {
+      const res = await fetch("/api/discord-bot-config/stop", {
+        method: "POST",
+        credentials: "include"
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage("✔ " + data.message);
+      } else {
+        setMessage("✗ " + data.message);
+      }
+      await fetchStatus();
+    } catch (error) {
+      setMessage(`✗ Error: ${error.message}`);
+    }
+  }
+
+  async function handleRestartBot() {
+    setMessage("Restarting bot...");
+    try {
+      const res = await fetch("/api/discord-bot-config/restart", {
+        method: "POST",
+        credentials: "include"
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage("✔ " + data.message);
+      } else {
+        setMessage("✗ " + data.message);
+      }
+      await fetchStatus();
+    } catch (error) {
+      setMessage(`✗ Error: ${error.message}`);
+    }
+  }
+
   async function handleSave() {
     setSaving(true);
     setMessage("");
@@ -252,15 +309,44 @@ export default function DiscordBotSettings() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3">
-          <Button
-            variant="primary"
-            size="md"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Save Bot Configuration"}
-          </Button>
+        <div className="space-y-3">
+          <div className="flex gap-3">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save Bot Configuration"}
+            </Button>
+          </div>
+
+          {/* Bot Control Buttons */}
+          <div className="flex gap-3 bg-[#1a1a1f] border border-[#39ff14] p-4">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleStartBot}
+              disabled={status?.running}
+            >
+              Start Bot
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleStopBot}
+              disabled={!status?.running}
+            >
+              Stop Bot
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleRestartBot}
+            >
+              Restart Bot
+            </Button>
+          </div>
         </div>
 
         {/* Webhook Notifications Section */}
@@ -341,8 +427,8 @@ export default function DiscordBotSettings() {
             <li>Paste them into the fields above</li>
             <li>(Optional) Add your server ID for faster command updates during development</li>
             <li>Enable the bot and save configuration</li>
-            <li>Restart the backend server to apply changes</li>
-            <li>Invite the bot using: <code className="text-[#39ff14]">https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=2048&scope=bot%20applications.commands</code></li>
+            <li>Click "Start Bot" to launch the bot without restarting the backend</li>
+            <li>Invite the bot using: <code className="text-[#39ff14]">https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands</code></li>
           </ol>
         </div>
       </div>

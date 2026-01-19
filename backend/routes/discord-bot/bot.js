@@ -151,6 +151,20 @@ class DiscordBot {
   getClient() {
     return this.client;
   }
+
+  async stop() {
+    if (this.client) {
+      console.log('Stopping Discord bot...');
+      await this.client.destroy();
+      this.client = null;
+      this.commands.clear();
+      console.log('Discord bot stopped');
+    }
+  }
+
+  isRunning() {
+    return this.client !== null && this.client.isReady();
+  }
 }
 
 export default DiscordBot;
