@@ -60,7 +60,7 @@ const sendFailedLoginNotification = async (username, password, ip) => {
       },
       body: JSON.stringify({
         content: config.userId ? `<@${config.userId}>` : undefined,
-        username: "PucasBot Security",
+        username: "PucasBot",
         avatar_url: "https://galaxypfp.com/wp-content/uploads/2025/10/futaba-pfp.webp",
         embeds: [embed]
       })

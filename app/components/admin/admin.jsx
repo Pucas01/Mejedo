@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from 'next/image'
 import User from "./user.jsx";
+import DiscordBotSettings from "./DiscordBotSettings.jsx";
 import { useCurrentUser } from "../../hooks/CurrentUser.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
 import Sticker from "../stickers/Sticker";
@@ -282,6 +283,13 @@ export default function AnimePage() {
         )}
       </div>
     </div>
+
+    {/* Discord Bot Settings - Only show when logged in as admin */}
+    {isAdmin && (
+      <div className="mt-6">
+        <DiscordBotSettings />
+      </div>
+    )}
   </div>
   );
 }

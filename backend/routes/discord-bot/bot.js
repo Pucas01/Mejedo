@@ -1,0 +1,156 @@
+import { Client, GatewayIntentBits, Collection, REST, Routes } from 'discord.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+class DiscordBot {
+  constructor() {
+    this.client = null;
+    this.commands = new Collection();
+  }
+
+  async initialize(config) {
+    if (!config.token) {
+      console.log('Discord bot token not configured. Skipping bot initialization.');
+      return;
+    }
+
+    // Create Discord client
+    this.client = new Client({
+      intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildPresences,
+      ],
+      presence: {
+        status: 'online',
+        activities: [{ name: 'Shoaling and stuff', type: 0 }]
+      }
+    });
+
+    // Load commands
+    await this.loadCommands();
+
+    // Register event handlers
+    this.registerEvents();
+
+    // Login
+    try {
+      await this.client.login(config.token);
+      console.log('Discord bot logged in successfully');
+
+      // Register slash commands
+      await this.registerSlashCommands(config);
+    } catch (error) {
+      console.error('Failed to login Discord bot:', error);
+    }
+  }
+
+  async loadCommands() {
+    const commandsPath = path.join(__dirname, 'commands');
+
+    if (!fs.existsSync(commandsPath)) {
+      console.log('No commands folder found');
+      return;
+    }
+
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+    for (const file of commandFiles) {
+      const filePath = path.join(commandsPath, file);
+      const command = await import(`file://${filePath}`);
+
+      if ('data' in command.default && 'execute' in command.default) {
+        this.commands.set(command.default.data.name, command.default);
+        console.log(`Loaded command: ${command.default.data.name}`);
+      } else {
+        console.log(`Warning: Command at ${filePath} is missing required "data" or "execute" property.`);
+      }
+    }
+  }
+
+  registerEvents() {
+    this.client.once('ready', () => {
+      console.log(`Discord bot ready! Logged in as ${this.client.user.tag}`);
+
+      // Set bot status to online
+      this.client.user.setPresence({
+        status: 'online',
+        activities: [{ name: 'Shoaling and stuff', type: 0 }]
+      });
+    });
+
+    this.client.on('interactionCreate', async (interaction) => {
+      if (!interaction.isChatInputCommand()) return;
+
+      const command = this.commands.get(interaction.commandName);
+
+      if (!command) {
+        console.error(`No command matching ${interaction.commandName} was found.`);
+        return;
+      }
+
+      try {
+        await command.execute(interaction);
+      } catch (error) {
+        console.error('Error executing command:', error);
+        const reply = {
+          content: 'There was an error while executing this command!',
+          ephemeral: true
+        };
+
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp(reply);
+        } else {
+          await interaction.reply(reply);
+        }
+      }
+    });
+  }
+
+  async registerSlashCommands(config) {
+    if (!config.clientId) {
+      console.log('Discord client ID not configured. Skipping slash command registration.');
+      return;
+    }
+
+    const commands = [];
+    for (const command of this.commands.values()) {
+      commands.push(command.data.toJSON());
+    }
+
+    const rest = new REST().setToken(config.token);
+
+    try {
+      console.log(`Started refreshing ${commands.length} application (/) commands.`);
+
+      let data;
+      if (config.guildId) {
+        // Register commands for a specific guild (faster for development)
+        data = await rest.put(
+          Routes.applicationGuildCommands(config.clientId, config.guildId),
+          { body: commands },
+        );
+      } else {
+        // Register commands globally
+        data = await rest.put(
+          Routes.applicationCommands(config.clientId),
+          { body: commands },
+        );
+      }
+
+      console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+    } catch (error) {
+      console.error('Error registering slash commands:', error);
+    }
+  }
+
+  getClient() {
+    return this.client;
+  }
+}
+
+export default DiscordBot;

@@ -45,6 +45,11 @@ import counter from "./routes/utils/moeCounter.js"
 import uploadRouter from "./routes/utils/imageUpload.js";
 import versionsRoute from "./routes/utils/versions.js"
 import musicRoute from "./routes/utils/music.js"
+
+// Discord bot
+import DiscordBot from "./routes/discord-bot/bot.js"
+import discordBotConfigRoute from "./routes/discord-bot/config.js"
+
 import session from "express-session"
 import cors from "cors";
 import * as crypto from 'crypto';
@@ -71,6 +76,19 @@ if (!fs.existsSync(DISCORD_WEBHOOK_FILE)) {
   };
   fs.writeFileSync(DISCORD_WEBHOOK_FILE, JSON.stringify(defaultConfig, null, 2));
   console.log("Created default discord-webhook.json config file");
+}
+
+// Create discord-bot.json if it doesn't exist
+const DISCORD_BOT_FILE = path.join(CONFIG_DIR, "discord-bot.json");
+if (!fs.existsSync(DISCORD_BOT_FILE)) {
+  const defaultConfig = {
+    token: "",
+    clientId: "",
+    guildId: "",
+    enabled: false
+  };
+  fs.writeFileSync(DISCORD_BOT_FILE, JSON.stringify(defaultConfig, null, 2));
+  console.log("Created default discord-bot.json config file");
 }
 
 const SESSION_SECRET = crypto.randomBytes(64).toString("hex");
@@ -120,9 +138,21 @@ app.use("/api/ado-discography", adoDiscographyRoute);
 app.use("/api/miku-discography", mikuDiscographyRoute);
 app.use("/api/hoyolab", hoyolabRoute);
 app.use("/api/discord-webhook-config", requireAuth, discordWebhookConfigRoute);
+app.use("/api/discord-bot-config", discordBotConfigRoute);
 
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
+
+// Initialize Discord bot
+const botConfig = JSON.parse(fs.readFileSync(DISCORD_BOT_FILE, 'utf-8'));
+if (botConfig.enabled) {
+  const discordBot = new DiscordBot();
+  discordBot.initialize(botConfig).catch(err => {
+    console.error('Failed to initialize Discord bot:', err);
+  });
+} else {
+  console.log('Discord bot is disabled in config.');
+}
