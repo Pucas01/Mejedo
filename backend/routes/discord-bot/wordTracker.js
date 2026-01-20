@@ -3,7 +3,8 @@ import {
   getWeeklyTopWords,
   getWeeklyTopUsers,
   getWeeklyTotalCount,
-  resetWeeklyStats
+  resetWeeklyStats,
+  getAllRecapChannels
 } from './wordStatsDb.js';
 
 const STOP_WORDS = new Set([
@@ -56,16 +57,21 @@ export function registerWordTracking(client) {
 
 export { STOP_WORDS };
 
-export function startWeeklyRecap(client, config) {
-  if (!config.recapChannelId) {
-    console.log('No recap channel configured, skipping weekly recap scheduler');
-    return;
-  }
-
+export function startWeeklyRecap(client) {
   recapInterval = setInterval(async () => {
     const now = new Date();
-    if (now.getDay() === 0 && now.getHours() === 12 && now.getMinutes() < 5) {
-      await postWeeklyRecap(client, config.recapChannelId);
+    const currentDay = now.getDay();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    if (currentMinute >= 5) return;
+
+    const recapChannels = await getAllRecapChannels();
+
+    for (const { recap_channel_id, recap_day, recap_hour } of recapChannels) {
+      if (currentDay === recap_day && currentHour === recap_hour) {
+        await postWeeklyRecap(client, recap_channel_id);
+      }
     }
   }, 5 * 60 * 1000);
 
@@ -93,7 +99,7 @@ function formatUserList(users) {
     .join('\n');
 }
 
-export async function postWeeklyRecap(client, channelId) {
+export async function postWeeklyRecap(client, channelId, resetStats = true) {
   const channel = client.channels.cache.get(channelId);
   if (!channel) {
     console.error('Recap channel not found:', channelId);
@@ -113,7 +119,7 @@ export async function postWeeklyRecap(client, channelId) {
     }
 
     const embed = {
-      title: 'Weekly Word Recap',
+      title: resetStats ? 'Weekly Word Recap' : 'Word Stats Preview',
       color: 0x39ff14,
       fields: [
         { name: 'Top Words This Week', value: formatWordList(topWords), inline: false },
@@ -121,14 +127,16 @@ export async function postWeeklyRecap(client, channelId) {
         { name: 'Total Words Tracked', value: `${totalWords}`, inline: true }
       ],
       timestamp: new Date().toISOString(),
-      footer: { text: 'Stats reset weekly' }
+      footer: { text: resetStats ? 'Stats reset weekly' : 'Preview only - stats not reset' }
     };
 
     await channel.send({ embeds: [embed] });
-    console.log('Weekly recap posted');
+    console.log(`Weekly recap posted (reset: ${resetStats})`);
 
-    await resetWeeklyStats(guildId);
-    console.log('Weekly stats reset');
+    if (resetStats) {
+      await resetWeeklyStats(guildId);
+      console.log('Weekly stats reset');
+    }
   } catch (error) {
     console.error('Error posting weekly recap:', error);
   }

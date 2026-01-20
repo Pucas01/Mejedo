@@ -184,6 +184,10 @@ export function getBotStatus() {
   };
 }
 
+export function getDiscordBotInstance() {
+  return discordBotInstance;
+}
+
 const botConfig = JSON.parse(fs.readFileSync(DISCORD_BOT_FILE, 'utf-8'));
 if (botConfig.enabled) {
   startDiscordBot();

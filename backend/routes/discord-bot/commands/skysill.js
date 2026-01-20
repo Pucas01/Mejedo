@@ -3,7 +3,9 @@ import { SlashCommandBuilder } from 'discord.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('skysill')
-    .setDescription('Replies with something!'),
+    .setDescription('Replies with something!')
+    .setIntegrationTypes([0, 1])
+    .setContexts([0, 1, 2]),
 
   async execute(interaction) {
     const spinner = ['|', '/', '-', '\\'];
