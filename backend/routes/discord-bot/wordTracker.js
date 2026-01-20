@@ -107,13 +107,14 @@ function formatWordList(words) {
 
       // Check if the word contains emoji pattern like "emojiname1234567890"
       // Custom Discord emojis get stored with their name and ID together after stripping <>:
-      const emojiMatch = w.word.match(/^([a-z_]+)(\d{17,19})$/i);
+      // Emoji names can be 2+ chars, IDs are exactly 17-20 digits
+      const emojiMatch = w.word.match(/^([a-z_]{2,})(\d{17,20})$/i);
       if (emojiMatch) {
         // Reconstruct as <:name:id> for custom emoji
         word = `<:${emojiMatch[1]}:${emojiMatch[2]}>`;
       }
-      // Check if the word is just a user ID (all digits, 17-19 chars)
-      else if (/^\d{17,19}$/.test(w.word)) {
+      // Check if the word is just a user ID (all digits, 17-20 chars)
+      else if (/^\d{17,20}$/.test(w.word)) {
         word = `<@${w.word}>`;
       }
 

@@ -70,7 +70,17 @@ export default {
         .map((w, i) => {
           const count = w.total_count || w.count;
           const bar = '|'.repeat(Math.min(Math.ceil(count / 10), 20));
-          return `\`${String(i + 1).padStart(2, ' ')}.\` **${w.word}** - ${count} ${bar}`;
+
+          // Format word for display (handle emojis and user mentions)
+          let displayWord = w.word;
+          const emojiMatch = w.word.match(/^([a-z_]{2,})(\d{17,20})$/i);
+          if (emojiMatch) {
+            displayWord = `<:${emojiMatch[1]}:${emojiMatch[2]}>`;
+          } else if (/^\d{17,20}$/.test(w.word)) {
+            displayWord = `<@${w.word}>`;
+          }
+
+          return `\`${String(i + 1).padStart(2, ' ')}.\` **${displayWord}** - ${count} ${bar}`;
         })
         .join('\n');
 
