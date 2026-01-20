@@ -8,6 +8,7 @@ import { useKonamiCode } from "./hooks/useKonamiCode.js";
 import { AchievementProvider, useAchievements } from "./hooks/useAchievements.js";
 import { WidgetProvider } from "./hooks/useWidgets.js";
 import { useTheme } from "./hooks/useTheme.js";
+import Button from "./components/ui/Button";
 
 // Dynamic imports with preload capability
 const pageComponents = {
@@ -265,41 +266,46 @@ function PageContent() {
   return (
     <WidgetProvider mascotVisible={mascotVisible} onToggleMascot={toggleMascot}>
     <div className="flex flex-col min-h-screen bg-[url(/LaptopSHQ.webp)] bg-cover bg-center bg-fixed bg-no-repeat text-white relative overflow-hidden">
-      <header className={`p-4 pb-0 text-center bg-[#090909] ${theme.colors.text}`}>
-        <h1 className="text-4xl font-bold flex items-center justify-center gap-2">
-          <span
-            className="cursor-pointer"
-            onClick={() => {
-              setEgg(true);
-              unlock("futaba_fan");
-            }}
-          >
-            /home/pucas01
-          </span>
-        </h1>
-        {isAdmin && <span>Admin Mode</span>}
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
-          <button
-            onClick={() => setAchievementsOpen(true)}
-            className={`text-xl cursor-pointer text-gray-500 ${theme.colors.hover} transition-colors`}
-            title="View Achievements"
-          >
-            Achievements
-          </button>
-          <button
-            onClick={() => setSpeedrunLeaderboardOpen(true)}
-            className={`text-xl cursor-pointer text-gray-500 ${theme.colors.hover} transition-colors`}
-            title="View Speedrun Leaderboard"
-          >
-            Speedruns
-          </button>
-          <button
-            onClick={() => setChangelogOpen(true)}
-            className={`text-xl cursor-pointer text-gray-500 ${theme.colors.hover} transition-colors`}
-            title="View Changelog"
-          >
-            Changelog
-          </button>
+      <header className={`pt-9 px-4 pb-4 bg-[#090909] ${theme.colors.text}`}>
+        <div className="relative flex flex-col lg:flex-row items-center justify-center gap-4">
+          <h1 className="text-4xl font-bold flex items-center gap-2 lg:absolute lg:left-1/2 lg:-translate-x-1/2">
+            <span
+              className="cursor-pointer"
+              onClick={() => {
+                setEgg(true);
+                unlock("futaba_fan");
+              }}
+            >
+              /home/pucas01
+            </span>
+            {isAdmin && <span className="text-base">Admin Mode</span>}
+          </h1>
+          <div className="lg:absolute lg:right-0 flex flex-wrap items-center justify-center gap-3 lg:mr-33">
+            <Button
+              onClick={() => setAchievementsOpen(true)}
+              variant="primary"
+              size="md"
+              title="View Achievements"
+            >
+              Achievements
+            </Button>
+            <Button
+              onClick={() => setSpeedrunLeaderboardOpen(true)}
+              variant="primary"
+              size="md"
+              title="View Speedrun Leaderboard"
+            >
+              Speedruns
+            </Button>
+            <Button
+              onClick={() => setChangelogOpen(true)}
+              variant="primary"
+              size="md"
+              title="View Changelog"
+            >
+              Changelog
+            </Button>
+          </div>
         </div>
       </header>
 

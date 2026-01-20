@@ -1,195 +1,125 @@
-# Discord Bot System
+# Discord Bot
 
-A fully integrated Discord bot with visual admin UI and webhook notifications.
+## Commands
 
-## Features
+| Command | Type | Description |
+|---------|------|-------------|
+| `/wordstats` | Slash | View word usage stats (server/personal, filtered/unfiltered) |
+| `/wordstats user:@someone` | Slash | View another user's stats |
+| `/forcerecap` | Slash | Force post weekly recap (admin only) |
+| `/skysill` | Slash | 50/50 spinner animation |
+| `/evie` | Slash | Akechi rant |
+| `/pucas01` | Slash | Link |
+| `/spencer` | Slash | User mention |
+| `/cookieclouds` | Slash | Twitch promo |
+| `retro` | Context Menu | Right-click message -> Apps -> retro. Replies "Ain't no way" |
 
-- ✅ Slash command support (`/hello`, `/test`)
-- ✅ Auto-loading commands from files
-- ✅ Visual admin UI for configuration (no terminal commands needed!)
-- ✅ Webhook notifications for security events
-- ✅ Test command to verify webhook setup
-- ✅ Config file auto-creation on startup
-- ✅ Integrated with Express backend
+## Word Stats System
 
-## File Structure
+Tracks word usage across all messages (excluding bots).
+
+### Features
+- Per-user and server-wide stats
+- Common words filtered by default (the, a, is, etc.)
+- Weekly recap posted automatically (Sunday noon)
+- All-time stats persist, weekly stats reset after recap
+
+### Config
+Set `recapChannelId` in admin panel for weekly recaps.
+
+### Database
+Stored in `config/word-stats.db` (SQLite).
+
+## Files
 
 ```
-backend/
-├── routes/
-│   └── discord-bot/
-│       ├── bot.js           # Bot initialization
-│       ├── config.js        # Config API routes
-│       ├── commands/        # Slash commands
-│       │   └── hello.js     # Example command
-│       └── README.md        # Setup guide
-└── config/
-    └── discord-bot.json     # Bot configuration (auto-created)
+backend/routes/discord-bot/
+├── bot.js              # Main bot class
+├── config.js           # Config API routes
+├── wordTracker.js      # Message tracking & weekly recap
+├── wordStatsDb.js      # Database functions
+├── wordStatsApi.js     # Stats API routes
+└── commands/
+    ├── wordstats.js
+    ├── forcerecap.js
+    ├── skysill.js
+    ├── retro.js
+    ├── evie.js
+    ├── pucas01.js
+    ├── spencer.js
+    └── cookieclouds.js
 ```
 
-## Admin Management
+## Config
 
-Access the visual admin panel at `/admin` on your website (login required).
-
-### Setup Workflow
-
-1. **Create Discord Application:**
-   - Go to https://discord.com/developers/applications
-   - Create new application
-   - Add a bot and copy the bot token
-   - Copy the client ID from OAuth2 section
-
-2. **Configure Bot via Admin UI:**
-   - Navigate to `/admin` and login
-   - Scroll down to "Discord Bot Settings" panel
-   - Enter your bot token and client ID
-   - (Optional) Enter your server ID for faster command updates during development
-   - Check "Enable Discord Bot"
-   - Click "Save Bot Configuration"
-
-3. **Configure Webhook Notifications (Optional):**
-   - In the same panel, scroll to "Webhook Notifications"
-   - Create a webhook in your Discord server (Server Settings → Integrations → Webhooks)
-   - Paste the webhook URL
-   - (Optional) Add your Discord user ID to get mentioned in notifications
-   - Check "Enable Webhook Notifications"
-   - Click "Save Webhook Settings"
-
-4. **Invite Bot to Server:**
-   ```
-   https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=274877991936&scope=bot%20applications.commands
-   ```
-   Replace `YOUR_CLIENT_ID` with your actual client ID. This includes permissions for: View Channels, Send Messages, Use Slash Commands, and Read Message History.
-
-5. **Restart Server:**
-   ```bash
-   npm run server
-   ```
-
-6. **Test in Discord:**
-   - Type `/hello` for a hello world message
-   - Type `/test` to send a test webhook notification
-
-## Adding Commands
-
-Create a new file in `backend/routes/discord-bot/commands/`:
-
-```javascript
-import { SlashCommandBuilder } from 'discord.js';
-
-export default {
-  data: new SlashCommandBuilder()
-    .setName('yourcommand')
-    .setDescription('Your command description'),
-
-  async execute(interaction) {
-    await interaction.reply('Your response!');
-  },
-};
-```
-
-Commands are automatically loaded on server restart.
-
-## API Endpoints
-
-**Admin Only (requires authentication):**
-
-- `GET /api/discord-bot-config` - Get current config (token masked)
-- `PUT /api/discord-bot-config` - Update config
-- `GET /api/discord-bot-config/status` - Get bot status
-
-## Configuration File
-
-`backend/config/discord-bot.json`:
-
+`config/discord-bot.json`:
 ```json
 {
-  "token": "YOUR_BOT_TOKEN",
-  "clientId": "YOUR_CLIENT_ID",
-  "guildId": "YOUR_GUILD_ID",
+  "token": "BOT_TOKEN",
+  "clientId": "CLIENT_ID",
+  "guildId": "",
+  "recapChannelId": "",
   "enabled": true
 }
 ```
 
-- `token`: Discord bot token
-- `clientId`: Application client ID
-- `guildId`: (Optional) Server ID for instant command updates during development
-- `enabled`: Set to `true` to start bot, `false` to disable
+- `guildId`: Set for instant command updates (dev), empty for global (prod)
+- `recapChannelId`: Channel for weekly word stats recap
 
-## Security
+## API Endpoints
 
-- Admin terminal requires login
-- Bot token is never sent to frontend (masked as `***SET***`)
-- All config endpoints require authentication
-- Config file is created with permissions 644
+### Bot Config (`/api/discord-bot-config`)
+- `GET /` - Get config
+- `PUT /` - Update config
+- `GET /status` - Bot status
+- `POST /start` - Start bot
+- `POST /stop` - Stop bot
+- `POST /restart` - Restart bot
 
-## Troubleshooting
+### Word Stats (`/api/word-stats`)
+- `GET /guilds` - List all servers with stats
+- `GET /guild/:id` - Get server's top words
+- `DELETE /guild/:id` - Clear server's stats
+- `GET /export` - Export all stats as JSON
+- `POST /import` - Import stats from JSON
 
-**Bot doesn't respond:**
-- Check `bot status` in admin terminal
-- Verify bot is enabled and configured
-- Check server logs for errors
-- Restart the server after config changes
+## Adding Commands
 
-**Commands don't appear:**
-- Global commands take up to 1 hour to propagate
-- Use `guildId` for instant updates during development
-- Restart Discord client to refresh command list
-
-**Permission errors:**
-- Ensure bot has "Send Messages" permission
-- Check bot role is above restricted roles
-- Re-invite bot with correct permissions
-
-## Development vs Production
-
-**Development:**
-```bash
-bot guildid YOUR_TEST_SERVER_ID
-```
-- Commands appear instantly in that server only
-- Fast iteration
-
-**Production:**
-```bash
-bot guildid ""  # Empty string for global
-```
-- Commands available in all servers
-- Takes up to 1 hour to update
-
-## Integration with Backend
-
-The bot runs in the same process as the Express server:
-1. Config file created on server startup
-2. Bot initialized after Express server starts
-3. Can share database, routes, and utilities with backend
-4. Access via `discordBot.getClient()` if needed
-
-## Example: Adding a Command with Options
-
+Slash command:
 ```javascript
 import { SlashCommandBuilder } from 'discord.js';
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('echo')
-    .setDescription('Echoes your message')
-    .addStringOption(option =>
-      option
-        .setName('message')
-        .setDescription('The message to echo')
-        .setRequired(true)
-    ),
+    .setName('name')
+    .setDescription('Description'),
 
   async execute(interaction) {
-    const message = interaction.options.getString('message');
-    await interaction.reply(message);
+    await interaction.reply('Response');
   },
 };
 ```
 
-## Resources
+Context menu command (right-click message):
+```javascript
+import { ContextMenuCommandBuilder, ApplicationCommandType } from 'discord.js';
 
-- [Discord.js Guide](https://discordjs.guide/)
-- [Discord Developer Portal](https://discord.com/developers/applications)
-- [Slash Commands](https://discord.com/developers/docs/interactions/application-commands)
+export default {
+  data: new ContextMenuCommandBuilder()
+    .setName('name')
+    .setType(ApplicationCommandType.Message),
+
+  async execute(interaction) {
+    const message = interaction.targetMessage;
+    await message.reply('Response');
+    await interaction.reply({ content: 'Done', ephemeral: true });
+  },
+};
+```
+
+## Required Intents
+
+- Guilds
+- GuildMessages
+- GuildPresences
+- MessageContent (enable in Discord Developer Portal)
