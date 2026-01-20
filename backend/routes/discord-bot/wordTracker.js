@@ -91,11 +91,11 @@ function formatWordList(words) {
     .map((w, i) => {
       let word = w.word;
 
-      const emojiMatch = w.word.match(/^([a-z_]+)(\d{17,19})$/i);
+      const emojiMatch = w.word.match(/^([a-z_]{2,})(\d{17,20})$/i);
       if (emojiMatch) {
         word = `<:${emojiMatch[1]}:${emojiMatch[2]}>`;
       }
-      else if (/^\d{17,19}$/.test(w.word)) {
+      else if (/^\d{17,20}$/.test(w.word)) {
         word = `<@${w.word}>`;
       }
 
