@@ -10,7 +10,6 @@ export default function DiscordBotSettings() {
     token: "",
     clientId: "",
     guildId: "",
-    recapChannelId: "",
     enabled: false
   });
   const [webhookConfig, setWebhookConfig] = useState({
@@ -296,22 +295,6 @@ export default function DiscordBotSettings() {
             </p>
           </div>
 
-          <div>
-            <label className="block text-[#39ff14] text-sm font-bold mb-2">
-              Word Stats Recap Channel ID (Optional)
-            </label>
-            <input
-              type="text"
-              value={config.recapChannelId}
-              onChange={(e) => setConfig({ ...config, recapChannelId: e.target.value })}
-              className="w-full bg-[#1a1a1f] border border-[#39ff14] text-white px-3 py-2 font-mono"
-              placeholder="Channel ID for weekly word stats recap"
-            />
-            <p className="text-gray-400 text-xs mt-1">
-              Right-click a channel → Copy Channel ID. Weekly word stats will be posted here every Sunday.
-            </p>
-          </div>
-
           {/* Enable/Disable Toggle */}
           <div className="flex items-center gap-3 bg-[#1a1a1f] border border-[#39ff14] p-3">
             <input
@@ -371,9 +354,6 @@ export default function DiscordBotSettings() {
         {/* Word Stats Section */}
         <div className="border-t-2 border-[#39ff14] pt-6 space-y-4">
           <h3 className="text-[#39ff14] font-bold text-lg">Word Stats</h3>
-          <p className="text-gray-400 text-sm">
-            Manage word tracking statistics across servers
-          </p>
           <Button
             variant="primary"
             size="md"

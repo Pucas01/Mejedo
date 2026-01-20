@@ -49,7 +49,7 @@ class DiscordBot {
 
       // Initialize word tracking
       registerWordTracking(this.client);
-      startWeeklyRecap(this.client, config);
+      startWeeklyRecap(this.client);
     } catch (error) {
       console.error('Failed to login Discord bot:', error);
     }
@@ -162,6 +162,21 @@ class DiscordBot {
     if (this.client) {
       console.log('Stopping Discord bot...');
       stopWeeklyRecap();
+
+      // Set status to offline before destroying
+      try {
+        await this.client.user.setPresence({
+          status: 'invisible',
+          activities: []
+        });
+        console.log('Bot status set to offline');
+
+        // Wait a moment for Discord to process the status update
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (error) {
+        console.error('Error setting bot status to offline:', error);
+      }
+
       await this.client.destroy();
       this.client = null;
       this.commands.clear();

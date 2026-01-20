@@ -201,6 +201,11 @@ export function getBotStatus() {
   };
 }
 
+// Helper function to get bot instance
+export function getDiscordBotInstance() {
+  return discordBotInstance;
+}
+
 // Initialize Discord bot on startup
 const botConfig = JSON.parse(fs.readFileSync(DISCORD_BOT_FILE, 'utf-8'));
 if (botConfig.enabled) {

@@ -9,6 +9,7 @@ import {
   getDbPath
 } from "./wordStatsDb.js";
 import { STOP_WORDS } from "./wordTracker.js";
+import { getDiscordBotInstance } from "../../server.js";
 import fs from "fs";
 
 const router = express.Router();
@@ -17,7 +18,47 @@ const router = express.Router();
 router.get("/guilds", requireAuth, async (req, res) => {
   try {
     const guilds = await getAllGuilds();
-    res.json(guilds);
+
+    // Try to fetch guild names from Discord if bot is running
+    const botInstance = getDiscordBotInstance();
+    if (botInstance && botInstance.isRunning()) {
+      const client = botInstance.getClient();
+
+      // Enrich guilds with Discord data
+      const enrichedGuilds = await Promise.all(guilds.map(async (guild) => {
+        try {
+          const discordGuild = await client.guilds.fetch(guild.guild_id);
+          let channelName = null;
+
+          if (guild.recap_channel_id) {
+            try {
+              const channel = await discordGuild.channels.fetch(guild.recap_channel_id);
+              channelName = channel ? channel.name : null;
+            } catch (err) {
+              console.error(`Failed to fetch channel ${guild.recap_channel_id}:`, err.message);
+            }
+          }
+
+          return {
+            ...guild,
+            guild_name: discordGuild.name,
+            recap_channel_name: channelName
+          };
+        } catch (err) {
+          console.error(`Failed to fetch guild ${guild.guild_id}:`, err.message);
+          return {
+            ...guild,
+            guild_name: null,
+            recap_channel_name: null
+          };
+        }
+      }));
+
+      res.json(enrichedGuilds);
+    } else {
+      // Bot not running, return guilds without names
+      res.json(guilds.map(g => ({ ...g, guild_name: null, recap_channel_name: null })));
+    }
   } catch (error) {
     console.error("Error fetching guilds:", error);
     res.status(500).json({ error: "Failed to fetch guilds" });

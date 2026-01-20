@@ -3,7 +3,8 @@ import {
   getWeeklyTopWords,
   getWeeklyTopUsers,
   getWeeklyTotalCount,
-  resetWeeklyStats
+  resetWeeklyStats,
+  getAllRecapChannels
 } from './wordStatsDb.js';
 
 // Common stop words to filter out
@@ -64,18 +65,25 @@ export function registerWordTracking(client) {
 export { STOP_WORDS };
 
 // Start weekly recap scheduler
-export function startWeeklyRecap(client, config) {
-  if (!config.recapChannelId) {
-    console.log('No recap channel configured, skipping weekly recap scheduler');
-    return;
-  }
-
-  // Check every hour if it's time for recap (Sunday at noon)
+export function startWeeklyRecap(client) {
+  // Check every 5 minutes if it's time for any guild's recap
   recapInterval = setInterval(async () => {
     const now = new Date();
-    // Sunday (0) at 12:00
-    if (now.getDay() === 0 && now.getHours() === 12 && now.getMinutes() < 5) {
-      await postWeeklyRecap(client, config.recapChannelId);
+    const currentDay = now.getDay();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    // Only check in the first 5 minutes of each hour
+    if (currentMinute >= 5) return;
+
+    // Get all guilds with recap channels configured
+    const recapChannels = await getAllRecapChannels();
+
+    for (const { recap_channel_id, recap_day, recap_hour } of recapChannels) {
+      // Check if it's time for this guild's recap
+      if (currentDay === recap_day && currentHour === recap_hour) {
+        await postWeeklyRecap(client, recap_channel_id);
+      }
     }
   }, 5 * 60 * 1000); // Check every 5 minutes
 
@@ -107,7 +115,7 @@ function formatUserList(users) {
 }
 
 // Post weekly recap to configured channel
-export async function postWeeklyRecap(client, channelId) {
+export async function postWeeklyRecap(client, channelId, resetStats = true) {
   const channel = client.channels.cache.get(channelId);
   if (!channel) {
     console.error('Recap channel not found:', channelId);
@@ -128,7 +136,7 @@ export async function postWeeklyRecap(client, channelId) {
     }
 
     const embed = {
-      title: 'Weekly Word Recap',
+      title: resetStats ? 'Weekly Word Recap' : 'Word Stats Preview',
       color: 0x39ff14,
       fields: [
         { name: 'Top Words This Week', value: formatWordList(topWords), inline: false },
@@ -136,15 +144,17 @@ export async function postWeeklyRecap(client, channelId) {
         { name: 'Total Words Tracked', value: `${totalWords}`, inline: true }
       ],
       timestamp: new Date().toISOString(),
-      footer: { text: 'Stats reset weekly' }
+      footer: { text: resetStats ? 'Stats reset weekly' : 'Preview only - stats not reset' }
     };
 
     await channel.send({ embeds: [embed] });
-    console.log('Weekly recap posted');
+    console.log(`Weekly recap posted (reset: ${resetStats})`);
 
-    // Reset weekly stats
-    await resetWeeklyStats(guildId);
-    console.log('Weekly stats reset');
+    // Reset weekly stats only if requested
+    if (resetStats) {
+      await resetWeeklyStats(guildId);
+      console.log('Weekly stats reset');
+    }
   } catch (error) {
     console.error('Error posting weekly recap:', error);
   }

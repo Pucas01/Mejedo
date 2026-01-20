@@ -26,6 +26,16 @@ db.serialize(() => {
     UNIQUE(guild_id, user_id, word)
   )`);
 
+  // Guild settings table
+  db.run(`CREATE TABLE IF NOT EXISTS guild_settings (
+    guild_id TEXT PRIMARY KEY,
+    recap_channel_id TEXT,
+    recap_day INTEGER DEFAULT 0,
+    recap_hour INTEGER DEFAULT 12,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
   // Create indexes for faster queries
   db.run(`CREATE INDEX IF NOT EXISTS idx_word_stats_guild ON word_stats(guild_id)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_word_stats_weekly_guild ON word_stats_weekly(guild_id)`);
@@ -148,12 +158,16 @@ export async function getWeeklyTotalCount(guildId) {
 export async function getAllGuilds() {
   return await allAsync(`
     SELECT
-      guild_id,
-      COUNT(DISTINCT user_id) as user_count,
-      COUNT(DISTINCT word) as unique_words,
-      SUM(count) as total_words
-    FROM word_stats
-    GROUP BY guild_id
+      ws.guild_id,
+      COUNT(DISTINCT ws.user_id) as user_count,
+      COUNT(DISTINCT ws.word) as unique_words,
+      SUM(ws.count) as total_words,
+      gs.recap_channel_id,
+      gs.recap_day,
+      gs.recap_hour
+    FROM word_stats ws
+    LEFT JOIN guild_settings gs ON ws.guild_id = gs.guild_id
+    GROUP BY ws.guild_id
     ORDER BY total_words DESC
   `);
 }
@@ -200,6 +214,36 @@ export async function clearGuildStats(guildId) {
 // Get database file path
 export function getDbPath() {
   return DB_FILE;
+}
+
+// Get guild settings
+export async function getGuildSettings(guildId) {
+  const results = await allAsync(`
+    SELECT * FROM guild_settings WHERE guild_id = ?
+  `, [guildId]);
+  return results[0] || null;
+}
+
+// Set recap channel and schedule for a guild
+export async function setRecapChannel(guildId, channelId, day = 0, hour = 12) {
+  await runAsync(`
+    INSERT INTO guild_settings (guild_id, recap_channel_id, recap_day, recap_hour, updated_at)
+    VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(guild_id) DO UPDATE SET
+      recap_channel_id = ?,
+      recap_day = ?,
+      recap_hour = ?,
+      updated_at = CURRENT_TIMESTAMP
+  `, [guildId, channelId, day, hour, channelId, day, hour]);
+}
+
+// Get all guilds with recap channels configured
+export async function getAllRecapChannels() {
+  return await allAsync(`
+    SELECT guild_id, recap_channel_id
+    FROM guild_settings
+    WHERE recap_channel_id IS NOT NULL
+  `);
 }
 
 export default db;

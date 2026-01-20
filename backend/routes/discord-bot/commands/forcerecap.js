@@ -1,32 +1,34 @@
 import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { postWeeklyRecap } from '../wordTracker.js';
-import fs from 'fs';
-import path from 'path';
+import { getGuildSettings } from '../wordStatsDb.js';
 
 export default {
   data: new SlashCommandBuilder()
     .setName('forcerecap')
     .setDescription('Force post the weekly word stats recap')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .setIntegrationTypes([0])
+    .setContexts([0]),
 
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
 
     try {
-      // Get recap channel from config
-      const configPath = path.join(process.cwd(), 'config', 'discord-bot.json');
-      const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      const guildId = interaction.guild.id;
 
-      if (!config.recapChannelId) {
-        await interaction.editReply('No recap channel configured. Set it in the admin panel first.');
+      // Get guild settings from database
+      const settings = await getGuildSettings(guildId);
+
+      if (!settings || !settings.recap_channel_id) {
+        await interaction.editReply('No recap channel configured for this server. Use `/setrecap` to configure it first.');
         return;
       }
 
-      await postWeeklyRecap(interaction.client, config.recapChannelId);
-      await interaction.editReply('Weekly recap posted and stats reset.');
+      await postWeeklyRecap(interaction.client, settings.recap_channel_id, false);
+      await interaction.editReply('Word stats preview posted (stats where not reset btw).');
     } catch (error) {
       console.error('Error forcing recap:', error);
-      await interaction.editReply('Failed to post recap. Check if the channel ID is valid.');
+      await interaction.editReply('Failed to post recap. Check if the channel is valid and the bot has permissions.');
     }
   },
 };

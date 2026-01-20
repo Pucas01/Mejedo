@@ -183,11 +183,26 @@ export default function WordStatsModal({ show, onClose }) {
                       onClick={() => selectGuild(guild)}
                     >
                       <div className="flex justify-between items-center">
-                        <div>
-                          <div className="text-white font-mono text-sm">{guild.guild_id}</div>
-                          <div className="text-gray-400 text-xs">
+                        <div className="flex-1">
+                          <div className="text-white font-bold text-sm">
+                            {guild.guild_name || guild.guild_id}
+                          </div>
+                          {guild.guild_name && (
+                            <div className="text-gray-500 text-xs font-mono">{guild.guild_id}</div>
+                          )}
+                          <div className="text-gray-400 text-xs mt-1">
                             {guild.user_count} users | {guild.unique_words} unique words | {guild.total_words} total
                           </div>
+                          {guild.recap_channel_id && (
+                            <div className="text-[#39ff14] text-xs mt-1">
+                              Recap: #{guild.recap_channel_name || guild.recap_channel_id}
+                              {guild.recap_day !== null && guild.recap_hour !== null && (
+                                <span className="text-gray-400">
+                                  {" "}• {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][guild.recap_day]} {String(guild.recap_hour).padStart(2, "0")}:00
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <Button
                           variant="primary"
