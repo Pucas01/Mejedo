@@ -24,13 +24,25 @@ export default {
       await interaction.editReply(`Pulling... ${spinner[i % 4]}`);
     }
 
-    // Randomly choose between two messages
-    const messages = [
-      'I fricking hate skysill!',
-      'Im a big fan of Goopie Megpoid!'
-    ];
+    // Roll for outcome: 5% Teto, 47.5% skysill hate, 47.5% Gumi love
+    const roll = Math.random() * 100;
 
-    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-    await interaction.editReply(`${randomMessage}`);
+    if (roll < 5) {
+      // 5% chance - Teto special
+      for (let i = 0; i < 6; i++) {
+        await delay(200);
+        await interaction.editReply(`Capturing radiance Triggered ${spinner[i % 4]}`);
+      }
+      await interaction.editReply({
+        content: '',
+        files: ['https://cdn.pucas01.com/gRCJscEM/Gumi-Teto-Store.png']
+      });
+    } else if (roll < 52.5) {
+      // 47.5% chance
+      await interaction.editReply('I fricking hate skysill!');
+    } else {
+      // 47.5% chance
+      await interaction.editReply('Im a big fan of Goopie Megpoid!');
+    }
   },
 };
