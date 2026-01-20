@@ -102,7 +102,23 @@ export function stopWeeklyRecap() {
 function formatWordList(words) {
   if (!words || words.length === 0) return 'No data yet';
   return words
-    .map((w, i) => `${i + 1}. **${w.word}** - ${w.total_count || w.count}`)
+    .map((w, i) => {
+      let word = w.word;
+
+      // Check if the word contains emoji pattern like "emojiname1234567890"
+      // Custom Discord emojis get stored with their name and ID together after stripping <>:
+      const emojiMatch = w.word.match(/^([a-z_]+)(\d{17,19})$/i);
+      if (emojiMatch) {
+        // Reconstruct as <:name:id> for custom emoji
+        word = `<:${emojiMatch[1]}:${emojiMatch[2]}>`;
+      }
+      // Check if the word is just a user ID (all digits, 17-19 chars)
+      else if (/^\d{17,19}$/.test(w.word)) {
+        word = `<@${w.word}>`;
+      }
+
+      return `${i + 1}. **${word}** - ${w.total_count || w.count}`;
+    })
     .join('\n');
 }
 
