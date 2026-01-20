@@ -22,12 +22,21 @@ export default {
       await interaction.editReply(`Pulling... ${spinner[i % 4]}`);
     }
 
-    const messages = [
-      'I fricking hate skysill!',
-      'Im a big fan of Goopie Megpoid!'
-    ];
+    const roll = Math.random() * 100;
 
-    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-    await interaction.editReply(`${randomMessage}`);
+    if (roll < 5) {
+      for (let i = 0; i < 6; i++) {
+        await delay(200);
+        await interaction.editReply(`Capturing radiance Triggered ${spinner[i % 4]}`);
+      }
+      await interaction.editReply({
+        content: '',
+        files: ['https://cdn.pucas01.com/gRCJscEM/Gumi-Teto-Store.png']
+      });
+    } else if (roll < 52.5) {
+      await interaction.editReply('I fricking hate skysill!');
+    } else {
+      await interaction.editReply('Im a big fan of Goopie Megpoid!');
+    }
   },
 };
