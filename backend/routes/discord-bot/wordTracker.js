@@ -88,7 +88,19 @@ export function stopWeeklyRecap() {
 function formatWordList(words) {
   if (!words || words.length === 0) return 'No data yet';
   return words
-    .map((w, i) => `${i + 1}. **${w.word}** - ${w.total_count || w.count}`)
+    .map((w, i) => {
+      let word = w.word;
+
+      const emojiMatch = w.word.match(/^([a-z_]+)(\d{17,19})$/i);
+      if (emojiMatch) {
+        word = `<:${emojiMatch[1]}:${emojiMatch[2]}>`;
+      }
+      else if (/^\d{17,19}$/.test(w.word)) {
+        word = `<@${w.word}>`;
+      }
+
+      return `${i + 1}. **${word}** - ${w.total_count || w.count}`;
+    })
     .join('\n');
 }
 
