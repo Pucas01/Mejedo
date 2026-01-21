@@ -34,7 +34,7 @@ export default {
         files: ['https://cdn.pucas01.com/gRCJscEM/Gumi-Teto-Store.png']
       });
     } else if (roll < 52.5) {
-      await interaction.editReply('I fricking hate skysill!');
+      await interaction.editReply(`Skysill fucking hates <@${interaction.user.id}>`);
     } else {
       await interaction.editReply('Im a big fan of Goopie Megpoid!');
     }
