@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { registerWordTracking, startWeeklyRecap, stopWeeklyRecap } from './wordTracker.js';
+import { registerTemperatureConverter } from './temperatureConverter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +45,8 @@ class DiscordBot {
 
       registerWordTracking(this.client);
       startWeeklyRecap(this.client);
+
+      registerTemperatureConverter(this.client);
     } catch (error) {
       console.error('Failed to login Discord bot:', error);
     }
