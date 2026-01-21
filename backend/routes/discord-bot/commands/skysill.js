@@ -39,7 +39,7 @@ export default {
       });
     } else if (roll < 52.5) {
       // 47.5% chance
-      await interaction.editReply('I fricking hate skysill!');
+      await interaction.editReply(`Skysill fucking hates <@${interaction.user.id}>`);
     } else {
       // 47.5% chance
       await interaction.editReply('Im a big fan of Goopie Megpoid!');
