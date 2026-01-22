@@ -3,7 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { registerWordTracking, startWeeklyRecap, stopWeeklyRecap } from './wordTracker.js';
+import { registerSpotifyTracking, startSpotifyRecap, stopSpotifyRecap } from './spotifyTracker.js';
 import { registerTemperatureConverter } from './temperatureConverter.js';
+import { initializeGuildSettings, isFeatureEnabled } from './wordStatsDb.js';
+import { isGloballyOptedIn, addTrackedUser, isUserTracked, removeAllTrackedUsersForGuild, removeUserFromGuild } from './spotifyStatsDb.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,6 +49,9 @@ class DiscordBot {
       registerWordTracking(this.client);
       startWeeklyRecap(this.client);
 
+      registerSpotifyTracking(this.client);
+      startSpotifyRecap(this.client);
+
       registerTemperatureConverter(this.client);
     } catch (error) {
       console.error('Failed to login Discord bot:', error);
@@ -83,6 +89,71 @@ class DiscordBot {
         status: 'online',
         activities: [{ name: 'Shoaling and stuff', type: 0 }]
       });
+
+      this.client.guilds.cache.forEach(async (guild) => {
+        try {
+          await initializeGuildSettings(guild.id);
+          console.log(`Initialized settings for guild: ${guild.name}`);
+        } catch (error) {
+          console.error(`Failed to initialize settings for guild ${guild.id}:`, error);
+        }
+      });
+    });
+
+    this.client.on('guildCreate', async (guild) => {
+      console.log(`Bot joined new guild: ${guild.name} (${guild.id})`);
+      try {
+        await initializeGuildSettings(guild.id);
+        console.log(`Initialized settings for new guild: ${guild.name} (features disabled by default)`);
+      } catch (error) {
+        console.error(`Failed to initialize settings for guild ${guild.id}:`, error);
+      }
+    });
+
+    this.client.on('guildMemberAdd', async (member) => {
+      try {
+        const userId = member.id;
+        const guildId = member.guild.id;
+
+        const optedIn = await isGloballyOptedIn(userId);
+        if (!optedIn) return;
+
+        const enabled = await isFeatureEnabled(guildId, 'spotify_tracking');
+        if (!enabled) return;
+
+        const alreadyTracked = await isUserTracked(userId, guildId);
+        if (alreadyTracked) return;
+
+        await addTrackedUser(userId, guildId, member.user.username);
+        console.log(`[Auto-Track] Added ${member.user.username} to Spotify tracking in ${member.guild.name} (global opt-in)`);
+      } catch (error) {
+        console.error('Error auto-tracking user on guild join:', error);
+      }
+    });
+
+    this.client.on('guildDelete', async (guild) => {
+      try {
+        console.log(`Bot removed from guild: ${guild.name} (${guild.id})`);
+        await removeAllTrackedUsersForGuild(guild.id);
+        console.log(`Cleaned up tracked users for guild: ${guild.name}`);
+      } catch (error) {
+        console.error(`Error cleaning up guild ${guild.id}:`, error);
+      }
+    });
+
+    this.client.on('guildMemberRemove', async (member) => {
+      try {
+        const userId = member.id;
+        const guildId = member.guild.id;
+
+        const wasTracked = await isUserTracked(userId, guildId);
+        if (!wasTracked) return;
+
+        await removeUserFromGuild(userId, guildId);
+        console.log(`[Cleanup] Removed ${member.user?.username || userId} from Spotify tracking in ${member.guild.name} (user left guild)`);
+      } catch (error) {
+        console.error('Error cleaning up user on guild leave:', error);
+      }
     });
 
     this.client.on('interactionCreate', async (interaction) => {
@@ -156,6 +227,7 @@ class DiscordBot {
     if (this.client) {
       console.log('Stopping Discord bot...');
       stopWeeklyRecap();
+      stopSpotifyRecap();
 
       try {
         await this.client.user.setPresence({
@@ -178,6 +250,70 @@ class DiscordBot {
 
   isRunning() {
     return this.client !== null && this.client.isReady();
+  }
+
+  async broadcastAnnouncement(title, message, color = 0x39ff14) {
+    if (!this.isRunning()) {
+      throw new Error('Bot is not running');
+    }
+
+    const { getAllAnnouncementChannels } = await import('./wordStatsDb.js');
+    const announcementChannels = await getAllAnnouncementChannels();
+
+    const results = {
+      successful: [],
+      failed: []
+    };
+
+    for (const { guild_id, announcement_channel_id } of announcementChannels) {
+      try {
+        const channel = await this.client.channels.fetch(announcement_channel_id);
+
+        if (!channel) {
+          results.failed.push({
+            guild_id,
+            error: 'Channel not found'
+          });
+          continue;
+        }
+
+        const permissions = channel.permissionsFor(channel.guild.members.me);
+        if (!permissions || !permissions.has(['SendMessages', 'EmbedLinks'])) {
+          results.failed.push({
+            guild_id,
+            guild_name: channel.guild.name,
+            error: 'Missing permissions'
+          });
+          continue;
+        }
+
+        const embed = {
+          title,
+          description: message,
+          color,
+          timestamp: new Date().toISOString(),
+          footer: { text: 'Mejedo Announcement' }
+        };
+
+        await channel.send({ embeds: [embed] });
+
+        results.successful.push({
+          guild_id,
+          guild_name: channel.guild.name,
+          channel_name: channel.name
+        });
+
+        console.log(`[Announcement] Sent to ${channel.guild.name} (#${channel.name})`);
+      } catch (error) {
+        console.error(`Error sending announcement to guild ${guild_id}:`, error);
+        results.failed.push({
+          guild_id,
+          error: error.message
+        });
+      }
+    }
+
+    return results;
   }
 }
 

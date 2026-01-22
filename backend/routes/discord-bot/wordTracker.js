@@ -4,7 +4,8 @@ import {
   getWeeklyTopUsers,
   getWeeklyTotalCount,
   resetWeeklyStats,
-  getAllRecapChannels
+  getAllRecapChannels,
+  isFeatureEnabled
 } from './wordStatsDb.js';
 
 const STOP_WORDS = new Set([
@@ -36,6 +37,9 @@ export function registerWordTracking(client) {
     if (message.author.bot) return;
 
     if (!message.guild) return;
+
+    const enabled = await isFeatureEnabled(message.guild.id, 'word_tracking');
+    if (!enabled) return;
 
     const words = message.content
       .toLowerCase()
