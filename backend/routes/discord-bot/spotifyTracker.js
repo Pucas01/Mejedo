@@ -130,6 +130,7 @@ export function registerSpotifyTracking(client) {
       currentlyPlaying.set(userId, {
         trackId,
         startTime,
+        activityStartTime,
         trackName,
         artist,
         logTimeout,
