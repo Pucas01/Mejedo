@@ -1,0 +1,232 @@
+import {
+  logListenToAllGuilds,
+  isUserTrackedGlobally,
+  getWeeklyTopTracks,
+  getWeeklyTopArtists,
+  getWeeklyTopListeners,
+  getWeeklyTotalCount,
+  resetWeeklyStats,
+} from './spotifyStatsDb.js';
+import { isFeatureEnabled, getAllRecapChannels } from './wordStatsDb.js';
+
+// Track currently playing songs to avoid duplicate logs
+const currentlyPlaying = new Map(); // userId -> { trackId, startTime, trackName, artist }
+
+let recapInterval = null;
+let cleanupInterval = null;
+
+// Maximum age for currentlyPlaying entries (30 minutes)
+const MAX_PLAYING_AGE_MS = 30 * 60 * 1000;
+
+// Cleanup stale entries from currentlyPlaying Map
+function cleanupStaleEntries() {
+  const now = Date.now();
+  const staleUserIds = [];
+
+  for (const [userId, data] of currentlyPlaying.entries()) {
+    if (now - data.startTime > MAX_PLAYING_AGE_MS) {
+      staleUserIds.push(userId);
+    }
+  }
+
+  staleUserIds.forEach(userId => currentlyPlaying.delete(userId));
+
+  if (staleUserIds.length > 0) {
+    console.log(`[Spotify Cleanup] Removed ${staleUserIds.length} stale entries from currentlyPlaying Map`);
+  }
+}
+
+// Register Spotify presence tracking
+export function registerSpotifyTracking(client) {
+  client.on('presenceUpdate', async (oldPresence, newPresence) => {
+    try {
+      // Skip if user is not in a guild
+      if (!newPresence.guild) return;
+
+      const userId = newPresence.userId;
+      const guildId = newPresence.guild.id;
+
+      // Check if Spotify tracking is enabled for this guild
+      const enabled = await isFeatureEnabled(guildId, 'spotify_tracking');
+      if (!enabled) return;
+
+      // Check if this user is tracked in ANY guild (global check to avoid duplicate tracking)
+      const tracked = await isUserTrackedGlobally(userId);
+      if (!tracked) return;
+
+      // Find Spotify activity in the new presence
+      const spotifyActivity = newPresence.activities.find(
+        (activity) => activity.name === 'Spotify' && activity.type === 2 // Type 2 = Listening
+      );
+
+      // If no Spotify activity, clear currently playing for this user
+      if (!spotifyActivity) {
+        currentlyPlaying.delete(userId);
+        return;
+      }
+
+      // Extract track info from Spotify activity
+      const trackId = spotifyActivity.syncId; // Spotify track ID
+      const trackName = spotifyActivity.details; // Song name
+      const artist = spotifyActivity.state; // Artist name
+      const album = spotifyActivity.assets?.largeText; // Album name
+
+      // Check if this is a new song or continuation of same song
+      const currentTrack = currentlyPlaying.get(userId);
+      if (currentTrack && currentTrack.trackId === trackId) {
+        // Same song still playing, don't log again
+        return;
+      }
+
+      // New song detected! Log it
+      const startTime = Date.now();
+      const durationMs = spotifyActivity.timestamps?.end
+        ? spotifyActivity.timestamps.end - spotifyActivity.timestamps.start
+        : null;
+
+      // Update currently playing tracker
+      currentlyPlaying.set(userId, {
+        trackId,
+        startTime,
+        trackName,
+        artist,
+      });
+
+      // Log to ALL guilds where this user is tracked
+      await logListenToAllGuilds(userId, trackName, artist, album, trackId, durationMs);
+
+      console.log(`[Spotify] ${newPresence.user?.username} is listening to: ${trackName} by ${artist}`);
+    } catch (error) {
+      console.error('Error tracking Spotify presence:', error);
+    }
+  });
+
+  console.log('Spotify tracking registered');
+}
+
+// Start weekly recap scheduler
+export function startSpotifyRecap(client) {
+  // Start cleanup interval for currentlyPlaying Map (every 10 minutes)
+  cleanupInterval = setInterval(() => {
+    cleanupStaleEntries();
+  }, 10 * 60 * 1000);
+  console.log('Spotify currentlyPlaying cleanup scheduler started');
+
+  // Check every 5 minutes if it's time for any guild's recap
+  recapInterval = setInterval(async () => {
+    const now = new Date();
+    const currentDay = now.getDay();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    // Only check in the first 5 minutes of each hour
+    if (currentMinute >= 5) return;
+
+    // Get all guilds with recap channels configured
+    const recapChannels = await getAllRecapChannels();
+
+    for (const { guild_id, recap_channel_id, recap_day, recap_hour } of recapChannels) {
+      // Check if Spotify tracking is enabled for this guild
+      const enabled = await isFeatureEnabled(guild_id, 'spotify_tracking');
+      if (!enabled) continue;
+
+      // Check if it's time for this guild's recap
+      if (currentDay === recap_day && currentHour === recap_hour) {
+        await postSpotifyRecap(client, recap_channel_id, guild_id, true);
+      }
+    }
+  }, 5 * 60 * 1000); // Check every 5 minutes
+
+  console.log('Spotify recap scheduler started');
+}
+
+// Stop the recap scheduler
+export function stopSpotifyRecap() {
+  if (recapInterval) {
+    clearInterval(recapInterval);
+    recapInterval = null;
+  }
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
+}
+
+// Format track list for embed
+function formatTrackList(tracks) {
+  if (!tracks || tracks.length === 0) return 'No data yet';
+  return tracks
+    .map((t, i) => {
+      const listeners = t.unique_listeners > 1 ? ` • ${t.unique_listeners} listeners` : '';
+      return `${i + 1}. **${t.track_name}** - ${t.artist} (${t.play_count} plays${listeners})`;
+    })
+    .join('\n');
+}
+
+// Format artist list for embed
+function formatArtistList(artists) {
+  if (!artists || artists.length === 0) return 'No data yet';
+  return artists
+    .map((a, i) => {
+      const listeners = a.unique_listeners > 1 ? ` • ${a.unique_listeners} listeners` : '';
+      return `${i + 1}. **${a.artist}** (${a.play_count} plays${listeners})`;
+    })
+    .join('\n');
+}
+
+// Format listener list for embed
+function formatListenerList(listeners, client) {
+  if (!listeners || listeners.length === 0) return 'No data yet';
+  return listeners
+    .map((l, i) => {
+      const tracksText = l.unique_tracks === 1 ? 'track' : 'tracks';
+      return `${i + 1}. <@${l.user_id}> - ${l.listen_count} plays (${l.unique_tracks} unique ${tracksText})`;
+    })
+    .join('\n');
+}
+
+// Post weekly Spotify recap to channel
+export async function postSpotifyRecap(client, channelId, guildId, resetStats = true) {
+  const channel = client.channels.cache.get(channelId);
+  if (!channel) {
+    console.error('Spotify recap channel not found:', channelId);
+    return;
+  }
+
+  try {
+    const topTracks = await getWeeklyTopTracks(guildId, 10);
+    const topArtists = await getWeeklyTopArtists(guildId, 5);
+    const topListeners = await getWeeklyTopListeners(guildId, 5);
+    const totalListens = await getWeeklyTotalCount(guildId);
+
+    // Skip if no data
+    if (totalListens === 0) {
+      console.log('No Spotify data for weekly recap, skipping');
+      return;
+    }
+
+    const embed = {
+      title: resetStats ? 'Weekly Music Recap' : 'Music Stats Preview',
+      color: 0x39ff14, // Neon green (matches word recap)
+      fields: [
+        { name: 'Top Tracks', value: formatTrackList(topTracks), inline: false },
+        { name: 'Top Artists', value: formatArtistList(topArtists), inline: false },
+        { name: 'Top Listeners', value: formatListenerList(topListeners, client), inline: false },
+        { name: 'Total Plays', value: `${totalListens}`, inline: true }
+      ],
+      timestamp: new Date().toISOString(),
+      footer: { text: resetStats ? 'Stats reset weekly' : 'Preview only - stats not reset' }
+    };
+
+    await channel.send({ embeds: [embed] });
+    console.log(`Spotify weekly recap posted (reset: ${resetStats})`);
+
+    // Reset weekly stats only if requested
+    if (resetStats) {
+      await resetWeeklyStats(guildId);
+      console.log('Spotify weekly stats reset');
+    }
+  } catch (error) {
+    console.error('Error posting Spotify recap:', error);
+  }
+}

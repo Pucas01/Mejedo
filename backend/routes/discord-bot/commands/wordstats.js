@@ -80,7 +80,7 @@ export default {
             displayWord = `<@${w.word}>`;
           }
 
-          return `\`${String(i + 1).padStart(2, ' ')}.\` **${displayWord}** - ${count} ${bar}`;
+          return `${i + 1}. **${displayWord}** - ${count} ${bar}`;
         })
         .join('\n');
 

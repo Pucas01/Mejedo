@@ -1,11 +1,23 @@
 import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { postWeeklyRecap } from '../wordTracker.js';
+import { postSpotifyRecap } from '../spotifyTracker.js';
 import { getGuildSettings } from '../wordStatsDb.js';
 
 export default {
   data: new SlashCommandBuilder()
     .setName('forcerecap')
-    .setDescription('Force post the weekly word stats recap')
+    .setDescription('Force post a weekly recap')
+    .addStringOption(option =>
+      option
+        .setName('type')
+        .setDescription('Type of recap to post')
+        .setRequired(false)
+        .addChoices(
+          { name: 'Words', value: 'words' },
+          { name: 'Music', value: 'music' },
+          { name: 'Both', value: 'both' }
+        )
+    )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .setIntegrationTypes([0])
     .setContexts([0]),
@@ -15,6 +27,7 @@ export default {
 
     try {
       const guildId = interaction.guild.id;
+      const type = interaction.options.getString('type') || 'both';
 
       // Get guild settings from database
       const settings = await getGuildSettings(guildId);
@@ -24,8 +37,22 @@ export default {
         return;
       }
 
-      await postWeeklyRecap(interaction.client, settings.recap_channel_id, false);
-      await interaction.editReply('Word stats preview posted (stats where not reset btw).');
+      let message = '';
+
+      // Post word recap
+      if (type === 'words' || type === 'both') {
+        await postWeeklyRecap(interaction.client, settings.recap_channel_id, false);
+        message += 'Word stats preview posted. ';
+      }
+
+      // Post music recap
+      if (type === 'music' || type === 'both') {
+        await postSpotifyRecap(interaction.client, settings.recap_channel_id, guildId, false);
+        message += 'Music stats preview posted. ';
+      }
+
+      message += '(Stats were not reset)';
+      await interaction.editReply(message);
     } catch (error) {
       console.error('Error forcing recap:', error);
       await interaction.editReply('Failed to post recap. Check if the channel is valid and the bot has permissions.');

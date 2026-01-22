@@ -32,6 +32,10 @@ db.serialize(() => {
     recap_channel_id TEXT,
     recap_day INTEGER DEFAULT 0,
     recap_hour INTEGER DEFAULT 12,
+    word_tracking_enabled INTEGER DEFAULT 0,
+    spotify_tracking_enabled INTEGER DEFAULT 0,
+    announcement_channel_id TEXT,
+    announcements_enabled INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
@@ -39,6 +43,31 @@ db.serialize(() => {
   // Create indexes for faster queries
   db.run(`CREATE INDEX IF NOT EXISTS idx_word_stats_guild ON word_stats(guild_id)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_word_stats_weekly_guild ON word_stats_weekly(guild_id)`);
+
+  // Migration: Add announcement columns if they don't exist
+  db.all(`PRAGMA table_info(guild_settings)`, (err, columns) => {
+    if (err) {
+      console.error('Error checking guild_settings columns:', err);
+      return;
+    }
+
+    const hasAnnouncementChannel = columns.some(col => col.name === 'announcement_channel_id');
+    const hasAnnouncementsEnabled = columns.some(col => col.name === 'announcements_enabled');
+
+    if (!hasAnnouncementChannel) {
+      db.run(`ALTER TABLE guild_settings ADD COLUMN announcement_channel_id TEXT`, (err) => {
+        if (err) console.error('Error adding announcement_channel_id column:', err);
+        else console.log('[Migration] Added announcement_channel_id column to guild_settings');
+      });
+    }
+
+    if (!hasAnnouncementsEnabled) {
+      db.run(`ALTER TABLE guild_settings ADD COLUMN announcements_enabled INTEGER DEFAULT 0`, (err) => {
+        if (err) console.error('Error adding announcements_enabled column:', err);
+        else console.log('[Migration] Added announcements_enabled column to guild_settings');
+      });
+    }
+  });
 });
 
 // Promisified helpers
@@ -240,9 +269,117 @@ export async function setRecapChannel(guildId, channelId, day = 0, hour = 12) {
 // Get all guilds with recap channels configured
 export async function getAllRecapChannels() {
   return await allAsync(`
-    SELECT guild_id, recap_channel_id
+    SELECT guild_id, recap_channel_id, recap_day, recap_hour
     FROM guild_settings
     WHERE recap_channel_id IS NOT NULL
+  `);
+}
+
+// Initialize guild settings (called when bot joins a server)
+export async function initializeGuildSettings(guildId) {
+  // Check if settings already exist
+  const existing = await getGuildSettings(guildId);
+  if (existing) {
+    return; // Already initialized, don't change anything
+  }
+
+  // Check if server has existing word stats data (for migration)
+  const hasWordStats = await allAsync(`
+    SELECT COUNT(*) as count FROM word_stats WHERE guild_id = ? LIMIT 1
+  `, [guildId]);
+
+  // Check if server has existing Spotify stats data
+  // We need to check the spotify_listens table from the other database
+  let hasSpotifyStatsCount = 0;
+  try {
+    const spotifyDbPath = path.join(process.cwd(), 'config', 'spotify-stats.db');
+    const spotifyDb = new sqlite3.Database(spotifyDbPath);
+    const spotifyStats = await new Promise((resolve, reject) => {
+      spotifyDb.get(`SELECT COUNT(*) as count FROM spotify_listens WHERE guild_id = ? LIMIT 1`, [guildId], (err, row) => {
+        spotifyDb.close();
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    hasSpotifyStatsCount = spotifyStats?.count || 0;
+  } catch (error) {
+    // Spotify DB might not exist yet, that's okay
+    console.log(`[Migration] Could not check Spotify stats for guild ${guildId}:`, error.message);
+  }
+
+  // Auto-enable features if existing data is found
+  const wordEnabled = hasWordStats[0]?.count > 0 ? 1 : 0;
+  const spotifyEnabled = hasSpotifyStatsCount > 0 ? 1 : 0;
+
+  await runAsync(`
+    INSERT OR IGNORE INTO guild_settings (guild_id, word_tracking_enabled, spotify_tracking_enabled, announcements_enabled)
+    VALUES (?, ?, ?, 0)
+  `, [guildId, wordEnabled, spotifyEnabled]);
+
+  if (wordEnabled || spotifyEnabled) {
+    console.log(`[Migration] Auto-enabled features for guild ${guildId}: Word=${wordEnabled ? 'Yes' : 'No'}, Spotify=${spotifyEnabled ? 'Yes' : 'No'}`);
+  }
+}
+
+// Update feature flags for a guild
+export async function updateFeatureFlags(guildId, wordTracking, spotifyTracking, announcements = null) {
+  // Ensure guild settings exist first
+  await initializeGuildSettings(guildId);
+
+  // If announcements parameter not provided, don't update it
+  if (announcements === null) {
+    await runAsync(`
+      UPDATE guild_settings
+      SET word_tracking_enabled = ?,
+          spotify_tracking_enabled = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE guild_id = ?
+    `, [wordTracking ? 1 : 0, spotifyTracking ? 1 : 0, guildId]);
+  } else {
+    await runAsync(`
+      UPDATE guild_settings
+      SET word_tracking_enabled = ?,
+          spotify_tracking_enabled = ?,
+          announcements_enabled = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE guild_id = ?
+    `, [wordTracking ? 1 : 0, spotifyTracking ? 1 : 0, announcements ? 1 : 0, guildId]);
+  }
+}
+
+// Check if a feature is enabled for a guild
+export async function isFeatureEnabled(guildId, feature) {
+  const settings = await getGuildSettings(guildId);
+  if (!settings) return false; // Default to disabled
+
+  if (feature === 'word_tracking') {
+    return settings.word_tracking_enabled === 1;
+  } else if (feature === 'spotify_tracking') {
+    return settings.spotify_tracking_enabled === 1;
+  } else if (feature === 'announcements') {
+    return settings.announcements_enabled === 1;
+  }
+
+  return false;
+}
+
+// Set announcement channel for a guild
+export async function setAnnouncementChannel(guildId, channelId) {
+  await runAsync(`
+    INSERT INTO guild_settings (guild_id, announcement_channel_id, updated_at)
+    VALUES (?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(guild_id) DO UPDATE SET
+      announcement_channel_id = ?,
+      updated_at = CURRENT_TIMESTAMP
+  `, [guildId, channelId, channelId]);
+}
+
+// Get all guilds with announcements enabled and channel configured
+export async function getAllAnnouncementChannels() {
+  return await allAsync(`
+    SELECT guild_id, announcement_channel_id
+    FROM guild_settings
+    WHERE announcement_channel_id IS NOT NULL AND announcements_enabled = 1
   `);
 }
 

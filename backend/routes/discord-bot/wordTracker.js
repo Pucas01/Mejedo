@@ -4,7 +4,8 @@ import {
   getWeeklyTopUsers,
   getWeeklyTotalCount,
   resetWeeklyStats,
-  getAllRecapChannels
+  getAllRecapChannels,
+  isFeatureEnabled
 } from './wordStatsDb.js';
 
 // Common stop words to filter out
@@ -40,6 +41,10 @@ export function registerWordTracking(client) {
 
     // Skip DMs
     if (!message.guild) return;
+
+    // Check if word tracking is enabled for this guild
+    const enabled = await isFeatureEnabled(message.guild.id, 'word_tracking');
+    if (!enabled) return;
 
     // Parse words from message content (store ALL words, filter at query time)
     const words = message.content

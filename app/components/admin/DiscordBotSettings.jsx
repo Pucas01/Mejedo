@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Button from "../ui/Button";
 import WindowDecoration from "../window/WindowDecoration";
 import WordStatsModal from "./WordStatsModal";
+import SpotifyStatsModal from "./SpotifyStatsModal";
+import AnnouncementsModal from "./AnnouncementsModal";
 
 export default function DiscordBotSettings() {
   const [config, setConfig] = useState({
@@ -22,6 +24,8 @@ export default function DiscordBotSettings() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [showWordStatsModal, setShowWordStatsModal] = useState(false);
+  const [showSpotifyStatsModal, setShowSpotifyStatsModal] = useState(false);
+  const [showAnnouncementsModal, setShowAnnouncementsModal] = useState(false);
 
   useEffect(() => {
     fetchConfig();
@@ -354,6 +358,9 @@ export default function DiscordBotSettings() {
         {/* Word Stats Section */}
         <div className="border-t-2 border-[#39ff14] pt-6 space-y-4">
           <h3 className="text-[#39ff14] font-bold text-lg">Word Stats</h3>
+          <p className="text-gray-400 text-sm">
+            Track word usage across all messages in your Discord server
+          </p>
           <Button
             variant="primary"
             size="md"
@@ -361,6 +368,46 @@ export default function DiscordBotSettings() {
           >
             Open Word Stats Manager
           </Button>
+        </div>
+
+        {/* Spotify Stats Section */}
+        <div className="border-t-2 border-[#1db954] pt-6 space-y-4">
+          <h3 className="text-[#1db954] font-bold text-lg">Spotify Listening Stats</h3>
+          <p className="text-gray-400 text-sm">
+            Track what everyone in your server is listening to on Spotify via Discord presence
+          </p>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => setShowSpotifyStatsModal(true)}
+          >
+            Open Spotify Stats Manager
+          </Button>
+          <div className="text-xs text-gray-500 space-y-1">
+            <div>• Use <code className="bg-[#1a1a1f] px-1">/trackmusic add @user</code> to start tracking</div>
+            <div>• Users need Spotify connected to Discord</div>
+            <div>• Weekly recap posts on Sundays at 12:00 PM</div>
+          </div>
+        </div>
+
+        {/* Announcements Section */}
+        <div className="border-t-2 border-[#D73DA3] pt-6 space-y-4">
+          <h3 className="text-[#D73DA3] font-bold text-lg">Server Announcements</h3>
+          <p className="text-gray-400 text-sm">
+            Broadcast announcements to all servers with announcements enabled
+          </p>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => setShowAnnouncementsModal(true)}
+          >
+            Open Announcements Manager
+          </Button>
+          <div className="text-xs text-gray-500 space-y-1">
+            <div>• Use <code className="bg-[#1a1a1f] px-1">/features toggle</code> to enable announcements</div>
+            <div>• Use <code className="bg-[#1a1a1f] px-1">/setannouncements</code> to configure channel</div>
+            <div>• Send custom announcements with title, message, and color</div>
+          </div>
         </div>
 
         {/* Webhook Notifications Section */}
@@ -438,6 +485,18 @@ export default function DiscordBotSettings() {
       <WordStatsModal
         show={showWordStatsModal}
         onClose={() => setShowWordStatsModal(false)}
+      />
+
+      {/* Spotify Stats Modal */}
+      <SpotifyStatsModal
+        show={showSpotifyStatsModal}
+        onClose={() => setShowSpotifyStatsModal(false)}
+      />
+
+      {/* Announcements Modal */}
+      <AnnouncementsModal
+        show={showAnnouncementsModal}
+        onClose={() => setShowAnnouncementsModal(false)}
       />
     </div>
   );
