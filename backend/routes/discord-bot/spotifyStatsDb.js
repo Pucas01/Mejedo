@@ -296,7 +296,7 @@ export async function resetWeeklyStats(guildId) {
   await runAsync(`DELETE FROM spotify_listens_weekly WHERE guild_id = ?`, [guildId]);
 }
 
-// Get user's listening stats summary
+// Get user's listening stats summary (guild-specific)
 export async function getUserStats(guildId, userId) {
   const totalListens = await getAsync(`
     SELECT COUNT(*) as total
@@ -321,6 +321,64 @@ export async function getUserStats(guildId, userId) {
     uniqueTracks: uniqueTracks?.total || 0,
     uniqueArtists: uniqueArtists?.total || 0,
   };
+}
+
+// Get user's listening stats summary (global across all guilds)
+export async function getGlobalUserStats(userId) {
+  const totalListens = await getAsync(`
+    SELECT COUNT(*) as total
+    FROM spotify_listens
+    WHERE user_id = ?
+  `, [userId]);
+
+  const uniqueTracks = await getAsync(`
+    SELECT COUNT(DISTINCT track_name || artist) as total
+    FROM spotify_listens
+    WHERE user_id = ?
+  `, [userId]);
+
+  const uniqueArtists = await getAsync(`
+    SELECT COUNT(DISTINCT artist) as total
+    FROM spotify_listens
+    WHERE user_id = ?
+  `, [userId]);
+
+  return {
+    totalListens: totalListens?.total || 0,
+    uniqueTracks: uniqueTracks?.total || 0,
+    uniqueArtists: uniqueArtists?.total || 0,
+  };
+}
+
+// Get top tracks for a user globally (across all guilds)
+export async function getGlobalTopTracksForUser(userId, limit = 10) {
+  return await allAsync(`
+    SELECT
+      track_name,
+      artist,
+      album,
+      COUNT(*) as play_count
+    FROM spotify_listens
+    WHERE user_id = ?
+    GROUP BY track_name, artist
+    ORDER BY play_count DESC
+    LIMIT ?
+  `, [userId, limit]);
+}
+
+// Get top artists for a user globally (across all guilds)
+export async function getGlobalTopArtistsForUser(userId, limit = 10) {
+  return await allAsync(`
+    SELECT
+      artist,
+      COUNT(*) as play_count,
+      COUNT(DISTINCT track_name) as unique_tracks
+    FROM spotify_listens
+    WHERE user_id = ?
+    GROUP BY artist
+    ORDER BY play_count DESC
+    LIMIT ?
+  `, [userId, limit]);
 }
 
 // Get music compatibility between two users (shared artists/tracks)

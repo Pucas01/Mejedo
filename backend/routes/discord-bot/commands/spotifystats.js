@@ -2,10 +2,10 @@ import { SlashCommandBuilder } from 'discord.js';
 import {
   getTopTracks,
   getTopArtists,
-  getTopTracksForUser,
-  getTopArtistsForUser,
-  getUserStats,
-  isUserTracked,
+  getGlobalUserStats,
+  getGlobalTopTracksForUser,
+  getGlobalTopArtistsForUser,
+  isUserTrackedGlobally,
 } from '../spotifyStatsDb.js';
 
 export default {
@@ -49,16 +49,16 @@ export default {
       let thumbnail = null;
 
       if (targetUser) {
-        // View specific user's stats
-        const tracked = await isUserTracked(targetUser.id, guildId);
+        // View specific user's stats (global across all servers)
+        const tracked = await isUserTrackedGlobally(targetUser.id);
         if (!tracked) {
           await interaction.editReply({
-            content: `${targetUser.username} is not being tracked in this server yet. An admin needs to add them with \`/trackmusic add\`.`
+            content: `${targetUser.username} is not being tracked in any server yet.`
           });
           return;
         }
 
-        const stats = await getUserStats(guildId, targetUser.id);
+        const stats = await getGlobalUserStats(targetUser.id);
         if (stats.totalListens === 0) {
           await interaction.editReply({
             content: `${targetUser.username} hasn't listened to any songs yet (or hasn't connected Spotify to Discord).`
@@ -67,11 +67,11 @@ export default {
         }
 
         title = `${targetUser.username}'s Spotify Stats`;
-        description = `Total: **${stats.totalListens}** plays • **${stats.uniqueTracks}** tracks • **${stats.uniqueArtists}** artists`;
+        description = `Total: **${stats.totalListens}** plays • **${stats.uniqueTracks}** tracks • **${stats.uniqueArtists}** artists\n*Showing global stats across all servers*`;
         thumbnail = { url: targetUser.displayAvatarURL() };
 
         if (type === 'both' || type === 'tracks') {
-          const topTracks = await getTopTracksForUser(guildId, targetUser.id, 15);
+          const topTracks = await getGlobalTopTracksForUser(targetUser.id, 15);
           const trackList = topTracks.length > 0
             ? topTracks.map((t, i) => `${i + 1}. **${t.track_name}** - ${t.artist} (${t.play_count} plays)`).join('\n')
             : 'No tracks yet';
@@ -79,7 +79,7 @@ export default {
         }
 
         if (type === 'both' || type === 'artists') {
-          const topArtists = await getTopArtistsForUser(guildId, targetUser.id, 10);
+          const topArtists = await getGlobalTopArtistsForUser(targetUser.id, 10);
           const artistList = topArtists.length > 0
             ? topArtists.map((a, i) => `${i + 1}. **${a.artist}** (${a.play_count} plays • ${a.unique_tracks} tracks)`).join('\n')
             : 'No artists yet';
@@ -87,16 +87,16 @@ export default {
         }
 
       } else if (scope === 'personal') {
-        // View own stats
-        const tracked = await isUserTracked(interaction.user.id, guildId);
+        // View own stats (global across all servers)
+        const tracked = await isUserTrackedGlobally(interaction.user.id);
         if (!tracked) {
           await interaction.editReply({
-            content: `You are not being tracked in this server yet. An admin needs to add you with \`/trackmusic add\`.`
+            content: `You are not being tracked in any server yet.`
           });
           return;
         }
 
-        const stats = await getUserStats(guildId, interaction.user.id);
+        const stats = await getGlobalUserStats(interaction.user.id);
         if (stats.totalListens === 0) {
           await interaction.editReply({
             content: `You haven't listened to any songs yet (or haven't connected Spotify to Discord).`
@@ -105,11 +105,11 @@ export default {
         }
 
         title = `Your Spotify Stats`;
-        description = `Total: **${stats.totalListens}** plays • **${stats.uniqueTracks}** tracks • **${stats.uniqueArtists}** artists`;
+        description = `Total: **${stats.totalListens}** plays • **${stats.uniqueTracks}** tracks • **${stats.uniqueArtists}** artists\n*Showing global stats across all servers*`;
         thumbnail = { url: interaction.user.displayAvatarURL() };
 
         if (type === 'both' || type === 'tracks') {
-          const topTracks = await getTopTracksForUser(guildId, interaction.user.id, 15);
+          const topTracks = await getGlobalTopTracksForUser(interaction.user.id, 15);
           const trackList = topTracks.length > 0
             ? topTracks.map((t, i) => `${i + 1}. **${t.track_name}** - ${t.artist} (${t.play_count} plays)`).join('\n')
             : 'No tracks yet';
@@ -117,7 +117,7 @@ export default {
         }
 
         if (type === 'both' || type === 'artists') {
-          const topArtists = await getTopArtistsForUser(guildId, interaction.user.id, 10);
+          const topArtists = await getGlobalTopArtistsForUser(interaction.user.id, 10);
           const artistList = topArtists.length > 0
             ? topArtists.map((a, i) => `${i + 1}. **${a.artist}** (${a.play_count} plays • ${a.unique_tracks} tracks)`).join('\n')
             : 'No artists yet';
