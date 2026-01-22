@@ -32,15 +32,26 @@ export default {
           { name: 'Tracks & Artists', value: 'both' },
           { name: 'Tracks Only', value: 'tracks' },
           { name: 'Artists Only', value: 'artists' }
-        )),
+        ))
+    .setIntegrationTypes([0, 1])
+    .setContexts([0, 1, 2]),
 
   async execute(interaction) {
-    const scope = interaction.options.getString('scope') || 'server';
+    const context = interaction.context;
+    const inDM = context === 1 || context === 2;
+    const scope = interaction.options.getString('scope') || (inDM ? 'personal' : 'server');
     const targetUser = interaction.options.getUser('user');
     const type = interaction.options.getString('type') || 'both';
-    const guildId = interaction.guild.id;
+    const guildId = interaction.guild?.id;
 
     await interaction.deferReply();
+
+    if (inDM && scope === 'server') {
+      await interaction.editReply({
+        content: 'Server stats are only available in servers. Use `/spotifystats scope:personal` to view your personal stats.'
+      });
+      return;
+    }
 
     try {
       let title;
@@ -123,6 +134,12 @@ export default {
         }
 
       } else {
+        if (inDM) {
+          await interaction.editReply({
+            content: 'Server stats are only available in servers. Use `scope:personal` to view your personal stats in DMs.'
+          });
+          return;
+        }
         title = `Server Spotify Stats`;
         description = `What everyone has been listening to on ${interaction.guild.name}`;
 
