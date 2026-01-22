@@ -276,8 +276,8 @@ export async function initializeGuildSettings(guildId) {
   const spotifyEnabled = hasSpotifyStatsCount > 0 ? 1 : 0;
 
   await runAsync(`
-    INSERT OR IGNORE INTO guild_settings (guild_id, word_tracking_enabled, spotify_tracking_enabled, announcements_enabled)
-    VALUES (?, ?, ?, 0)
+    INSERT OR IGNORE INTO guild_settings (guild_id, word_tracking_enabled, spotify_tracking_enabled)
+    VALUES (?, ?, ?)
   `, [guildId, wordEnabled, spotifyEnabled]);
 
   if (wordEnabled || spotifyEnabled) {
