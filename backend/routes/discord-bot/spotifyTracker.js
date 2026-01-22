@@ -14,6 +14,7 @@ const currentlyPlaying = new Map(); // userId -> { trackId, startTime, trackName
 
 let recapInterval = null;
 let cleanupInterval = null;
+let loopCheckInterval = null;
 
 // Maximum age for currentlyPlaying entries (30 minutes)
 const MAX_PLAYING_AGE_MS = 30 * 60 * 1000;
@@ -39,8 +40,90 @@ function cleanupStaleEntries() {
   }
 }
 
+// Poll for song position changes to detect loops
+function startLoopDetection(client) {
+  // Check every 30 seconds for position changes
+  loopCheckInterval = setInterval(async () => {
+    const now = Date.now();
+
+    for (const [userId, trackData] of currentlyPlaying.entries()) {
+      // Skip if song hasn't been logged yet
+      if (!trackData.logged) continue;
+
+      try {
+        // Find the user's current presence across all guilds
+        let foundPresence = null;
+        for (const guild of client.guilds.cache.values()) {
+          const member = guild.members.cache.get(userId);
+          if (member?.presence) {
+            foundPresence = member.presence;
+            break;
+          }
+        }
+
+        if (!foundPresence) continue;
+
+        // Find Spotify activity
+        const spotifyActivity = foundPresence.activities.find(
+          (activity) => activity.name === 'Spotify' && activity.type === 2
+        );
+
+        if (!spotifyActivity || spotifyActivity.syncId !== trackData.trackId) {
+          // User stopped playing or switched songs
+          continue;
+        }
+
+        // Calculate current position in the song
+        const activityStart = spotifyActivity.timestamps?.start;
+        if (!activityStart) continue;
+
+        const currentPosition = now - activityStart;
+        const lastPosition = trackData.lastKnownPosition || 0;
+
+        // If position went backwards AND at least 1 minute has passed since last log, it's a loop
+        const timeSinceLastLog = now - (trackData.lastLogTime || 0);
+        if (currentPosition < lastPosition - 5000 && timeSinceLastLog >= 60000) {
+
+          // Cancel any pending timeout
+          if (trackData.logTimeout) {
+            clearTimeout(trackData.logTimeout);
+          }
+
+          // Schedule a new log after 10 seconds
+          const logTimeout = setTimeout(async () => {
+            await logListenToAllGuilds(userId, trackData.trackName, trackData.artist, trackData.album, trackData.trackId, trackData.durationMs);
+            const track = currentlyPlaying.get(userId);
+            if (track) {
+              track.lastLogTime = Date.now();
+              track.logTimeout = null;
+            }
+            console.log(`[Spotify] User ${userId} listened to (looped): ${trackData.trackName} by ${trackData.artist}`);
+          }, MIN_PLAY_TIME_MS);
+
+          // Update tracker
+          currentlyPlaying.set(userId, {
+            ...trackData,
+            lastKnownPosition: currentPosition,
+            logTimeout,
+          });
+        } else {
+          // Update the last known position
+          trackData.lastKnownPosition = currentPosition;
+        }
+      } catch (error) {
+        console.error('[Loop Check] Error checking user:', error);
+      }
+    }
+  }, 30000); // Check every 30 seconds
+
+  console.log('Spotify loop detection polling started (every 30s)');
+}
+
 // Register Spotify presence tracking
 export function registerSpotifyTracking(client) {
+  // Start loop detection polling
+  startLoopDetection(client);
+
   client.on('presenceUpdate', async (oldPresence, newPresence) => {
     try {
       // Skip if user is not in a guild
@@ -81,20 +164,25 @@ export function registerSpotifyTracking(client) {
       const durationMs = spotifyActivity.timestamps?.end
         ? spotifyActivity.timestamps.end - spotifyActivity.timestamps.start
         : null;
+      const activityStartTime = spotifyActivity.timestamps?.start; // When Spotify says the song started
 
       // Check if this is a new song or continuation of same song
       const currentTrack = currentlyPlaying.get(userId);
       const now = Date.now();
 
       if (currentTrack && currentTrack.trackId === trackId) {
-        // Same track still playing, check if we need to handle loops
-        if (currentTrack.logged) {
-          // Song was already logged, check if enough time has passed for a loop
-          const timeSinceLastLog = now - currentTrack.lastLogTime;
+        // Same track still playing
+        // Check for loop via activity start time change
+        if (currentTrack.activityStartTime && activityStartTime) {
+          const timeDiff = Math.abs(activityStartTime - currentTrack.activityStartTime);
 
-          if (timeSinceLastLog >= 60000) { // 60000ms = 1 minute
-            // More than 1 minute has passed, this is a loop/restart
-            console.log(`[Spotify Loop] ${newPresence.user?.username} looped: ${trackName} by ${artist}`);
+          // If activity start time changed significantly (>2 seconds), this is a loop/restart
+          if (timeDiff > 2000 && currentTrack.logged) {
+
+            // Cancel old timeout if it exists
+            if (currentTrack.logTimeout) {
+              clearTimeout(currentTrack.logTimeout);
+            }
 
             // Schedule a new log after 10 seconds
             const logTimeout = setTimeout(async () => {
@@ -102,7 +190,43 @@ export function registerSpotifyTracking(client) {
               const track = currentlyPlaying.get(userId);
               if (track) {
                 track.lastLogTime = Date.now();
+                track.logTimeout = null;
               }
+              console.log(`[Spotify] ${newPresence.user?.username} listened to (looped): ${trackName} by ${artist}`);
+            }, MIN_PLAY_TIME_MS);
+
+            // Update tracker with new activity start time
+            currentlyPlaying.set(userId, {
+              ...currentTrack,
+              activityStartTime,
+              logTimeout,
+            });
+            return;
+          }
+        }
+
+        // Fallback: check if we need to handle loops via time-based detection
+        if (currentTrack.logged) {
+          // Song was already logged, check if enough time has passed for a loop
+          const timeSinceLastLog = now - currentTrack.lastLogTime;
+
+          if (timeSinceLastLog >= 60000) { // 60000ms = 1 minute
+            // More than 1 minute has passed, this is a loop/restart
+
+            // Cancel old timeout if it exists
+            if (currentTrack.logTimeout) {
+              clearTimeout(currentTrack.logTimeout);
+            }
+
+            // Schedule a new log after 10 seconds
+            const logTimeout = setTimeout(async () => {
+              await logListenToAllGuilds(userId, trackName, artist, album, trackId, durationMs);
+              const track = currentlyPlaying.get(userId);
+              if (track) {
+                track.lastLogTime = Date.now();
+                track.logTimeout = null;
+              }
+              console.log(`[Spotify] ${newPresence.user?.username} listened to (looped): ${trackName} by ${artist}`);
             }, MIN_PLAY_TIME_MS);
 
             // Update tracker
@@ -146,9 +270,13 @@ export function registerSpotifyTracking(client) {
         startTime,
         trackName,
         artist,
+        album,
+        durationMs,
         logTimeout,
         logged: false,
         lastLogTime: null,
+        activityStartTime, // Track Spotify's reported start time
+        lastKnownPosition: 0, // Track the song position for loop detection
       });
     } catch (error) {
       console.error('Error tracking Spotify presence:', error);
@@ -203,6 +331,10 @@ export function stopSpotifyRecap() {
   if (cleanupInterval) {
     clearInterval(cleanupInterval);
     cleanupInterval = null;
+  }
+  if (loopCheckInterval) {
+    clearInterval(loopCheckInterval);
+    loopCheckInterval = null;
   }
 }
 
