@@ -44,28 +44,69 @@ db.serialize(() => {
   db.run(`CREATE INDEX IF NOT EXISTS idx_word_stats_guild ON word_stats(guild_id)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_word_stats_weekly_guild ON word_stats_weekly(guild_id)`);
 
-  // Migration: Add announcement columns if they don't exist
+  // Migration: Add missing columns to guild_settings if they don't exist
   db.all(`PRAGMA table_info(guild_settings)`, (err, columns) => {
     if (err) {
-      console.error('Error checking guild_settings columns:', err);
+      console.error('[Migration] Error checking guild_settings columns:', err);
       return;
     }
 
-    const hasAnnouncementChannel = columns.some(col => col.name === 'announcement_channel_id');
-    const hasAnnouncementsEnabled = columns.some(col => col.name === 'announcements_enabled');
+    const columnNames = columns.map(col => col.name);
+    const migrations = [];
 
-    if (!hasAnnouncementChannel) {
-      db.run(`ALTER TABLE guild_settings ADD COLUMN announcement_channel_id TEXT`, (err) => {
-        if (err) console.error('Error adding announcement_channel_id column:', err);
-        else console.log('[Migration] Added announcement_channel_id column to guild_settings');
+    // Check for all feature flag columns
+    if (!columnNames.includes('word_tracking_enabled')) {
+      migrations.push({
+        column: 'word_tracking_enabled',
+        sql: 'ALTER TABLE guild_settings ADD COLUMN word_tracking_enabled INTEGER DEFAULT 0'
       });
     }
 
-    if (!hasAnnouncementsEnabled) {
-      db.run(`ALTER TABLE guild_settings ADD COLUMN announcements_enabled INTEGER DEFAULT 0`, (err) => {
-        if (err) console.error('Error adding announcements_enabled column:', err);
-        else console.log('[Migration] Added announcements_enabled column to guild_settings');
+    if (!columnNames.includes('spotify_tracking_enabled')) {
+      migrations.push({
+        column: 'spotify_tracking_enabled',
+        sql: 'ALTER TABLE guild_settings ADD COLUMN spotify_tracking_enabled INTEGER DEFAULT 0'
       });
+    }
+
+    if (!columnNames.includes('announcement_channel_id')) {
+      migrations.push({
+        column: 'announcement_channel_id',
+        sql: 'ALTER TABLE guild_settings ADD COLUMN announcement_channel_id TEXT'
+      });
+    }
+
+    if (!columnNames.includes('announcements_enabled')) {
+      migrations.push({
+        column: 'announcements_enabled',
+        sql: 'ALTER TABLE guild_settings ADD COLUMN announcements_enabled INTEGER DEFAULT 0'
+      });
+    }
+
+    // Run migrations sequentially
+    if (migrations.length > 0) {
+      console.log(`[Migration] Found ${migrations.length} missing columns in guild_settings, adding them...`);
+
+      let index = 0;
+      const runNextMigration = () => {
+        if (index >= migrations.length) {
+          console.log('[Migration] All guild_settings migrations completed successfully');
+          return;
+        }
+
+        const migration = migrations[index];
+        db.run(migration.sql, (err) => {
+          if (err) {
+            console.error(`[Migration] Error adding ${migration.column} column:`, err);
+          } else {
+            console.log(`[Migration] Added ${migration.column} column to guild_settings`);
+          }
+          index++;
+          runNextMigration();
+        });
+      };
+
+      runNextMigration();
     }
   });
 });
