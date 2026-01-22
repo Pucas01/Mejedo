@@ -16,6 +16,8 @@ let cleanupInterval = null;
 
 const MAX_PLAYING_AGE_MS = 30 * 60 * 1000;
 
+const MIN_PLAY_TIME_MS = 10 * 1000;
+
 function cleanupStaleEntries() {
   const now = Date.now();
   const staleUserIds = [];
@@ -52,6 +54,10 @@ export function registerSpotifyTracking(client) {
       );
 
       if (!spotifyActivity) {
+        const currentTrack = currentlyPlaying.get(userId);
+        if (currentTrack?.logTimeout) {
+          clearTimeout(currentTrack.logTimeout);
+        }
         currentlyPlaying.delete(userId);
         return;
       }
@@ -60,27 +66,65 @@ export function registerSpotifyTracking(client) {
       const trackName = spotifyActivity.details;
       const artist = spotifyActivity.state;
       const album = spotifyActivity.assets?.largeText;
-
-      const currentTrack = currentlyPlaying.get(userId);
-      if (currentTrack && currentTrack.trackId === trackId) {
-        return;
-      }
-
-      const startTime = Date.now();
       const durationMs = spotifyActivity.timestamps?.end
         ? spotifyActivity.timestamps.end - spotifyActivity.timestamps.start
         : null;
+
+      const currentTrack = currentlyPlaying.get(userId);
+      const now = Date.now();
+
+      if (currentTrack && currentTrack.trackId === trackId) {
+        if (currentTrack.logged) {
+          const timeSinceLastLog = now - currentTrack.lastLogTime;
+
+          if (timeSinceLastLog >= 60000) {
+            console.log(`[Spotify Loop] ${newPresence.user?.username} looped: ${trackName} by ${artist}`);
+
+            const logTimeout = setTimeout(async () => {
+              await logListenToAllGuilds(userId, trackName, artist, album, trackId, durationMs);
+              const track = currentlyPlaying.get(userId);
+              if (track) {
+                track.lastLogTime = Date.now();
+              }
+            }, MIN_PLAY_TIME_MS);
+
+            currentlyPlaying.set(userId, {
+              ...currentTrack,
+              logTimeout,
+            });
+          }
+        }
+        return;
+      }
+
+      if (currentTrack?.logTimeout) {
+        clearTimeout(currentTrack.logTimeout);
+      }
+
+      const startTime = now;
+
+      const logTimeout = setTimeout(async () => {
+        await logListenToAllGuilds(userId, trackName, artist, album, trackId, durationMs);
+
+        const track = currentlyPlaying.get(userId);
+        if (track) {
+          track.logged = true;
+          track.lastLogTime = Date.now();
+          track.logTimeout = null;
+        }
+
+        console.log(`[Spotify] ${newPresence.user?.username} listened to: ${trackName} by ${artist}`);
+      }, MIN_PLAY_TIME_MS);
 
       currentlyPlaying.set(userId, {
         trackId,
         startTime,
         trackName,
         artist,
+        logTimeout,
+        logged: false,
+        lastLogTime: null,
       });
-
-      await logListenToAllGuilds(userId, trackName, artist, album, trackId, durationMs);
-
-      console.log(`[Spotify] ${newPresence.user?.username} is listening to: ${trackName} by ${artist}`);
     } catch (error) {
       console.error('Error tracking Spotify presence:', error);
     }

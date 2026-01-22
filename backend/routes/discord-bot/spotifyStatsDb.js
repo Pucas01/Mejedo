@@ -289,6 +289,61 @@ export async function getUserStats(guildId, userId) {
   };
 }
 
+export async function getGlobalUserStats(userId) {
+  const totalListens = await getAsync(`
+    SELECT COUNT(*) as total
+    FROM spotify_listens
+    WHERE user_id = ?
+  `, [userId]);
+
+  const uniqueTracks = await getAsync(`
+    SELECT COUNT(DISTINCT track_name || artist) as total
+    FROM spotify_listens
+    WHERE user_id = ?
+  `, [userId]);
+
+  const uniqueArtists = await getAsync(`
+    SELECT COUNT(DISTINCT artist) as total
+    FROM spotify_listens
+    WHERE user_id = ?
+  `, [userId]);
+
+  return {
+    totalListens: totalListens?.total || 0,
+    uniqueTracks: uniqueTracks?.total || 0,
+    uniqueArtists: uniqueArtists?.total || 0,
+  };
+}
+
+export async function getGlobalTopTracksForUser(userId, limit = 10) {
+  return await allAsync(`
+    SELECT
+      track_name,
+      artist,
+      album,
+      COUNT(*) as play_count
+    FROM spotify_listens
+    WHERE user_id = ?
+    GROUP BY track_name, artist
+    ORDER BY play_count DESC
+    LIMIT ?
+  `, [userId, limit]);
+}
+
+export async function getGlobalTopArtistsForUser(userId, limit = 10) {
+  return await allAsync(`
+    SELECT
+      artist,
+      COUNT(*) as play_count,
+      COUNT(DISTINCT track_name) as unique_tracks
+    FROM spotify_listens
+    WHERE user_id = ?
+    GROUP BY artist
+    ORDER BY play_count DESC
+    LIMIT ?
+  `, [userId, limit]);
+}
+
 export async function getMusicCompatibility(guildId, userId1, userId2) {
   const sharedArtists = await allAsync(`
     SELECT
