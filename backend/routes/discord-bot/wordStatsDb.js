@@ -311,9 +311,11 @@ export async function initializeGuildSettings(guildId) {
   const wordEnabled = hasWordStats[0]?.count > 0 ? 1 : 0;
   const spotifyEnabled = hasSpotifyStatsCount > 0 ? 1 : 0;
 
+  // Use INSERT OR IGNORE to avoid conflicts, only insert basic columns
+  // The migration will add announcement columns if they don't exist
   await runAsync(`
-    INSERT OR IGNORE INTO guild_settings (guild_id, word_tracking_enabled, spotify_tracking_enabled, announcements_enabled)
-    VALUES (?, ?, ?, 0)
+    INSERT OR IGNORE INTO guild_settings (guild_id, word_tracking_enabled, spotify_tracking_enabled)
+    VALUES (?, ?, ?)
   `, [guildId, wordEnabled, spotifyEnabled]);
 
   if (wordEnabled || spotifyEnabled) {
