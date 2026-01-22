@@ -66,7 +66,6 @@ export function registerSpotifyTracking(client) {
       const trackName = spotifyActivity.details;
       const artist = spotifyActivity.state;
       const album = spotifyActivity.assets?.largeText;
-      const activityStartTime = spotifyActivity.timestamps?.start || Date.now();
       const durationMs = spotifyActivity.timestamps?.end
         ? spotifyActivity.timestamps.end - spotifyActivity.timestamps.start
         : null;
@@ -75,35 +74,25 @@ export function registerSpotifyTracking(client) {
       const now = Date.now();
 
       if (currentTrack && currentTrack.trackId === trackId) {
-        const timeDiff = Math.abs(activityStartTime - currentTrack.activityStartTime);
+        if (currentTrack.logged) {
+          const timeSinceLastLog = now - currentTrack.lastLogTime;
 
-        if (timeDiff > 2000) {
-          console.log(`[Spotify Loop] ${newPresence.user?.username} looped: ${trackName} by ${artist}`);
+          if (timeSinceLastLog >= 60000) {
+            console.log(`[Spotify Loop] ${newPresence.user?.username} looped: ${trackName} by ${artist}`);
 
-          if (currentTrack.logTimeout) {
-            clearTimeout(currentTrack.logTimeout);
+            const logTimeout = setTimeout(async () => {
+              await logListenToAllGuilds(userId, trackName, artist, album, trackId, durationMs);
+              const track = currentlyPlaying.get(userId);
+              if (track) {
+                track.lastLogTime = Date.now();
+              }
+            }, MIN_PLAY_TIME_MS);
+
+            currentlyPlaying.set(userId, {
+              ...currentTrack,
+              logTimeout,
+            });
           }
-
-          const logTimeout = setTimeout(async () => {
-            await logListenToAllGuilds(userId, trackName, artist, album, trackId, durationMs);
-            const track = currentlyPlaying.get(userId);
-            if (track) {
-              track.logged = true;
-              track.lastLogTime = Date.now();
-              track.logTimeout = null;
-            }
-          }, MIN_PLAY_TIME_MS);
-
-          currentlyPlaying.set(userId, {
-            trackId,
-            startTime: now,
-            activityStartTime,
-            trackName,
-            artist,
-            logTimeout,
-            logged: false,
-            lastLogTime: null,
-          });
         }
         return;
       }
