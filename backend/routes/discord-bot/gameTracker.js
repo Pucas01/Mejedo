@@ -64,7 +64,7 @@ async function handleGameStart(guildId, userId, game) {
   const gameId = game.applicationId || null;
 
   // Store in database
-  const sessionId = gameStatsDb.startGameSession(guildId, userId, gameName, gameId);
+  const sessionId = await gameStatsDb.startGameSession(guildId, userId, gameName, gameId);
 
   // Track in memory
   activeSessions.set(userId, {
@@ -83,7 +83,7 @@ async function handleGameStop(guildId, userId) {
 
   if (session) {
     // End session in database
-    gameStatsDb.endGameSession(guildId, userId, session.sessionId);
+    await gameStatsDb.endGameSession(guildId, userId, session.sessionId);
 
     // Remove from memory
     activeSessions.delete(userId);
@@ -93,14 +93,14 @@ async function handleGameStop(guildId, userId) {
   }
 }
 
-function updateActiveSessionCheckpoints() {
+async function updateActiveSessionCheckpoints() {
   // Update end times for all active sessions as checkpoints
   // This prevents data loss if bot crashes during long sessions
   for (const [userId, session] of activeSessions.entries()) {
     try {
-      gameStatsDb.endGameSession(session.guildId, userId, session.sessionId);
+      await gameStatsDb.endGameSession(session.guildId, userId, session.sessionId);
       // Restart the session with a new entry
-      const newSessionId = gameStatsDb.startGameSession(
+      const newSessionId = await gameStatsDb.startGameSession(
         session.guildId,
         userId,
         session.gameName,
@@ -212,9 +212,9 @@ export function stopGameTracking() {
 }
 
 // Initialize on bot start - end any sessions that were active when bot stopped
-export function initializeGameTracking() {
+export async function initializeGameTracking() {
   console.log('Initializing game tracking...');
-  gameStatsDb.endAllActiveSessions();
+  await gameStatsDb.endAllActiveSessions();
   console.log('Ended all previously active game sessions');
 }
 
