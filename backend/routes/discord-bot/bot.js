@@ -30,11 +30,7 @@ class DiscordBot {
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildPresences,
         GatewayIntentBits.MessageContent,
-      ],
-      presence: {
-        status: 'online',
-        activities: [{ name: 'Shoaling and stuff', type: 0 }]
-      }
+      ]
     });
 
     // Load commands
@@ -93,15 +89,24 @@ class DiscordBot {
     }
   }
 
+  updateBotStatus() {
+    if (!this.client || !this.client.user) return;
+
+    const guildCount = this.client.guilds.cache.size;
+    const serverText = guildCount === 1 ? 'server' : 'servers';
+
+    this.client.user.setPresence({
+      status: 'online',
+      activities: [{ name: `Shoaling in ${guildCount} ${serverText}`, type: 0 }]
+    });
+  }
+
   registerEvents() {
     this.client.once('ready', () => {
       console.log(`Discord bot ready! Logged in as ${this.client.user.tag}`);
 
-      // Set bot status to online
-      this.client.user.setPresence({
-        status: 'online',
-        activities: [{ name: 'Shoaling and stuff', type: 0 }]
-      });
+      // Set bot status with server count
+      this.updateBotStatus();
 
       // Initialize settings for all guilds the bot is in
       this.client.guilds.cache.forEach(async (guild) => {
@@ -120,9 +125,20 @@ class DiscordBot {
       try {
         await initializeGuildSettings(guild.id);
         console.log(`Initialized settings for new guild: ${guild.name} (features disabled by default)`);
+
+        // Update bot status with new server count
+        this.updateBotStatus();
       } catch (error) {
         console.error(`Failed to initialize settings for guild ${guild.id}:`, error);
       }
+    });
+
+    // Update status when bot leaves a guild
+    this.client.on('guildDelete', (guild) => {
+      console.log(`Bot removed from guild: ${guild.name} (${guild.id})`);
+
+      // Update bot status with new server count
+      this.updateBotStatus();
     });
 
     // Note: With the new opt-out system, no cleanup is needed.
