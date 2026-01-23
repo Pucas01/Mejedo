@@ -292,9 +292,6 @@ export default function DiscordBotSettings() {
               className="w-full bg-[#1a1a1f] border border-[#39ff14] text-white px-3 py-2 font-mono"
               placeholder="Leave empty for global commands"
             />
-            <p className="text-gray-400 text-xs mt-1">
-              Set guild ID for instant command updates (dev). Leave empty for global commands (production).
-            </p>
           </div>
 
           <div className="flex items-center gap-3 bg-[#1a1a1f] border border-[#39ff14] p-3">
@@ -352,9 +349,6 @@ export default function DiscordBotSettings() {
 
         <div className="border-t-2 border-[#39ff14] pt-6 space-y-4">
           <h3 className="text-[#39ff14] font-bold text-lg">Word Stats</h3>
-          <p className="text-gray-400 text-sm">
-            Track word usage across all messages in your Discord server
-          </p>
           <Button
             variant="primary"
             size="md"
@@ -366,9 +360,6 @@ export default function DiscordBotSettings() {
 
         <div className="border-t-2 border-[#1db954] pt-6 space-y-4">
           <h3 className="text-[#1db954] font-bold text-lg">Spotify Listening Stats</h3>
-          <p className="text-gray-400 text-sm">
-            Track what everyone in your server is listening to on Spotify via Discord presence
-          </p>
           <Button
             variant="primary"
             size="md"
@@ -376,18 +367,10 @@ export default function DiscordBotSettings() {
           >
             Open Spotify Stats Manager
           </Button>
-          <div className="text-xs text-gray-500 space-y-1">
-            <div>• Use <code className="bg-[#1a1a1f] px-1">/trackmusic add @user</code> to start tracking</div>
-            <div>• Users need Spotify connected to Discord</div>
-            <div>• Weekly recap posts on Sundays at 12:00 PM</div>
-          </div>
         </div>
 
         <div className="border-t-2 border-[#D73DA3] pt-6 space-y-4">
           <h3 className="text-[#D73DA3] font-bold text-lg">Server Announcements</h3>
-          <p className="text-gray-400 text-sm">
-            Broadcast announcements to all servers with announcements enabled
-          </p>
           <Button
             variant="primary"
             size="md"
@@ -395,18 +378,10 @@ export default function DiscordBotSettings() {
           >
             Open Announcements Manager
           </Button>
-          <div className="text-xs text-gray-500 space-y-1">
-            <div>• Use <code className="bg-[#1a1a1f] px-1">/features toggle</code> to enable announcements</div>
-            <div>• Use <code className="bg-[#1a1a1f] px-1">/setannouncements</code> to configure channel</div>
-            <div>• Send custom announcements with title, message, and color</div>
-          </div>
         </div>
 
         <div className="border-t-2 border-[#39ff14] pt-6 space-y-4">
           <h3 className="text-[#39ff14] font-bold text-lg">Webhook Notifications</h3>
-          <p className="text-gray-400 text-sm">
-            Get Discord notifications for events like failed login attempts
-          </p>
 
           <div>
             <label className="block text-[#39ff14] text-sm font-bold mb-2">
@@ -419,9 +394,6 @@ export default function DiscordBotSettings() {
               className="w-full bg-[#1a1a1f] border border-[#39ff14] text-white px-3 py-2 font-mono text-sm"
               placeholder="https://discord.com/api/webhooks/..."
             />
-            <p className="text-gray-400 text-xs mt-1">
-              Create a webhook in your Discord server settings → Integrations → Webhooks
-            </p>
           </div>
 
           <div>
@@ -435,9 +407,6 @@ export default function DiscordBotSettings() {
               className="w-full bg-[#1a1a1f] border border-[#39ff14] text-white px-3 py-2 font-mono"
               placeholder="Your Discord user ID"
             />
-            <p className="text-gray-400 text-xs mt-1">
-              You'll be mentioned in webhook notifications (Right-click your profile → Copy User ID)
-            </p>
           </div>
 
           <div className="flex items-center gap-3 bg-[#1a1a1f] border border-[#39ff14] p-3">
@@ -479,6 +448,7 @@ export default function DiscordBotSettings() {
       <SpotifyStatsModal
         show={showSpotifyStatsModal}
         onClose={() => setShowSpotifyStatsModal(false)}
+        discordGuildId={config.guildId}
       />
 
       <AnnouncementsModal

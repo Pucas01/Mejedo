@@ -7,10 +7,14 @@ import {
   getTopArtistsForUser,
   getUserStats,
   getTrackedUsers,
+  getOptedOutUsers,
+  getAllGuildsWithStats,
+  getAllUsersWithStats,
   exportAllStats,
   clearGuildStats,
   getDbPath,
 } from './spotifyStatsDb.js';
+import { getDiscordBotInstance } from '../../server.js';
 
 const router = express.Router();
 
@@ -19,6 +23,75 @@ function validateLimit(limit, defaultLimit = 10, maxLimit = 100) {
   if (isNaN(parsed) || parsed < 1) return defaultLimit;
   return Math.min(parsed, maxLimit);
 }
+
+router.get('/opted-out-users', requireAuth, async (req, res) => {
+  try {
+    const users = await getOptedOutUsers();
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching opted-out users:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/all-guilds', requireAuth, async (req, res) => {
+  try {
+    const guilds = await getAllGuildsWithStats();
+
+    const botInstance = getDiscordBotInstance();
+    const client = botInstance?.getClient();
+    if (client && client.isReady()) {
+      for (const guild of guilds) {
+        try {
+          const discordGuild = await client.guilds.fetch(guild.guild_id);
+          guild.guild_name = discordGuild?.name || 'Unknown Guild';
+        } catch (error) {
+          guild.guild_name = 'Unknown Guild';
+        }
+      }
+    } else {
+      for (const guild of guilds) {
+        guild.guild_name = 'Unknown Guild';
+      }
+    }
+
+    res.json(guilds);
+  } catch (error) {
+    console.error('Error fetching all guilds:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/all-users', requireAuth, async (req, res) => {
+  try {
+    const users = await getAllUsersWithStats();
+
+    const botInstance = getDiscordBotInstance();
+    const client = botInstance?.getClient();
+    if (client && client.isReady()) {
+      for (const user of users) {
+        try {
+          const discordUser = await client.users.fetch(user.user_id);
+          user.username = discordUser?.username || 'Unknown User';
+          user.display_name = discordUser?.globalName || discordUser?.username || 'Unknown User';
+        } catch (error) {
+          user.username = 'Unknown User';
+          user.display_name = 'Unknown User';
+        }
+      }
+    } else {
+      for (const user of users) {
+        user.username = 'Unknown User';
+        user.display_name = 'Unknown User';
+      }
+    }
+
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 router.get('/tracked-users', async (req, res) => {
   try {

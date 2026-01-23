@@ -6,7 +6,7 @@ import { registerWordTracking, startWeeklyRecap, stopWeeklyRecap } from './wordT
 import { registerSpotifyTracking, startSpotifyRecap, stopSpotifyRecap } from './spotifyTracker.js';
 import { registerTemperatureConverter } from './temperatureConverter.js';
 import { initializeGuildSettings, isFeatureEnabled } from './wordStatsDb.js';
-import { isGloballyOptedIn, addTrackedUser, isUserTracked, removeAllTrackedUsersForGuild, removeUserFromGuild } from './spotifyStatsDb.js';
+import { migrateOptInToOptOut } from './spotifyStatsDb.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,6 +53,9 @@ class DiscordBot {
       startSpotifyRecap(this.client);
 
       registerTemperatureConverter(this.client);
+
+      await migrateOptInToOptOut();
+      console.log('Spotify tracking migration completed (opt-in → opt-out)');
     } catch (error) {
       console.error('Failed to login Discord bot:', error);
     }
@@ -107,52 +110,6 @@ class DiscordBot {
         console.log(`Initialized settings for new guild: ${guild.name} (features disabled by default)`);
       } catch (error) {
         console.error(`Failed to initialize settings for guild ${guild.id}:`, error);
-      }
-    });
-
-    this.client.on('guildMemberAdd', async (member) => {
-      try {
-        const userId = member.id;
-        const guildId = member.guild.id;
-
-        const optedIn = await isGloballyOptedIn(userId);
-        if (!optedIn) return;
-
-        const enabled = await isFeatureEnabled(guildId, 'spotify_tracking');
-        if (!enabled) return;
-
-        const alreadyTracked = await isUserTracked(userId, guildId);
-        if (alreadyTracked) return;
-
-        await addTrackedUser(userId, guildId, member.user.username);
-        console.log(`[Auto-Track] Added ${member.user.username} to Spotify tracking in ${member.guild.name} (global opt-in)`);
-      } catch (error) {
-        console.error('Error auto-tracking user on guild join:', error);
-      }
-    });
-
-    this.client.on('guildDelete', async (guild) => {
-      try {
-        console.log(`Bot removed from guild: ${guild.name} (${guild.id})`);
-        await removeAllTrackedUsersForGuild(guild.id);
-        console.log(`Cleaned up tracked users for guild: ${guild.name}`);
-      } catch (error) {
-        console.error(`Error cleaning up guild ${guild.id}:`, error);
-      }
-    });
-
-    this.client.on('guildMemberRemove', async (member) => {
-      try {
-        const userId = member.id;
-        const guildId = member.guild.id;
-
-        const wasTracked = await isUserTracked(userId, guildId);
-        if (!wasTracked) return;
-
-        await removeUserFromGuild(userId, guildId);
-        console.log(`[Cleanup] Removed ${member.user?.username || userId} from Spotify tracking in ${member.guild.name} (user left guild)`);
-      } catch (error) {
-        console.error('Error cleaning up user on guild leave:', error);
       }
     });
 
