@@ -6,7 +6,18 @@ import { validateSnowflake, validateText, validateLimit } from './validation.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.join(__dirname, '../../config/game-stats.db');
 
-const db = new sqlite3.Database(dbPath);
+console.log('[Game Stats DB] Attempting to open database at:', dbPath);
+
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('[Game Stats DB] FATAL: Failed to open database:', err);
+    console.error('[Game Stats DB] Database path:', dbPath);
+    console.error('[Game Stats DB] Current working directory:', process.cwd());
+    console.error('[Game Stats DB] __dirname:', __dirname);
+  } else {
+    console.log('[Game Stats DB] Successfully opened database');
+  }
+});
 
 // Promisified helpers
 function runAsync(sql, params = []) {
