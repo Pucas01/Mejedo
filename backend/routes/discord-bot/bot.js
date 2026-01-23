@@ -29,11 +29,7 @@ class DiscordBot {
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildPresences,
         GatewayIntentBits.MessageContent,
-      ],
-      presence: {
-        status: 'online',
-        activities: [{ name: 'Shoaling and stuff', type: 0 }]
-      }
+      ]
     });
 
     await this.loadCommands();
@@ -84,14 +80,23 @@ class DiscordBot {
     }
   }
 
+  updateBotStatus() {
+    if (!this.client || !this.client.user) return;
+
+    const guildCount = this.client.guilds.cache.size;
+    const serverText = guildCount === 1 ? 'server' : 'servers';
+
+    this.client.user.setPresence({
+      status: 'online',
+      activities: [{ name: `Shoaling in ${guildCount} ${serverText}`, type: 0 }]
+    });
+  }
+
   registerEvents() {
     this.client.once('ready', () => {
       console.log(`Discord bot ready! Logged in as ${this.client.user.tag}`);
 
-      this.client.user.setPresence({
-        status: 'online',
-        activities: [{ name: 'Shoaling and stuff', type: 0 }]
-      });
+      this.updateBotStatus();
 
       this.client.guilds.cache.forEach(async (guild) => {
         try {
@@ -108,9 +113,17 @@ class DiscordBot {
       try {
         await initializeGuildSettings(guild.id);
         console.log(`Initialized settings for new guild: ${guild.name} (features disabled by default)`);
+
+        this.updateBotStatus();
       } catch (error) {
         console.error(`Failed to initialize settings for guild ${guild.id}:`, error);
       }
+    });
+
+    this.client.on('guildDelete', (guild) => {
+      console.log(`Bot removed from guild: ${guild.name} (${guild.id})`);
+
+      this.updateBotStatus();
     });
 
     this.client.on('interactionCreate', async (interaction) => {
