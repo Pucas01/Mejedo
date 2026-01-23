@@ -93,7 +93,7 @@ router.get('/all-users', requireAuth, async (req, res) => {
   }
 });
 
-router.get('/tracked-users', async (req, res) => {
+router.get('/tracked-users', requireAuth, async (req, res) => {
   try {
     const guildId = req.query.guildId;
     const users = guildId ? await getTrackedUsers(guildId) : await getTrackedUsers();
@@ -104,7 +104,7 @@ router.get('/tracked-users', async (req, res) => {
   }
 });
 
-router.get('/guild/:guildId/tracked-users', async (req, res) => {
+router.get('/guild/:guildId/tracked-users', requireAuth, async (req, res) => {
   try {
     const { guildId } = req.params;
     const users = await getTrackedUsers(guildId);
@@ -115,7 +115,7 @@ router.get('/guild/:guildId/tracked-users', async (req, res) => {
   }
 });
 
-router.get('/guild/:guildId/top-tracks', async (req, res) => {
+router.get('/guild/:guildId/top-tracks', requireAuth, async (req, res) => {
   try {
     const { guildId } = req.params;
     const limit = validateLimit(req.query.limit, 10, 100);
@@ -127,7 +127,7 @@ router.get('/guild/:guildId/top-tracks', async (req, res) => {
   }
 });
 
-router.get('/guild/:guildId/top-artists', async (req, res) => {
+router.get('/guild/:guildId/top-artists', requireAuth, async (req, res) => {
   try {
     const { guildId } = req.params;
     const limit = validateLimit(req.query.limit, 10, 100);
@@ -139,7 +139,7 @@ router.get('/guild/:guildId/top-artists', async (req, res) => {
   }
 });
 
-router.get('/guild/:guildId/user/:userId/top-tracks', async (req, res) => {
+router.get('/guild/:guildId/user/:userId/top-tracks', requireAuth, async (req, res) => {
   try {
     const { guildId, userId } = req.params;
     const limit = validateLimit(req.query.limit, 10, 100);
@@ -151,7 +151,7 @@ router.get('/guild/:guildId/user/:userId/top-tracks', async (req, res) => {
   }
 });
 
-router.get('/guild/:guildId/user/:userId/top-artists', async (req, res) => {
+router.get('/guild/:guildId/user/:userId/top-artists', requireAuth, async (req, res) => {
   try {
     const { guildId, userId } = req.params;
     const limit = validateLimit(req.query.limit, 10, 100);
@@ -163,7 +163,7 @@ router.get('/guild/:guildId/user/:userId/top-artists', async (req, res) => {
   }
 });
 
-router.get('/guild/:guildId/user/:userId/stats', async (req, res) => {
+router.get('/guild/:guildId/user/:userId/stats', requireAuth, async (req, res) => {
   try {
     const { guildId, userId } = req.params;
     const stats = await getUserStats(guildId, userId);

@@ -196,17 +196,29 @@ class DiscordBot {
   async stop() {
     if (this.client) {
       console.log('Stopping Discord bot...');
+
       stopWeeklyRecap();
       stopSpotifyRecap();
+      console.log('Stopped scheduled tasks');
 
       try {
-        await this.client.user.setPresence({
-          status: 'invisible',
-          activities: []
-        });
-        console.log('Bot status set to offline');
+        const { flushPendingLogs } = await import('./spotifyTracker.js');
+        await flushPendingLogs();
+        console.log('Flushed pending Spotify logs');
+      } catch (error) {
+        console.error('Error flushing Spotify logs:', error);
+      }
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      try {
+        if (this.client.user) {
+          await this.client.user.setPresence({
+            status: 'invisible',
+            activities: []
+          });
+          console.log('Bot status set to offline');
+
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       } catch (error) {
         console.error('Error setting bot status to offline:', error);
       }
@@ -214,7 +226,7 @@ class DiscordBot {
       await this.client.destroy();
       this.client = null;
       this.commands.clear();
-      console.log('Discord bot stopped');
+      console.log('Discord bot stopped gracefully');
     }
   }
 

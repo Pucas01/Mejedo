@@ -1,5 +1,14 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
+import {
+  validateSnowflake,
+  validateUsername,
+  validateTrackName,
+  validateArtistName,
+  validateAlbumName,
+  validateSpotifyTrackId,
+  validateDuration
+} from './validation.js';
 
 const DB_FILE = path.join(process.cwd(), 'config', 'spotify-stats.db');
 const db = new sqlite3.Database(DB_FILE);
@@ -84,52 +93,77 @@ function getAsync(sql, params = []) {
 }
 
 export async function addTrackedUser(userId, guildId, username) {
+  validateSnowflake(userId, 'User ID');
+  validateSnowflake(guildId, 'Guild ID');
+  const sanitizedUsername = validateUsername(username);
+
   await runAsync(`
     INSERT OR REPLACE INTO tracked_users (user_id, guild_id, username, last_seen)
     VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-  `, [userId, guildId, username]);
+  `, [userId, guildId, sanitizedUsername]);
 }
 
 export async function removeTrackedUser(userId, guildId) {
+  validateSnowflake(userId, 'User ID');
+  validateSnowflake(guildId, 'Guild ID');
+
   await runAsync(`DELETE FROM tracked_users WHERE user_id = ? AND guild_id = ?`, [userId, guildId]);
 }
 
 export async function getTrackedUsers(guildId) {
+  validateSnowflake(guildId, 'Guild ID');
+
   return await allAsync(`SELECT * FROM tracked_users WHERE guild_id = ? ORDER BY username`, [guildId]);
 }
 
 export async function getGuildsTrackingUser(userId) {
+  validateSnowflake(userId, 'User ID');
+
   return await allAsync(`SELECT guild_id FROM tracked_users WHERE user_id = ?`, [userId]);
 }
 
 export async function isUserTracked(userId, guildId) {
+  validateSnowflake(userId, 'User ID');
+  validateSnowflake(guildId, 'Guild ID');
+
   const result = await getAsync(`SELECT user_id FROM tracked_users WHERE user_id = ? AND guild_id = ?`, [userId, guildId]);
   return result !== undefined;
 }
 
 export async function isUserTrackedGlobally(userId) {
+  validateSnowflake(userId, 'User ID');
+
   const result = await getAsync(`SELECT user_id FROM tracked_users WHERE user_id = ? LIMIT 1`, [userId]);
   return result !== undefined;
 }
 
 export async function setGlobalOptOut(userId, username) {
+  validateSnowflake(userId, 'User ID');
+  const sanitizedUsername = validateUsername(username);
+
   await runAsync(`
     INSERT INTO global_optout (user_id, username)
     VALUES (?, ?)
     ON CONFLICT(user_id) DO UPDATE SET opted_out_at = CURRENT_TIMESTAMP
-  `, [userId, username]);
+  `, [userId, sanitizedUsername]);
 }
 
 export async function isGloballyOptedOut(userId) {
+  validateSnowflake(userId, 'User ID');
+
   const result = await getAsync(`SELECT user_id FROM global_optout WHERE user_id = ?`, [userId]);
   return result !== undefined;
 }
 
 export async function removeGlobalOptOut(userId) {
+  validateSnowflake(userId, 'User ID');
+
   await runAsync(`DELETE FROM global_optout WHERE user_id = ?`, [userId]);
 }
 
 export async function isGloballyOptedIn(userId) {
+  validateSnowflake(userId, 'User ID');
+
   const result = await getAsync(`SELECT user_id FROM global_optin WHERE user_id = ?`, [userId]);
   return result !== undefined;
 }
@@ -150,7 +184,15 @@ export async function migrateOptInToOptOut() {
 }
 
 export async function logListen(guildId, userId, trackName, artist, album, spotifyTrackId, durationMs) {
-  const params = [guildId, userId, trackName, artist, album, spotifyTrackId, durationMs];
+  validateSnowflake(guildId, 'Guild ID');
+  validateSnowflake(userId, 'User ID');
+  const sanitizedTrack = validateTrackName(trackName);
+  const sanitizedArtist = validateArtistName(artist);
+  const sanitizedAlbum = validateAlbumName(album);
+  const sanitizedTrackId = validateSpotifyTrackId(spotifyTrackId);
+  const sanitizedDuration = validateDuration(durationMs);
+
+  const params = [guildId, userId, sanitizedTrack, sanitizedArtist, sanitizedAlbum, sanitizedTrackId, sanitizedDuration];
 
   await runAsync(`
     INSERT INTO spotify_listens (guild_id, user_id, track_name, artist, album, spotify_track_id, duration_ms)
@@ -172,6 +214,8 @@ export async function logListenToAllGuilds(userId, trackName, artist, album, spo
 }
 
 export async function getTopTracks(guildId, limit = 10) {
+  validateSnowflake(guildId, 'Guild ID');
+
   return await allAsync(`
     SELECT
       track_name,
@@ -188,6 +232,8 @@ export async function getTopTracks(guildId, limit = 10) {
 }
 
 export async function getTopArtists(guildId, limit = 10) {
+  validateSnowflake(guildId, 'Guild ID');
+
   return await allAsync(`
     SELECT
       artist,
@@ -203,6 +249,9 @@ export async function getTopArtists(guildId, limit = 10) {
 }
 
 export async function getTopTracksForUser(guildId, userId, limit = 10) {
+  validateSnowflake(guildId, 'Guild ID');
+  validateSnowflake(userId, 'User ID');
+
   return await allAsync(`
     SELECT
       track_name,
@@ -218,6 +267,9 @@ export async function getTopTracksForUser(guildId, userId, limit = 10) {
 }
 
 export async function getTopArtistsForUser(guildId, userId, limit = 10) {
+  validateSnowflake(guildId, 'Guild ID');
+  validateSnowflake(userId, 'User ID');
+
   return await allAsync(`
     SELECT
       artist,
@@ -232,6 +284,8 @@ export async function getTopArtistsForUser(guildId, userId, limit = 10) {
 }
 
 export async function getWeeklyTopTracks(guildId, limit = 10) {
+  validateSnowflake(guildId, 'Guild ID');
+
   return await allAsync(`
     SELECT
       track_name,
@@ -248,6 +302,8 @@ export async function getWeeklyTopTracks(guildId, limit = 10) {
 }
 
 export async function getWeeklyTopArtists(guildId, limit = 10) {
+  validateSnowflake(guildId, 'Guild ID');
+
   return await allAsync(`
     SELECT
       artist,
@@ -262,6 +318,8 @@ export async function getWeeklyTopArtists(guildId, limit = 10) {
 }
 
 export async function getWeeklyTotalCount(guildId) {
+  validateSnowflake(guildId, 'Guild ID');
+
   const result = await getAsync(`
     SELECT COUNT(*) as total
     FROM spotify_listens_weekly
@@ -271,6 +329,8 @@ export async function getWeeklyTotalCount(guildId) {
 }
 
 export async function getWeeklyTopListeners(guildId, limit = 5) {
+  validateSnowflake(guildId, 'Guild ID');
+
   return await allAsync(`
     SELECT
       user_id,
@@ -285,10 +345,15 @@ export async function getWeeklyTopListeners(guildId, limit = 5) {
 }
 
 export async function resetWeeklyStats(guildId) {
+  validateSnowflake(guildId, 'Guild ID');
+
   await runAsync(`DELETE FROM spotify_listens_weekly WHERE guild_id = ?`, [guildId]);
 }
 
 export async function getUserStats(guildId, userId) {
+  validateSnowflake(guildId, 'Guild ID');
+  validateSnowflake(userId, 'User ID');
+
   const totalListens = await getAsync(`
     SELECT COUNT(*) as total
     FROM spotify_listens
@@ -315,6 +380,8 @@ export async function getUserStats(guildId, userId) {
 }
 
 export async function getGlobalUserStats(userId) {
+  validateSnowflake(userId, 'User ID');
+
   const totalListens = await getAsync(`
     SELECT COUNT(*) as total
     FROM spotify_listens
@@ -420,6 +487,8 @@ export async function getMusicCompatibility(guildId, userId1, userId2) {
 }
 
 export async function clearGuildStats(guildId) {
+  validateSnowflake(guildId, 'Guild ID');
+
   await runAsync(`DELETE FROM spotify_listens WHERE guild_id = ?`, [guildId]);
   await runAsync(`DELETE FROM spotify_listens_weekly WHERE guild_id = ?`, [guildId]);
 }
@@ -429,7 +498,26 @@ export async function removeAllTrackedUsersForGuild(guildId) {
 }
 
 export async function removeUserFromGuild(userId, guildId) {
+  validateSnowflake(userId, 'User ID');
+  validateSnowflake(guildId, 'Guild ID');
+
   await runAsync(`DELETE FROM tracked_users WHERE user_id = ? AND guild_id = ?`, [userId, guildId]);
+}
+
+export async function deleteAllUserData(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  await runAsync(`DELETE FROM spotify_listens WHERE user_id = ?`, [userId]);
+
+  await runAsync(`DELETE FROM spotify_listens_weekly WHERE user_id = ?`, [userId]);
+
+  await runAsync(`DELETE FROM tracked_users WHERE user_id = ?`, [userId]);
+
+  await runAsync(`DELETE FROM global_optout WHERE user_id = ?`, [userId]);
+
+  await runAsync(`DELETE FROM global_optin WHERE user_id = ?`, [userId]);
+
+  console.log(`[GDPR] Deleted all Spotify data for user ${userId}`);
 }
 
 export function getDbPath() {

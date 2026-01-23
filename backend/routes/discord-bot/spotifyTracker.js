@@ -285,6 +285,31 @@ export function stopSpotifyRecap() {
   }
 }
 
+export async function flushPendingLogs() {
+  console.log(`[Spotify] Flushing ${currentlyPlaying.size} pending song logs...`);
+
+  const flushPromises = [];
+
+  for (const [userId, trackData] of currentlyPlaying.entries()) {
+    if (trackData.logTimeout) {
+      clearTimeout(trackData.logTimeout);
+    }
+
+    if (!trackData.logged) {
+      const playTime = Date.now() - trackData.startTime;
+      if (playTime >= 5000) {
+        console.log(`[Spotify] Skipping pending log for user ${userId} - no guildId available`);
+      }
+    }
+  }
+
+  await Promise.all(flushPromises);
+
+  currentlyPlaying.clear();
+
+  console.log('[Spotify] Flush complete');
+}
+
 function formatTrackList(tracks) {
   if (!tracks || tracks.length === 0) return 'No data yet';
   return tracks
