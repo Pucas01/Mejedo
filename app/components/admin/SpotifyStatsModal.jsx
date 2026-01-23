@@ -107,18 +107,18 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
         a.download = `spotify-stats-export-${new Date().toISOString().split("T")[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        setMessage("✔ Export downloaded");
+        setMessage("Export downloaded");
         setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
-      setMessage("✗ Failed to export");
+      setMessage("Failed to export");
       setTimeout(() => setMessage(""), 3000);
     }
   }
 
   async function handleClearStats() {
     if (!selectedGuildId) {
-      setMessage("✗ No guild selected");
+      setMessage("No guild selected");
       return;
     }
 
@@ -131,15 +131,15 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
       });
 
       if (res.ok) {
-        setMessage("✔ Spotify stats cleared");
+        setMessage("Spotify stats cleared");
         fetchData();
         fetchGuildStats(selectedGuildId);
       } else {
-        setMessage("✗ Failed to clear stats");
+        setMessage("Failed to clear stats");
       }
       setTimeout(() => setMessage(""), 3000);
     } catch (error) {
-      setMessage("✗ Failed to clear stats");
+      setMessage("Failed to clear stats");
       setTimeout(() => setMessage(""), 3000);
     }
   }
@@ -205,7 +205,7 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
 
           {message && (
             <div className={`mb-4 p-2 border text-sm ${
-              message.startsWith("✔")
+              message.includes("cleared") || message.includes("downloaded")
                 ? "border-green-400 text-green-400"
                 : "border-red-400 text-red-400"
             }`}>

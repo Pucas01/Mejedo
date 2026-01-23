@@ -22,6 +22,7 @@ export default {
             .addChoices(
               { name: 'Word Tracking', value: 'word_tracking' },
               { name: 'Spotify Tracking', value: 'spotify_tracking' },
+              { name: 'Game Tracking', value: 'game_tracking' },
               { name: 'Announcements', value: 'announcements' }
             )
         )
@@ -46,6 +47,7 @@ export default {
 
       const wordEnabled = settings?.word_tracking_enabled === 1;
       const spotifyEnabled = settings?.spotify_tracking_enabled === 1;
+      const gameEnabled = settings?.game_tracking_enabled === 1;
       const announcementsEnabled = settings?.announcements_enabled === 1;
 
       const embed = {
@@ -61,6 +63,11 @@ export default {
           {
             name: 'Spotify Tracking',
             value: spotifyEnabled ? '**Enabled**' : '**Disabled**',
+            inline: true
+          },
+          {
+            name: 'Game Tracking',
+            value: gameEnabled ? '**Enabled**' : '**Disabled**',
             inline: true
           },
           {
@@ -85,26 +92,31 @@ export default {
       const settings = await getGuildSettings(guildId);
       const currentWordEnabled = settings?.word_tracking_enabled === 1;
       const currentSpotifyEnabled = settings?.spotify_tracking_enabled === 1;
+      const currentGameEnabled = settings?.game_tracking_enabled === 1;
       const currentAnnouncementsEnabled = settings?.announcements_enabled === 1;
 
       // Update the requested feature
       let newWordEnabled = currentWordEnabled;
       let newSpotifyEnabled = currentSpotifyEnabled;
+      let newGameEnabled = currentGameEnabled;
       let newAnnouncementsEnabled = currentAnnouncementsEnabled;
 
       if (feature === 'word_tracking') {
         newWordEnabled = enabled;
       } else if (feature === 'spotify_tracking') {
         newSpotifyEnabled = enabled;
+      } else if (feature === 'game_tracking') {
+        newGameEnabled = enabled;
       } else if (feature === 'announcements') {
         newAnnouncementsEnabled = enabled;
       }
 
       // Save to database
-      await updateFeatureFlags(guildId, newWordEnabled, newSpotifyEnabled, newAnnouncementsEnabled);
+      await updateFeatureFlags(guildId, newWordEnabled, newSpotifyEnabled, newGameEnabled, newAnnouncementsEnabled);
 
       const featureName = feature === 'word_tracking' ? 'Word Tracking'
         : feature === 'spotify_tracking' ? 'Spotify Tracking'
+        : feature === 'game_tracking' ? 'Game Tracking'
         : 'Announcements';
       const statusText = enabled ? '**enabled**' : '**disabled**';
 
@@ -127,7 +139,12 @@ export default {
       } else if (feature === 'spotify_tracking' && enabled) {
         embed.fields.push({
           name: 'Spotify Tracking',
-          value: 'The bot will now track Spotify listening. Use `/trackmusic add @user` to add users to tracking.'
+          value: 'The bot will now track Spotify listening. Use `/musicstats` to view stats. Users can opt out with `/track optout type:Music`.'
+        });
+      } else if (feature === 'game_tracking' && enabled) {
+        embed.fields.push({
+          name: 'Game Tracking',
+          value: 'The bot will now track gaming activity. Use `/gamestats` to view stats. Users can opt out with `/track optout type:Gaming`.'
         });
       } else if (feature === 'announcements' && enabled) {
         embed.fields.push({

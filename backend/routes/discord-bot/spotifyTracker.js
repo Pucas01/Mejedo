@@ -19,8 +19,8 @@ let loopCheckInterval = null;
 // Maximum age for currentlyPlaying entries (30 minutes)
 const MAX_PLAYING_AGE_MS = 30 * 60 * 1000;
 
-// Minimum play time before logging a song (10 seconds)
-const MIN_PLAY_TIME_MS = 10 * 1000;
+// Minimum play time before logging a song (5 seconds)
+const MIN_PLAY_TIME_MS = 5 * 1000;
 
 // Cleanup stale entries from currentlyPlaying Map
 function cleanupStaleEntries() {

@@ -5,6 +5,7 @@ import Button from "../ui/Button";
 import WindowDecoration from "../window/WindowDecoration";
 import WordStatsModal from "./WordStatsModal";
 import SpotifyStatsModal from "./SpotifyStatsModal";
+import GameStatsModal from "./GameStatsModal";
 import AnnouncementsModal from "./AnnouncementsModal";
 
 export default function DiscordBotSettings() {
@@ -25,6 +26,7 @@ export default function DiscordBotSettings() {
   const [message, setMessage] = useState("");
   const [showWordStatsModal, setShowWordStatsModal] = useState(false);
   const [showSpotifyStatsModal, setShowSpotifyStatsModal] = useState(false);
+  const [showGameStatsModal, setShowGameStatsModal] = useState(false);
   const [showAnnouncementsModal, setShowAnnouncementsModal] = useState(false);
 
   useEffect(() => {
@@ -376,6 +378,18 @@ export default function DiscordBotSettings() {
           </Button>
         </div>
 
+        {/* Game Stats Section */}
+        <div className="border-t-2 border-[#39ff14] pt-6 space-y-4">
+          <h3 className="text-[#39ff14] font-bold text-lg">Gaming Activity Stats</h3>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => setShowGameStatsModal(true)}
+          >
+            Open Game Stats Manager
+          </Button>
+        </div>
+
         {/* Announcements Section */}
         <div className="border-t-2 border-[#D73DA3] pt-6 space-y-4">
           <h3 className="text-[#D73DA3] font-bold text-lg">Server Announcements</h3>
@@ -460,6 +474,13 @@ export default function DiscordBotSettings() {
       <SpotifyStatsModal
         show={showSpotifyStatsModal}
         onClose={() => setShowSpotifyStatsModal(false)}
+        discordGuildId={config.guildId}
+      />
+
+      {/* Game Stats Modal */}
+      <GameStatsModal
+        show={showGameStatsModal}
+        onClose={() => setShowGameStatsModal(false)}
         discordGuildId={config.guildId}
       />
 

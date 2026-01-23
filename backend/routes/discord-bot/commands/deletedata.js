@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { deleteAllUserData } from '../spotifyStatsDb.js';
+import { deleteAllUserData as deleteSpotifyData } from '../spotifyStatsDb.js';
 import { deleteAllUserWordData } from '../wordStatsDb.js';
+import { deleteAllUserData as deleteGameData } from '../gameStatsDb.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -14,21 +15,21 @@ export default {
 
     // Create confirmation embed
     const confirmEmbed = {
-      title: '⚠️ Delete All Your Data',
+      title: 'Delete All Your Data',
       description: `This will **permanently delete** all data the bot has collected about you.`,
       color: 0xff4444,
       fields: [
         {
           name: 'What will be deleted:',
-          value: `• All Spotify listening history (across all servers)
-• All word usage statistics (across all servers)
-• Your opt-out/opt-in status
-• Your tracked user status
-• Everything associated with your Discord ID`,
+          value: `- All Spotify listening history (across all servers)
+- All gaming session history (across all servers)
+- All word usage statistics (across all servers)
+- Your opt-out/opt-in status for all tracking
+- Everything associated with your Discord ID`,
           inline: false
         },
         {
-          name: '⚠️ This action is IRREVERSIBLE',
+          name: 'WARNING: This action is IRREVERSIBLE',
           value: 'Once deleted, this data **cannot be recovered**.',
           inline: false
         },
@@ -68,7 +69,7 @@ Type anything else to cancel.`,
 
       if (content !== 'CONFIRM DELETE') {
         await interaction.followUp({
-          content: '❌ Data deletion cancelled. Your data has not been deleted.',
+          content: 'Data deletion cancelled. Your data has not been deleted.',
           ephemeral: true
         });
         return;
@@ -76,36 +77,41 @@ Type anything else to cancel.`,
 
       // User confirmed - delete all data
       await interaction.followUp({
-        content: '🗑️ Deleting your data... This may take a moment.',
+        content: 'Deleting your data... This may take a moment.',
         ephemeral: true
       });
 
       try {
         // Delete Spotify data
-        await deleteAllUserData(user.id);
+        await deleteSpotifyData(user.id);
+
+        // Delete game data
+        await deleteGameData(user.id);
 
         // Delete word stats data
         await deleteAllUserWordData(user.id);
 
         // Success message
         const successEmbed = {
-          title: '✅ Data Deletion Complete',
+          title: 'Data Deletion Complete',
           description: 'All your data has been permanently deleted from the bot.',
           color: 0x00ff00,
           fields: [
             {
               name: 'What was deleted:',
-              value: `• All Spotify listening history
-• All word usage statistics
-• All tracking preferences
-• All associated data`,
+              value: `- All Spotify listening history
+- All gaming session history
+- All word usage statistics
+- All tracking preferences
+- All associated data`,
               inline: false
             },
             {
               name: 'What happens now:',
-              value: `• If Spotify tracking is enabled in this server, you will be tracked again by default (you were opted out)
-• You can opt out again with \`/trackmusic optout\`
-• If you want to stop word tracking, ask a server admin to disable the feature`,
+              value: `- If Spotify tracking is enabled, you will be tracked again by default
+- If game tracking is enabled, you will be tracked again by default
+- You can opt out with /track optout
+- For word tracking, ask a server admin to disable the feature`,
               inline: false
             }
           ],
@@ -120,7 +126,7 @@ Type anything else to cancel.`,
       } catch (error) {
         console.error('[GDPR] Error deleting user data:', error);
         await interaction.editReply({
-          content: '❌ An error occurred while deleting your data. Please contact a server administrator.',
+          content: 'An error occurred while deleting your data. Please contact a server administrator.',
           ephemeral: true
         });
       }
@@ -128,13 +134,13 @@ Type anything else to cancel.`,
       // Timeout or other error
       if (error.message === 'time') {
         await interaction.followUp({
-          content: '⏱️ Confirmation timed out. Data deletion cancelled.',
+          content: 'Confirmation timed out. Data deletion cancelled.',
           ephemeral: true
         });
       } else {
         console.error('[GDPR] Error in deletedata command:', error);
         await interaction.followUp({
-          content: '❌ An error occurred. Data deletion cancelled.',
+          content: 'An error occurred. Data deletion cancelled.',
           ephemeral: true
         });
       }

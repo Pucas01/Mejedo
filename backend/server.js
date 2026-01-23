@@ -51,6 +51,7 @@ import DiscordBot from "./routes/discord-bot/bot.js"
 import discordBotConfigRoute from "./routes/discord-bot/config.js"
 import wordStatsApiRoute from "./routes/discord-bot/wordStatsApi.js"
 import spotifyStatsApiRoute from "./routes/discord-bot/spotifyStatsApi.js"
+import gameStatsApiRoute from "./routes/discord-bot/gameStatsApi.js"
 import announcementsApiRoute from "./routes/discord-bot/announcementsApi.js"
 
 import session from "express-session"
@@ -144,6 +145,7 @@ app.use("/api/discord-webhook-config", requireAuth, discordWebhookConfigRoute);
 app.use("/api/discord-bot-config", discordBotConfigRoute);
 app.use("/api/word-stats", wordStatsApiRoute);
 app.use("/api/spotify-stats", spotifyStatsApiRoute);
+app.use("/api/game-stats", gameStatsApiRoute);
 app.use("/api/announcements", announcementsApiRoute);
 
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));

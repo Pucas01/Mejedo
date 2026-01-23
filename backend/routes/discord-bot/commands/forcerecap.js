@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { postWeeklyRecap } from '../wordTracker.js';
 import { postSpotifyRecap } from '../spotifyTracker.js';
+import { postGameRecap } from '../gameTracker.js';
 import { getGuildSettings } from '../wordStatsDb.js';
 
 export default {
@@ -15,7 +16,8 @@ export default {
         .addChoices(
           { name: 'Words', value: 'words' },
           { name: 'Music', value: 'music' },
-          { name: 'Both', value: 'both' }
+          { name: 'Gaming', value: 'gaming' },
+          { name: 'All', value: 'all' }
         )
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
@@ -27,7 +29,7 @@ export default {
 
     try {
       const guildId = interaction.guild.id;
-      const type = interaction.options.getString('type') || 'both';
+      const type = interaction.options.getString('type') || 'all';
 
       // Get guild settings from database
       const settings = await getGuildSettings(guildId);
@@ -40,15 +42,21 @@ export default {
       let message = '';
 
       // Post word recap
-      if (type === 'words' || type === 'both') {
+      if (type === 'words' || type === 'all') {
         await postWeeklyRecap(interaction.client, settings.recap_channel_id, false);
         message += 'Word stats preview posted. ';
       }
 
       // Post music recap
-      if (type === 'music' || type === 'both') {
+      if (type === 'music' || type === 'all') {
         await postSpotifyRecap(interaction.client, settings.recap_channel_id, guildId, false);
         message += 'Music stats preview posted. ';
+      }
+
+      // Post gaming recap
+      if (type === 'gaming' || type === 'all') {
+        await postGameRecap(interaction.client, guildId);
+        message += 'Gaming stats preview posted. ';
       }
 
       message += '(Stats were not reset)';
