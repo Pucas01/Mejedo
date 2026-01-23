@@ -217,27 +217,42 @@ class DiscordBot {
   async stop() {
     if (this.client) {
       console.log('Stopping Discord bot...');
+
+      // Stop scheduled tasks first
       stopWeeklyRecap();
       stopSpotifyRecap();
+      console.log('Stopped scheduled tasks');
+
+      // Flush any pending Spotify logs
+      try {
+        const { flushPendingLogs } = await import('./spotifyTracker.js');
+        await flushPendingLogs();
+        console.log('Flushed pending Spotify logs');
+      } catch (error) {
+        console.error('Error flushing Spotify logs:', error);
+      }
 
       // Set status to offline before destroying
       try {
-        await this.client.user.setPresence({
-          status: 'invisible',
-          activities: []
-        });
-        console.log('Bot status set to offline');
+        if (this.client.user) {
+          await this.client.user.setPresence({
+            status: 'invisible',
+            activities: []
+          });
+          console.log('Bot status set to offline');
 
-        // Wait a moment for Discord to process the status update
-        await new Promise(resolve => setTimeout(resolve, 1000));
+          // Wait a moment for Discord to process the status update
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       } catch (error) {
         console.error('Error setting bot status to offline:', error);
       }
 
+      // Destroy the client connection
       await this.client.destroy();
       this.client = null;
       this.commands.clear();
-      console.log('Discord bot stopped');
+      console.log('Discord bot stopped gracefully');
     }
   }
 

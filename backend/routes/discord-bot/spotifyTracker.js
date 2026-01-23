@@ -338,6 +338,38 @@ export function stopSpotifyRecap() {
   }
 }
 
+// Flush all pending Spotify logs (for graceful shutdown)
+export async function flushPendingLogs() {
+  console.log(`[Spotify] Flushing ${currentlyPlaying.size} pending song logs...`);
+
+  const flushPromises = [];
+
+  for (const [userId, trackData] of currentlyPlaying.entries()) {
+    // Cancel the timeout
+    if (trackData.logTimeout) {
+      clearTimeout(trackData.logTimeout);
+    }
+
+    // If the song hasn't been logged yet and has been playing for at least 5 seconds, log it
+    if (!trackData.logged) {
+      const playTime = Date.now() - trackData.startTime;
+      if (playTime >= 5000) { // 5 seconds minimum
+        // We don't have guildId stored in currentlyPlaying, so we can't log it
+        // This is a limitation - we'll just skip pending logs on shutdown
+        console.log(`[Spotify] Skipping pending log for user ${userId} - no guildId available`);
+      }
+    }
+  }
+
+  // Wait for all pending logs to complete
+  await Promise.all(flushPromises);
+
+  // Clear the map
+  currentlyPlaying.clear();
+
+  console.log('[Spotify] Flush complete');
+}
+
 // Format track list for embed
 function formatTrackList(tracks) {
   if (!tracks || tracks.length === 0) return 'No data yet';

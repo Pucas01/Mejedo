@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
+import { validateSnowflake, validateWord } from './validation.js';
 
 const DB_FILE = path.join(process.cwd(), 'config', 'word-stats.db');
 const db = new sqlite3.Database(DB_FILE);
@@ -132,6 +133,18 @@ function allAsync(sql, params = []) {
 
 // Increment word count in both tables
 export async function incrementWordCount(guildId, userId, word) {
+  // Validate inputs
+  validateSnowflake(guildId, 'Guild ID');
+  validateSnowflake(userId, 'User ID');
+
+  // Validate word (silently skip invalid words instead of throwing)
+  try {
+    validateWord(word);
+  } catch (error) {
+    console.warn(`[Word Validation] Skipping invalid word: ${error.message}`);
+    return;
+  }
+
   // All-time stats
   await runAsync(`
     INSERT INTO word_stats (guild_id, user_id, word, count)
@@ -150,6 +163,9 @@ export async function incrementWordCount(guildId, userId, word) {
 // Get server-wide top words (all-time)
 // If stopWords set is provided, filters them out
 export async function getTopWords(guildId, limit = 10, stopWords = null) {
+  // Validate inputs
+  validateSnowflake(guildId, 'Guild ID');
+
   // Fetch extra results to account for filtering
   const fetchLimit = stopWords ? limit * 5 : limit;
   const results = await allAsync(`
@@ -170,6 +186,10 @@ export async function getTopWords(guildId, limit = 10, stopWords = null) {
 // Get user's top words (all-time)
 // If stopWords set is provided, filters them out
 export async function getTopWordsForUser(guildId, userId, limit = 10, stopWords = null) {
+  // Validate inputs
+  validateSnowflake(guildId, 'Guild ID');
+  validateSnowflake(userId, 'User ID');
+
   const fetchLimit = stopWords ? limit * 5 : limit;
   const results = await allAsync(`
     SELECT word, count
@@ -187,6 +207,8 @@ export async function getTopWordsForUser(guildId, userId, limit = 10, stopWords 
 
 // Get server-wide top words (weekly)
 export async function getWeeklyTopWords(guildId, limit = 10) {
+  validateSnowflake(guildId, 'Guild ID');
+
   return await allAsync(`
     SELECT word, SUM(count) as total_count
     FROM word_stats_weekly
@@ -199,6 +221,8 @@ export async function getWeeklyTopWords(guildId, limit = 10) {
 
 // Get top users by word count (weekly)
 export async function getWeeklyTopUsers(guildId, limit = 5) {
+  validateSnowflake(guildId, 'Guild ID');
+
   return await allAsync(`
     SELECT user_id, SUM(count) as total_words
     FROM word_stats_weekly
@@ -211,11 +235,15 @@ export async function getWeeklyTopUsers(guildId, limit = 5) {
 
 // Reset weekly stats for a guild
 export async function resetWeeklyStats(guildId) {
+  validateSnowflake(guildId, 'Guild ID');
+
   await runAsync(`DELETE FROM word_stats_weekly WHERE guild_id = ?`, [guildId]);
 }
 
 // Get total word count for guild (weekly)
 export async function getWeeklyTotalCount(guildId) {
+  validateSnowflake(guildId, 'Guild ID');
+
   const result = await allAsync(`
     SELECT SUM(count) as total
     FROM word_stats_weekly
@@ -277,6 +305,8 @@ export async function importStats(data) {
 
 // Clear all stats for a guild
 export async function clearGuildStats(guildId) {
+  validateSnowflake(guildId, 'Guild ID');
+
   await runAsync(`DELETE FROM word_stats WHERE guild_id = ?`, [guildId]);
   await runAsync(`DELETE FROM word_stats_weekly WHERE guild_id = ?`, [guildId]);
 }
@@ -288,6 +318,8 @@ export function getDbPath() {
 
 // Get guild settings
 export async function getGuildSettings(guildId) {
+  validateSnowflake(guildId, 'Guild ID');
+
   const results = await allAsync(`
     SELECT * FROM guild_settings WHERE guild_id = ?
   `, [guildId]);
@@ -296,6 +328,9 @@ export async function getGuildSettings(guildId) {
 
 // Set recap channel and schedule for a guild
 export async function setRecapChannel(guildId, channelId, day = 0, hour = 12) {
+  validateSnowflake(guildId, 'Guild ID');
+  validateSnowflake(channelId, 'Channel ID');
+
   await runAsync(`
     INSERT INTO guild_settings (guild_id, recap_channel_id, recap_day, recap_hour, updated_at)
     VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -318,6 +353,8 @@ export async function getAllRecapChannels() {
 
 // Initialize guild settings (called when bot joins a server)
 export async function initializeGuildSettings(guildId) {
+  validateSnowflake(guildId, 'Guild ID');
+
   // Check if settings already exist
   const existing = await getGuildSettings(guildId);
   if (existing) {
@@ -366,6 +403,8 @@ export async function initializeGuildSettings(guildId) {
 
 // Update feature flags for a guild
 export async function updateFeatureFlags(guildId, wordTracking, spotifyTracking, announcements = null) {
+  validateSnowflake(guildId, 'Guild ID');
+
   // Ensure guild settings exist first
   await initializeGuildSettings(guildId);
 
@@ -392,6 +431,8 @@ export async function updateFeatureFlags(guildId, wordTracking, spotifyTracking,
 
 // Check if a feature is enabled for a guild
 export async function isFeatureEnabled(guildId, feature) {
+  validateSnowflake(guildId, 'Guild ID');
+
   const settings = await getGuildSettings(guildId);
   if (!settings) return false; // Default to disabled
 
@@ -408,6 +449,9 @@ export async function isFeatureEnabled(guildId, feature) {
 
 // Set announcement channel for a guild
 export async function setAnnouncementChannel(guildId, channelId) {
+  validateSnowflake(guildId, 'Guild ID');
+  validateSnowflake(channelId, 'Channel ID');
+
   await runAsync(`
     INSERT INTO guild_settings (guild_id, announcement_channel_id, updated_at)
     VALUES (?, ?, CURRENT_TIMESTAMP)
@@ -424,6 +468,19 @@ export async function getAllAnnouncementChannels() {
     FROM guild_settings
     WHERE announcement_channel_id IS NOT NULL AND announcements_enabled = 1
   `);
+}
+
+// GDPR: Delete ALL data for a user across all guilds
+export async function deleteAllUserWordData(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  // Delete from all-time word stats
+  await runAsync(`DELETE FROM word_stats WHERE user_id = ?`, [userId]);
+
+  // Delete from weekly word stats
+  await runAsync(`DELETE FROM word_stats_weekly WHERE user_id = ?`, [userId]);
+
+  console.log(`[GDPR] Deleted all word data for user ${userId}`);
 }
 
 export default db;

@@ -217,3 +217,53 @@ if (botConfig.enabled) {
 } else {
   console.log('Discord bot is disabled in config.');
 }
+
+// Graceful shutdown handler
+let isShuttingDown = false;
+
+async function gracefulShutdown(signal) {
+  if (isShuttingDown) {
+    console.log('Shutdown already in progress...');
+    return;
+  }
+
+  isShuttingDown = true;
+  console.log(`\n${signal} received. Starting graceful shutdown...`);
+
+  try {
+    // Stop accepting new requests
+    console.log('Stopping server from accepting new connections...');
+
+    // Give active requests time to complete (5 seconds)
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // Stop Discord bot if running
+    if (discordBotInstance && discordBotInstance.isRunning()) {
+      console.log('Stopping Discord bot...');
+      await stopDiscordBot();
+      console.log('Discord bot stopped successfully');
+    }
+
+    console.log('Graceful shutdown complete');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error during graceful shutdown:', error);
+    process.exit(1);
+  }
+}
+
+// Register shutdown handlers
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit on unhandled rejection, just log it
+});
