@@ -3,7 +3,9 @@ import * as gameStatsDb from './gameStatsDb.js';
 import * as wordStatsDb from './wordStatsDb.js';
 
 const activeSessions = new Map();
+const lastStreakCheck = new Map();
 let recapInterval = null;
+let streakCheckInterval = null;
 
 export function setupGameTracking(client) {
   console.log('[Game Tracker] Setting up game tracking...');
@@ -47,7 +49,96 @@ export function setupGameTracking(client) {
     updateActiveSessionCheckpoints();
   }, 5 * 60 * 1000);
 
+  startStreakChecking(client);
+
   console.log('Game tracking setup complete');
+}
+
+async function checkStreaksAndNotify(client) {
+  const today = new Date().toISOString().split('T')[0];
+
+  try {
+    const optedInUsers = await gameStatsDb.allAsync('SELECT user_id FROM streak_dm_optin');
+
+    for (const { user_id } of optedInUsers) {
+      try {
+        const lastCheck = lastStreakCheck.get(user_id);
+        if (lastCheck && lastCheck.date === today) {
+          continue;
+        }
+
+        const streaks = await gameStatsDb.getAllGameStreaks(user_id);
+
+        const notifiableStreaks = streaks.filter(s => s.streak > 1);
+
+        if (notifiableStreaks.length === 0) {
+          lastStreakCheck.set(user_id, { date: today, streaks: {} });
+          continue;
+        }
+
+        const previousStreaks = lastCheck?.streaks || {};
+        const hasNewOrUpdated = notifiableStreaks.some(s =>
+          !previousStreaks[s.game_name] || previousStreaks[s.game_name] !== s.streak
+        );
+
+        if (!hasNewOrUpdated) {
+          continue;
+        }
+
+        const currentStreaks = {};
+        notifiableStreaks.forEach(s => {
+          currentStreaks[s.game_name] = s.streak;
+        });
+
+        try {
+          const user = await client.users.fetch(user_id);
+
+          const streakText = notifiableStreaks
+            .map(s => `🔥 **${s.streak}-day streak**: ${s.game_name}`)
+            .join('\n');
+
+          const embed = {
+            title: 'Your Gaming Streaks Updated!',
+            description: streakText,
+            color: 0x39ff14,
+            footer: {
+              text: 'Hey, yeah you, listen up, 67.'
+            },
+            timestamp: new Date().toISOString()
+          };
+
+          await user.send({ embeds: [embed] });
+          console.log(`[Streak DM] Sent streak update to user ${user_id}`);
+        } catch (dmError) {
+          console.error(`[Streak DM] Could not send DM to user ${user_id}:`, dmError.message);
+        }
+
+        lastStreakCheck.set(user_id, { date: today, streaks: currentStreaks });
+      } catch (userError) {
+        console.error(`[Streak Check] Error processing user ${user_id}:`, userError);
+      }
+    }
+  } catch (error) {
+    console.error('[Streak Check] Error checking streaks:', error);
+  }
+}
+
+function startStreakChecking(client) {
+  streakCheckInterval = setInterval(() => {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+
+    if (minute < 5) {
+      checkStreaksAndNotify(client);
+    }
+  }, 60 * 60 * 1000);
+
+  setTimeout(() => {
+    checkStreaksAndNotify(client);
+  }, 30000);
+
+  console.log('Streak checking scheduler started');
 }
 
 async function handleGameStart(guildId, userId, game) {
@@ -219,5 +310,10 @@ export function stopGameRecap() {
     clearInterval(recapInterval);
     recapInterval = null;
     console.log('Game recap scheduler stopped');
+  }
+  if (streakCheckInterval) {
+    clearInterval(streakCheckInterval);
+    streakCheckInterval = null;
+    console.log('Streak checking scheduler stopped');
   }
 }

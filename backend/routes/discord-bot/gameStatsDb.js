@@ -24,7 +24,7 @@ function getAsync(sql, params = []) {
   });
 }
 
-function allAsync(sql, params = []) {
+export function allAsync(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.all(sql, params, (err, rows) => {
       if (err) reject(err);
@@ -66,6 +66,13 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS global_optout_gaming (
       user_id TEXT PRIMARY KEY,
       opted_out_at INTEGER DEFAULT (strftime('%s', 'now'))
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS streak_dm_optin (
+      user_id TEXT PRIMARY KEY,
+      opted_in_at INTEGER DEFAULT (strftime('%s', 'now'))
     )
   `);
 
@@ -393,4 +400,146 @@ export async function getGlobalTopGamesForUser(userId, limit = 10) {
     ORDER BY total_seconds DESC
     LIMIT ?
   `, [userId, limit]);
+}
+
+export async function getGameStreak(userId, gameName) {
+  validateSnowflake(userId, 'User ID');
+  const sanitizedGameName = validateText(gameName, 'Game name', 200);
+
+  const days = await allAsync(`
+    SELECT DISTINCT DATE(start_time, 'unixepoch') as play_date
+    FROM game_sessions
+    WHERE user_id = ?
+      AND game_name = ?
+      AND end_time IS NOT NULL
+    ORDER BY play_date DESC
+  `, [userId, sanitizedGameName]);
+
+  if (days.length === 0) return 0;
+
+  let streak = 0;
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+  const mostRecentPlay = days[0].play_date;
+  if (mostRecentPlay !== today && mostRecentPlay !== yesterday) {
+    return 0;
+  }
+
+  let expectedDate = new Date(mostRecentPlay);
+  for (const day of days) {
+    const currentDate = day.play_date;
+    const expectedDateStr = expectedDate.toISOString().split('T')[0];
+
+    if (currentDate === expectedDateStr) {
+      streak++;
+      expectedDate.setDate(expectedDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
+
+export async function getAllGameStreaks(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  const games = await allAsync(`
+    SELECT DISTINCT game_name
+    FROM game_sessions
+    WHERE user_id = ?
+      AND end_time IS NOT NULL
+  `, [userId]);
+
+  const streaks = [];
+  for (const game of games) {
+    const streak = await getGameStreak(userId, game.game_name);
+    if (streak > 0) {
+      streaks.push({
+        game_name: game.game_name,
+        streak: streak
+      });
+    }
+  }
+
+  streaks.sort((a, b) => b.streak - a.streak);
+  return streaks;
+}
+
+export async function getLongestStreakEver(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  const games = await allAsync(`
+    SELECT DISTINCT game_name
+    FROM game_sessions
+    WHERE user_id = ?
+      AND end_time IS NOT NULL
+  `, [userId]);
+
+  let longestStreak = 0;
+  let longestStreakGame = null;
+
+  for (const game of games) {
+    const days = await allAsync(`
+      SELECT DISTINCT DATE(start_time, 'unixepoch') as play_date
+      FROM game_sessions
+      WHERE user_id = ?
+        AND game_name = ?
+        AND end_time IS NOT NULL
+      ORDER BY play_date ASC
+    `, [userId, game.game_name]);
+
+    if (days.length === 0) continue;
+
+    let currentStreak = 1;
+    let maxStreak = 1;
+
+    for (let i = 1; i < days.length; i++) {
+      const prevDate = new Date(days[i - 1].play_date);
+      const currDate = new Date(days[i].play_date);
+
+      const dayDiff = Math.floor((currDate - prevDate) / (1000 * 60 * 60 * 24));
+
+      if (dayDiff === 1) {
+        currentStreak++;
+        maxStreak = Math.max(maxStreak, currentStreak);
+      } else {
+        currentStreak = 1;
+      }
+    }
+
+    if (maxStreak > longestStreak) {
+      longestStreak = maxStreak;
+      longestStreakGame = game.game_name;
+    }
+  }
+
+  return longestStreak > 0 ? { streak: longestStreak, game_name: longestStreakGame } : null;
+}
+
+export function optInStreakDMs(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  return runAsync(`
+    INSERT OR REPLACE INTO streak_dm_optin (user_id)
+    VALUES (?)
+  `, [userId]);
+}
+
+export function optOutStreakDMs(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  return runAsync('DELETE FROM streak_dm_optin WHERE user_id = ?', [userId]);
+}
+
+export function isStreakDMsEnabled(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  return new Promise((resolve, reject) => {
+    db.get('SELECT user_id FROM streak_dm_optin WHERE user_id = ?', [userId], (err, row) => {
+      if (err) reject(err);
+      else resolve(row !== undefined);
+    });
+  });
 }
