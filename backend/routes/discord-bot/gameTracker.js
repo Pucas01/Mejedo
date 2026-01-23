@@ -54,7 +54,7 @@ async function handleGameStart(guildId, userId, game) {
   const gameName = game.name;
   const gameId = game.applicationId || null;
 
-  const sessionId = gameStatsDb.startGameSession(guildId, userId, gameName, gameId);
+  const sessionId = await gameStatsDb.startGameSession(guildId, userId, gameName, gameId);
 
   activeSessions.set(userId, {
     sessionId,
@@ -71,7 +71,7 @@ async function handleGameStop(guildId, userId) {
   const session = activeSessions.get(userId);
 
   if (session) {
-    gameStatsDb.endGameSession(guildId, userId, session.sessionId);
+    await gameStatsDb.endGameSession(guildId, userId, session.sessionId);
 
     activeSessions.delete(userId);
 
@@ -80,11 +80,11 @@ async function handleGameStop(guildId, userId) {
   }
 }
 
-function updateActiveSessionCheckpoints() {
+async function updateActiveSessionCheckpoints() {
   for (const [userId, session] of activeSessions.entries()) {
     try {
-      gameStatsDb.endGameSession(session.guildId, userId, session.sessionId);
-      const newSessionId = gameStatsDb.startGameSession(
+      await gameStatsDb.endGameSession(session.guildId, userId, session.sessionId);
+      const newSessionId = await gameStatsDb.startGameSession(
         session.guildId,
         userId,
         session.gameName,
@@ -184,9 +184,9 @@ export function stopGameTracking() {
   console.log('Game tracking stopped');
 }
 
-export function initializeGameTracking() {
+export async function initializeGameTracking() {
   console.log('Initializing game tracking...');
-  gameStatsDb.endAllActiveSessions();
+  await gameStatsDb.endAllActiveSessions();
   console.log('Ended all previously active game sessions');
 }
 
