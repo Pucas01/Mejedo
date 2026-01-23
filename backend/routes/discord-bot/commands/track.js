@@ -13,7 +13,7 @@ export default {
     .addSubcommand(subcommand =>
       subcommand
         .setName('optout')
-        .setDescription('Opt out of tracking')
+        .setDescription('Opt out of tracking or notifications')
         .addStringOption(option =>
           option
             .setName('type')
@@ -22,14 +22,15 @@ export default {
             .addChoices(
               { name: 'Music (Spotify)', value: 'music' },
               { name: 'Gaming', value: 'gaming' },
-              { name: 'Both', value: 'both' }
+              { name: 'Streak DM Notifications', value: 'streakdms' },
+              { name: 'Both Music & Gaming', value: 'both' }
             )
         )
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('optin')
-        .setDescription('Opt back into tracking')
+        .setDescription('Opt back into tracking or notifications')
         .addStringOption(option =>
           option
             .setName('type')
@@ -38,7 +39,8 @@ export default {
             .addChoices(
               { name: 'Music (Spotify)', value: 'music' },
               { name: 'Gaming', value: 'gaming' },
-              { name: 'Both', value: 'both' }
+              { name: 'Streak DM Notifications', value: 'streakdms' },
+              { name: 'Both Music & Gaming', value: 'both' }
             )
         )
     )
@@ -62,6 +64,7 @@ export default {
 
         let musicOptedOut = false;
         let gamingOptedOut = false;
+        let streakDMsDisabled = false;
         let messages = [];
 
         if (type === 'music' || type === 'both') {
@@ -86,6 +89,17 @@ export default {
           }
         }
 
+        if (type === 'streakdms') {
+          const alreadyDisabled = !(await gameStatsDb.isStreakDMsEnabled(userId));
+          if (alreadyDisabled) {
+            messages.push('You are not receiving streak DM notifications.');
+          } else {
+            await gameStatsDb.optOutStreakDMs(userId);
+            streakDMsDisabled = true;
+            messages.push('Disabled streak DM notifications.');
+          }
+        }
+
         const embed = {
           title: 'Opt-out Complete',
           description: messages.join('\n'),
@@ -93,10 +107,17 @@ export default {
           fields: []
         };
 
-        if (musicOptedOut || gamingOptedOut) {
+        if (musicOptedOut || gamingOptedOut || streakDMsDisabled) {
+          const whatThisMeans = [];
+          if (musicOptedOut) whatThisMeans.push('- The bot will no longer track your Spotify activity');
+          if (gamingOptedOut) whatThisMeans.push('- The bot will no longer track your gaming sessions');
+          if (streakDMsDisabled) whatThisMeans.push('- You will no longer receive streak DM notifications');
+          if (musicOptedOut || gamingOptedOut) whatThisMeans.push('- Your existing data has been preserved');
+          whatThisMeans.push('- You can opt back in anytime with `/track optin`');
+
           embed.fields.push({
             name: 'What this means:',
-            value: `${musicOptedOut ? '- The bot will no longer track your Spotify activity\n' : ''}${gamingOptedOut ? '- The bot will no longer track your gaming sessions\n' : ''}- Your existing data has been preserved\n- You can opt back in anytime with \`/track optin\``,
+            value: whatThisMeans.join('\n'),
             inline: false
           });
         }
@@ -110,6 +131,7 @@ export default {
 
         let musicOptedIn = false;
         let gamingOptedIn = false;
+        let streakDMsEnabled = false;
         let messages = [];
 
         if (type === 'music' || type === 'both') {
@@ -134,6 +156,17 @@ export default {
           }
         }
 
+        if (type === 'streakdms') {
+          const alreadyEnabled = await gameStatsDb.isStreakDMsEnabled(userId);
+          if (alreadyEnabled) {
+            messages.push('You are already receiving streak DM notifications.');
+          } else {
+            await gameStatsDb.optInStreakDMs(userId);
+            streakDMsEnabled = true;
+            messages.push('Enabled streak DM notifications (2+ day streaks only).');
+          }
+        }
+
         const embed = {
           title: 'Opt-in Complete',
           description: messages.join('\n'),
@@ -141,10 +174,20 @@ export default {
           fields: []
         };
 
-        if (musicOptedIn || gamingOptedIn) {
+        if (musicOptedIn || gamingOptedIn || streakDMsEnabled) {
+          const whatThisMeans = [];
+          if (musicOptedIn) whatThisMeans.push('- The bot will now track your Spotify activity');
+          if (gamingOptedIn) whatThisMeans.push('- The bot will now track your gaming sessions');
+          if (streakDMsEnabled) {
+            whatThisMeans.push('- You will receive DMs when your gaming streaks update');
+            whatThisMeans.push('- Only 2+ day streaks trigger notifications');
+          }
+          if (musicOptedIn || gamingOptedIn) whatThisMeans.push('- Tracking only works in servers where the feature is enabled');
+          whatThisMeans.push('- You can opt out anytime with `/track optout`');
+
           embed.fields.push({
             name: 'What this means:',
-            value: `${musicOptedIn ? '- The bot will now track your Spotify activity\n' : ''}${gamingOptedIn ? '- The bot will now track your gaming sessions\n' : ''}- Tracking only works in servers where the feature is enabled\n- You can opt out anytime with \`/track optout\``,
+            value: whatThisMeans.join('\n'),
             inline: false
           });
         }
@@ -155,6 +198,7 @@ export default {
       else if (subcommand === 'status') {
         const musicOptedOut = await isSpotifyOptedOut(userId);
         const gamingOptedOut = await gameStatsDb.isUserOptedOut(userId);
+        const streakDMsEnabled = await gameStatsDb.isStreakDMsEnabled(userId);
 
         const embed = {
           title: 'Your Tracking Status',
@@ -169,6 +213,11 @@ export default {
               name: 'Gaming',
               value: gamingOptedOut ? '**Opted Out** - Not being tracked' : '**Opted In** - Being tracked in enabled servers',
               inline: true
+            },
+            {
+              name: 'Streak DM Notifications',
+              value: streakDMsEnabled ? '**Enabled** - You will receive DMs when your gaming streaks update' : '**Disabled** - No streak notifications',
+              inline: false
             }
           ],
           footer: {

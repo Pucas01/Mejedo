@@ -3,7 +3,9 @@ import * as gameStatsDb from './gameStatsDb.js';
 import * as wordStatsDb from './wordStatsDb.js';
 
 const activeSessions = new Map(); // userId -> { guildId, gameName, gameId, startTime }
+const lastStreakCheck = new Map(); // userId -> { date, streaks: { gameName: streakCount } }
 let recapInterval = null;
+let streakCheckInterval = null;
 
 export function setupGameTracking(client) {
   console.log('[Game Tracker] Setting up game tracking...');
@@ -56,7 +58,111 @@ export function setupGameTracking(client) {
     updateActiveSessionCheckpoints();
   }, 5 * 60 * 1000);
 
+  // Check for streak updates daily at midnight
+  startStreakChecking(client);
+
   console.log('Game tracking setup complete');
+}
+
+// Check streaks and send DMs to opted-in users
+async function checkStreaksAndNotify(client) {
+  const today = new Date().toISOString().split('T')[0];
+
+  try {
+    // Get all users who have streak DMs enabled
+    const optedInUsers = await gameStatsDb.allAsync('SELECT user_id FROM streak_dm_optin');
+
+    for (const { user_id } of optedInUsers) {
+      try {
+        // Skip if we already checked this user today
+        const lastCheck = lastStreakCheck.get(user_id);
+        if (lastCheck && lastCheck.date === today) {
+          continue;
+        }
+
+        // Get current streaks
+        const streaks = await gameStatsDb.getAllGameStreaks(user_id);
+
+        // Filter out 1-day streaks
+        const notifiableStreaks = streaks.filter(s => s.streak > 1);
+
+        if (notifiableStreaks.length === 0) {
+          // Update last check even if no streaks
+          lastStreakCheck.set(user_id, { date: today, streaks: {} });
+          continue;
+        }
+
+        // Check if any streaks have changed since yesterday
+        const previousStreaks = lastCheck?.streaks || {};
+        const hasNewOrUpdated = notifiableStreaks.some(s =>
+          !previousStreaks[s.game_name] || previousStreaks[s.game_name] !== s.streak
+        );
+
+        if (!hasNewOrUpdated) {
+          continue;
+        }
+
+        // Build streak map for tracking
+        const currentStreaks = {};
+        notifiableStreaks.forEach(s => {
+          currentStreaks[s.game_name] = s.streak;
+        });
+
+        // Send DM
+        try {
+          const user = await client.users.fetch(user_id);
+
+          const streakText = notifiableStreaks
+            .map(s => `🔥 **${s.streak}-day streak**: ${s.game_name}`)
+            .join('\n');
+
+          const embed = {
+            title: 'Your Gaming Streaks Updated!',
+            description: streakText,
+            color: 0x39ff14,
+            footer: {
+              text: 'Hey, yeah you, listen up, 67.'
+            },
+            timestamp: new Date().toISOString()
+          };
+
+          await user.send({ embeds: [embed] });
+          console.log(`[Streak DM] Sent streak update to user ${user_id}`);
+        } catch (dmError) {
+          console.error(`[Streak DM] Could not send DM to user ${user_id}:`, dmError.message);
+        }
+
+        // Update last check
+        lastStreakCheck.set(user_id, { date: today, streaks: currentStreaks });
+      } catch (userError) {
+        console.error(`[Streak Check] Error processing user ${user_id}:`, userError);
+      }
+    }
+  } catch (error) {
+    console.error('[Streak Check] Error checking streaks:', error);
+  }
+}
+
+// Start daily streak checking (runs at midnight and every hour to catch timezone differences)
+function startStreakChecking(client) {
+  // Check every hour
+  streakCheckInterval = setInterval(() => {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+
+    // Only run at the top of each hour
+    if (minute < 5) {
+      checkStreaksAndNotify(client);
+    }
+  }, 60 * 60 * 1000); // Every hour
+
+  // Also run once on startup (but wait a bit for bot to fully initialize)
+  setTimeout(() => {
+    checkStreaksAndNotify(client);
+  }, 30000); // Wait 30 seconds after startup
+
+  console.log('Streak checking scheduler started');
 }
 
 async function handleGameStart(guildId, userId, game) {
@@ -254,5 +360,10 @@ export function stopGameRecap() {
     clearInterval(recapInterval);
     recapInterval = null;
     console.log('Game recap scheduler stopped');
+  }
+  if (streakCheckInterval) {
+    clearInterval(streakCheckInterval);
+    streakCheckInterval = null;
+    console.log('Streak checking scheduler stopped');
   }
 }

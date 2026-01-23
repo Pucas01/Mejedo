@@ -25,7 +25,7 @@ function getAsync(sql, params = []) {
   });
 }
 
-function allAsync(sql, params = []) {
+export function allAsync(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.all(sql, params, (err, rows) => {
       if (err) reject(err);
@@ -71,6 +71,14 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS global_optout_gaming (
       user_id TEXT PRIMARY KEY,
       opted_out_at INTEGER DEFAULT (strftime('%s', 'now'))
+    )
+  `);
+
+  // Streak DM notifications opt-in
+  db.run(`
+    CREATE TABLE IF NOT EXISTS streak_dm_optin (
+      user_id TEXT PRIMARY KEY,
+      opted_in_at INTEGER DEFAULT (strftime('%s', 'now'))
     )
   `);
 
@@ -418,4 +426,162 @@ export async function getGlobalTopGamesForUser(userId, limit = 10) {
     ORDER BY total_seconds DESC
     LIMIT ?
   `, [userId, limit]);
+}
+
+// Calculate current streak for a specific game (consecutive days played)
+export async function getGameStreak(userId, gameName) {
+  validateSnowflake(userId, 'User ID');
+  const sanitizedGameName = validateText(gameName, 'Game name', 200);
+
+  // Get all unique days this game was played, ordered by date descending
+  const days = await allAsync(`
+    SELECT DISTINCT DATE(start_time, 'unixepoch') as play_date
+    FROM game_sessions
+    WHERE user_id = ?
+      AND game_name = ?
+      AND end_time IS NOT NULL
+    ORDER BY play_date DESC
+  `, [userId, sanitizedGameName]);
+
+  if (days.length === 0) return 0;
+
+  // Calculate streak from most recent day backwards
+  let streak = 0;
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+  // Check if the most recent play was today or yesterday
+  const mostRecentPlay = days[0].play_date;
+  if (mostRecentPlay !== today && mostRecentPlay !== yesterday) {
+    return 0; // Streak broken
+  }
+
+  // Count consecutive days
+  let expectedDate = new Date(mostRecentPlay);
+  for (const day of days) {
+    const currentDate = day.play_date;
+    const expectedDateStr = expectedDate.toISOString().split('T')[0];
+
+    if (currentDate === expectedDateStr) {
+      streak++;
+      // Move to previous day
+      expectedDate.setDate(expectedDate.getDate() - 1);
+    } else {
+      break; // Streak broken
+    }
+  }
+
+  return streak;
+}
+
+// Get streaks for all games a user plays
+export async function getAllGameStreaks(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  // Get all games the user has played
+  const games = await allAsync(`
+    SELECT DISTINCT game_name
+    FROM game_sessions
+    WHERE user_id = ?
+      AND end_time IS NOT NULL
+  `, [userId]);
+
+  const streaks = [];
+  for (const game of games) {
+    const streak = await getGameStreak(userId, game.game_name);
+    if (streak > 0) {
+      streaks.push({
+        game_name: game.game_name,
+        streak: streak
+      });
+    }
+  }
+
+  // Sort by streak length descending
+  streaks.sort((a, b) => b.streak - a.streak);
+  return streaks;
+}
+
+// Calculate longest streak ever for a user across all games
+export async function getLongestStreakEver(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  // Get all games the user has played
+  const games = await allAsync(`
+    SELECT DISTINCT game_name
+    FROM game_sessions
+    WHERE user_id = ?
+      AND end_time IS NOT NULL
+  `, [userId]);
+
+  let longestStreak = 0;
+  let longestStreakGame = null;
+
+  for (const game of games) {
+    // Get all unique days this game was played
+    const days = await allAsync(`
+      SELECT DISTINCT DATE(start_time, 'unixepoch') as play_date
+      FROM game_sessions
+      WHERE user_id = ?
+        AND game_name = ?
+        AND end_time IS NOT NULL
+      ORDER BY play_date ASC
+    `, [userId, game.game_name]);
+
+    if (days.length === 0) continue;
+
+    // Calculate all streaks for this game (not just current)
+    let currentStreak = 1;
+    let maxStreak = 1;
+
+    for (let i = 1; i < days.length; i++) {
+      const prevDate = new Date(days[i - 1].play_date);
+      const currDate = new Date(days[i].play_date);
+
+      // Check if dates are consecutive (1 day apart)
+      const dayDiff = Math.floor((currDate - prevDate) / (1000 * 60 * 60 * 24));
+
+      if (dayDiff === 1) {
+        currentStreak++;
+        maxStreak = Math.max(maxStreak, currentStreak);
+      } else {
+        currentStreak = 1;
+      }
+    }
+
+    // Update longest streak if this game has a longer one
+    if (maxStreak > longestStreak) {
+      longestStreak = maxStreak;
+      longestStreakGame = game.game_name;
+    }
+  }
+
+  return longestStreak > 0 ? { streak: longestStreak, game_name: longestStreakGame } : null;
+}
+
+// Streak DM opt-in management
+export function optInStreakDMs(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  return runAsync(`
+    INSERT OR REPLACE INTO streak_dm_optin (user_id)
+    VALUES (?)
+  `, [userId]);
+}
+
+export function optOutStreakDMs(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  return runAsync('DELETE FROM streak_dm_optin WHERE user_id = ?', [userId]);
+}
+
+export function isStreakDMsEnabled(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  return new Promise((resolve, reject) => {
+    db.get('SELECT user_id FROM streak_dm_optin WHERE user_id = ?', [userId], (err, row) => {
+      if (err) reject(err);
+      else resolve(row !== undefined);
+    });
+  });
 }

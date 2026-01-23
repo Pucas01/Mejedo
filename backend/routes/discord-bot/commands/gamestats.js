@@ -61,6 +61,8 @@ export default {
         // User stats - always use global stats for personal scope
         const userStats = await gameStatsDb.getGlobalUserStats(userId);
         const topGames = await gameStatsDb.getGlobalTopGamesForUser(userId, 10);
+        const streaks = await gameStatsDb.getAllGameStreaks(userId);
+        const longestEver = await gameStatsDb.getLongestStreakEver(userId);
 
         if (!userStats || userStats.total_sessions === 0) {
           await interaction.editReply({
@@ -73,6 +75,27 @@ export default {
         const avgSessionMinutes = (userStats.avg_session_seconds / 60).toFixed(0);
 
         embed.setTitle(`${targetUser ? targetUser.username : 'Your'} Gaming Stats (All-Time)`);
+
+        // Current streaks (if any)
+        if (streaks.length > 0) {
+          const streaksText = streaks
+            .map(s => `🔥 ${s.streak}-day streak: **${s.game_name}**`)
+            .join('\n');
+          embed.addFields({
+            name: 'Current Streaks',
+            value: streaksText,
+            inline: false,
+          });
+        }
+
+        // Longest streak ever
+        if (longestEver) {
+          embed.addFields({
+            name: 'Longest Streak Ever',
+            value: `${longestEver.streak}-day streak: **${longestEver.game_name}**`,
+            inline: false,
+          });
+        }
 
         // Summary
         embed.addFields({
