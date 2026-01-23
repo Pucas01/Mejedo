@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { registerWordTracking, startWeeklyRecap, stopWeeklyRecap } from './wordTracker.js';
 import { registerSpotifyTracking, startSpotifyRecap, stopSpotifyRecap } from './spotifyTracker.js';
+import { setupGameTracking, initializeGameTracking, startGameRecap, stopGameRecap, stopGameTracking } from './gameTracker.js';
 import { registerTemperatureConverter } from './temperatureConverter.js';
 import { initializeGuildSettings, isFeatureEnabled } from './wordStatsDb.js';
 import { migrateOptInToOptOut } from './spotifyStatsDb.js';
@@ -47,6 +48,10 @@ class DiscordBot {
 
       registerSpotifyTracking(this.client);
       startSpotifyRecap(this.client);
+
+      initializeGameTracking();
+      setupGameTracking(this.client);
+      startGameRecap(this.client);
 
       registerTemperatureConverter(this.client);
 
@@ -199,6 +204,7 @@ class DiscordBot {
 
       stopWeeklyRecap();
       stopSpotifyRecap();
+      stopGameRecap();
       console.log('Stopped scheduled tasks');
 
       try {
@@ -207,6 +213,13 @@ class DiscordBot {
         console.log('Flushed pending Spotify logs');
       } catch (error) {
         console.error('Error flushing Spotify logs:', error);
+      }
+
+      try {
+        stopGameTracking();
+        console.log('Stopped game tracking');
+      } catch (error) {
+        console.error('Error stopping game tracking:', error);
       }
 
       try {

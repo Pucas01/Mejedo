@@ -10,7 +10,7 @@ Tracks what everyone in your Discord server is listening to on Spotify via Disco
 - 🎤 All-time stats with top tracks and artists
 - 🔒 **Opt-out by default** - everyone is tracked unless they choose to opt out
 - 💻 Web-based admin panel for managing stats
-- 🔐 User privacy controls via `/trackmusic` commands
+- 🔐 User privacy controls via `/track` commands
 
 ## How It Works
 
@@ -44,13 +44,13 @@ View Spotify listening statistics with flexible options.
 - `/spotifystats user:@Alice` - Alice's stats
 - `/spotifystats scope:Server type:Tracks Only` - Server top tracks only
 
-**`/trackmusic optout`**
+**`/track optout type:Music`**
 Opt yourself out of Spotify tracking across all servers with the bot.
 
-**`/trackmusic optin`**
+**`/track optin type:Music`**
 Opt yourself back into Spotify tracking (removes opt-out).
 
-**`/trackmusic status`**
+**`/track status`**
 Check if you're currently opted in or out of tracking.
 
 ### Admin Commands
@@ -149,8 +149,8 @@ app/components/admin/
    - Discord Settings → Connections → Spotify
 
 4. **That's it!** Everyone is automatically tracked unless they opt out.
-   - Users can opt out with `/trackmusic optout`
-   - Users can opt back in with `/trackmusic optin`
+   - Users can opt out with `/track optout type:Music`
+   - Users can opt back in with `/track optin type:Music`
 
 5. **Test it!**
    - Have someone play a song on Spotify
@@ -175,9 +175,9 @@ app/components/admin/
 
 - **Opt-out by default:** Everyone is tracked unless they choose to opt out
 - Only tracks data already publicly visible in Discord (presence)
-- Users can opt out anytime with `/trackmusic optout`
-- Users can check their status with `/trackmusic status`
-- Users can opt back in with `/trackmusic optin`
+- Users can opt out anytime with `/track optout type:Music`
+- Users can check their status with `/track status`
+- Users can opt back in with `/track optin type:Music`
 - Opt-out is global across all servers
 - Existing listening history is preserved even when opted out
 
@@ -197,13 +197,13 @@ app/components/admin/
 /spotifystats type:Artists Only
 
 # User opts out of tracking
-/trackmusic optout
+/track optout type:Music
 
 # User checks their tracking status
-/trackmusic status
+/track status
 
 # User opts back in
-/trackmusic optin
+/track optin type:Music
 
 # Admin forces a preview recap
 /forcerecap music

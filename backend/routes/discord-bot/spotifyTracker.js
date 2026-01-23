@@ -17,7 +17,7 @@ let loopCheckInterval = null;
 
 const MAX_PLAYING_AGE_MS = 30 * 60 * 1000;
 
-const MIN_PLAY_TIME_MS = 10 * 1000;
+const MIN_PLAY_TIME_MS = 5 * 1000;
 
 function cleanupStaleEntries() {
   const now = Date.now();

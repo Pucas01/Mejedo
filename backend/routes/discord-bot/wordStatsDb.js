@@ -77,6 +77,13 @@ db.serialize(() => {
       });
     }
 
+    if (!columnNames.includes('game_tracking_enabled')) {
+      migrations.push({
+        column: 'game_tracking_enabled',
+        sql: 'ALTER TABLE guild_settings ADD COLUMN game_tracking_enabled INTEGER DEFAULT 0'
+      });
+    }
+
     if (migrations.length > 0) {
       console.log(`[Migration] Found ${migrations.length} missing columns in guild_settings, adding them...`);
 
@@ -357,29 +364,32 @@ export async function initializeGuildSettings(guildId) {
   }
 }
 
-export async function updateFeatureFlags(guildId, wordTracking, spotifyTracking, announcements = null) {
+export async function updateFeatureFlags(guildId, wordTracking, spotifyTracking, gameTracking = null, announcements = null) {
   validateSnowflake(guildId, 'Guild ID');
 
   await initializeGuildSettings(guildId);
 
-  if (announcements === null) {
-    await runAsync(`
-      UPDATE guild_settings
-      SET word_tracking_enabled = ?,
-          spotify_tracking_enabled = ?,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE guild_id = ?
-    `, [wordTracking ? 1 : 0, spotifyTracking ? 1 : 0, guildId]);
-  } else {
-    await runAsync(`
-      UPDATE guild_settings
-      SET word_tracking_enabled = ?,
-          spotify_tracking_enabled = ?,
-          announcements_enabled = ?,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE guild_id = ?
-    `, [wordTracking ? 1 : 0, spotifyTracking ? 1 : 0, announcements ? 1 : 0, guildId]);
+  const fields = ['word_tracking_enabled = ?', 'spotify_tracking_enabled = ?'];
+  const values = [wordTracking ? 1 : 0, spotifyTracking ? 1 : 0];
+
+  if (gameTracking !== null) {
+    fields.push('game_tracking_enabled = ?');
+    values.push(gameTracking ? 1 : 0);
   }
+
+  if (announcements !== null) {
+    fields.push('announcements_enabled = ?');
+    values.push(announcements ? 1 : 0);
+  }
+
+  fields.push('updated_at = CURRENT_TIMESTAMP');
+  values.push(guildId);
+
+  await runAsync(`
+    UPDATE guild_settings
+    SET ${fields.join(', ')}
+    WHERE guild_id = ?
+  `, values);
 }
 
 export async function isFeatureEnabled(guildId, feature) {
