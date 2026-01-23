@@ -55,7 +55,7 @@ export default {
 
       // Post gaming recap
       if (type === 'gaming' || type === 'all') {
-        await postGameRecap(interaction.client, guildId);
+        await postGameRecap(interaction.client, guildId, false);
         message += 'Gaming stats preview posted. ';
       }
 

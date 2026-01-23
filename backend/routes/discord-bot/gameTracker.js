@@ -118,18 +118,18 @@ function updateActiveSessionCheckpoints() {
 }
 
 // Weekly recap
-export async function postGameRecap(client, guildId) {
+export async function postGameRecap(client, guildId, resetStats = true) {
   try {
-    const settings = wordStatsDb.getGuildSettings(guildId);
+    const settings = await wordStatsDb.getGuildSettings(guildId);
     if (!settings?.recap_channel_id) {
       console.log(`No recap channel configured for guild ${guildId}`);
       return;
     }
 
     // Get weekly stats
-    const topGames = gameStatsDb.getTopGames(guildId, 5, true);
-    const topGamers = gameStatsDb.getTopGamers(guildId, 5, true);
-    const guildStats = gameStatsDb.getGuildStats(guildId, true);
+    const topGames = await gameStatsDb.getTopGames(guildId, 5, true);
+    const topGamers = await gameStatsDb.getTopGamers(guildId, 5, true);
+    const guildStats = await gameStatsDb.getGuildStats(guildId, true);
 
     // Check if there's any data
     if (!guildStats || guildStats.total_sessions === 0) {
@@ -142,7 +142,7 @@ export async function postGameRecap(client, guildId) {
 
     // Build embed
     const embed = new EmbedBuilder()
-      .setTitle('Weekly Gaming Recap')
+      .setTitle(resetStats ? 'Weekly Gaming Recap' : 'Gaming Stats Preview')
       .setColor(0x39ff14)
       .setTimestamp();
 
@@ -181,11 +181,13 @@ export async function postGameRecap(client, guildId) {
     const channel = await client.channels.fetch(settings.recap_channel_id);
     if (channel) {
       await channel.send({ embeds: [embed] });
-      console.log(`[Game Recap] Posted weekly recap to guild ${guildId}`);
+      console.log(`[Game Recap] Posted ${resetStats ? 'weekly recap' : 'preview'} to guild ${guildId}`);
 
-      // Clear weekly stats
-      gameStatsDb.clearWeeklyStats(guildId);
-      console.log(`[Game Recap] Cleared weekly stats for guild ${guildId}`);
+      // Clear weekly stats only if requested
+      if (resetStats) {
+        await gameStatsDb.clearWeeklyStats(guildId);
+        console.log(`[Game Recap] Cleared weekly stats for guild ${guildId}`);
+      }
     }
   } catch (error) {
     console.error(`Error posting game recap for guild ${guildId}:`, error);
