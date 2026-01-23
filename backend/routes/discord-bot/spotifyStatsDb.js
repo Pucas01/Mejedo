@@ -43,7 +43,15 @@ db.serialize(() => {
     PRIMARY KEY (user_id, guild_id)
   )`);
 
-  // Global opt-in tracking (users who want to be automatically tracked in all servers)
+  // Global opt-OUT tracking (users who don't want to be tracked)
+  // New default: everyone is tracked unless they opt out
+  db.run(`CREATE TABLE IF NOT EXISTS global_optout (
+    user_id TEXT PRIMARY KEY,
+    username TEXT,
+    opted_out_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  // Legacy opt-in table (kept for migration, will be removed in future)
   db.run(`CREATE TABLE IF NOT EXISTS global_optin (
     user_id TEXT PRIMARY KEY,
     username TEXT,
@@ -120,53 +128,82 @@ export async function isUserTrackedGlobally(userId) {
   return result !== undefined;
 }
 
-// Set global opt-in flag for a user
-export async function setGlobalOptIn(userId, username) {
+// Set global opt-OUT flag for a user (they don't want to be tracked)
+export async function setGlobalOptOut(userId, username) {
   await runAsync(`
-    INSERT INTO global_optin (user_id, username)
+    INSERT INTO global_optout (user_id, username)
     VALUES (?, ?)
-    ON CONFLICT(user_id) DO UPDATE SET opted_in_at = CURRENT_TIMESTAMP
+    ON CONFLICT(user_id) DO UPDATE SET opted_out_at = CURRENT_TIMESTAMP
   `, [userId, username]);
 }
 
-// Check if user has globally opted in
+// Check if user has globally opted OUT
+export async function isGloballyOptedOut(userId) {
+  const result = await getAsync(`SELECT user_id FROM global_optout WHERE user_id = ?`, [userId]);
+  return result !== undefined;
+}
+
+// Remove global opt-OUT flag for a user (they want to be tracked again)
+export async function removeGlobalOptOut(userId) {
+  await runAsync(`DELETE FROM global_optout WHERE user_id = ?`, [userId]);
+}
+
+// LEGACY: Check if user has globally opted in (for migration)
 export async function isGloballyOptedIn(userId) {
   const result = await getAsync(`SELECT user_id FROM global_optin WHERE user_id = ?`, [userId]);
   return result !== undefined;
 }
 
-// Remove global opt-in flag for a user
-export async function removeGlobalOptIn(userId) {
-  await runAsync(`DELETE FROM global_optin WHERE user_id = ?`, [userId]);
+// Migration function: Convert all opted-in users to NOT opted-out (run once on startup)
+export async function migrateOptInToOptOut() {
+  try {
+    // Get all users who explicitly opted in
+    const optedInUsers = await allAsync(`SELECT user_id, username FROM global_optin`);
+
+    if (optedInUsers.length > 0) {
+      console.log(`[Migration] Found ${optedInUsers.length} users with explicit opt-in. They will continue to be tracked (not added to opt-out list).`);
+    }
+
+    // We don't need to do anything - users who opted in before are now tracked by default
+    // Only users who were NOT opted in before might want to opt out now
+    // This is handled by the new opt-out command
+
+    // Optionally: Clear the legacy table after migration
+    // await runAsync(`DELETE FROM global_optin`);
+    // console.log('[Migration] Cleared legacy global_optin table');
+
+    return true;
+  } catch (error) {
+    console.error('[Migration] Error during opt-in to opt-out migration:', error);
+    return false;
+  }
 }
 
-// Log a song listen to ALL guilds where the user is tracked
-// This ensures the bot only tracks once globally, but all servers see the data
+// Log a song listen to a specific guild
+export async function logListen(guildId, userId, trackName, artist, album, spotifyTrackId, durationMs) {
+  const params = [guildId, userId, trackName, artist, album, spotifyTrackId, durationMs];
+
+  // All-time stats
+  await runAsync(`
+    INSERT INTO spotify_listens (guild_id, user_id, track_name, artist, album, spotify_track_id, duration_ms)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `, params);
+
+  // Weekly stats
+  await runAsync(`
+    INSERT INTO spotify_listens_weekly (guild_id, user_id, track_name, artist, album, spotify_track_id, duration_ms)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `, params);
+}
+
+// LEGACY: Log a song listen to ALL guilds where the user is tracked (for backward compatibility)
 export async function logListenToAllGuilds(userId, trackName, artist, album, spotifyTrackId, durationMs) {
   // Get all guilds tracking this user
   const guilds = await getGuildsTrackingUser(userId);
 
   // Log to each guild
   for (const guild of guilds) {
-    const params = [guild.guild_id, userId, trackName, artist, album, spotifyTrackId, durationMs];
-
-    // All-time stats
-    await runAsync(`
-      INSERT INTO spotify_listens (guild_id, user_id, track_name, artist, album, spotify_track_id, duration_ms)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, params);
-
-    // Weekly stats
-    await runAsync(`
-      INSERT INTO spotify_listens_weekly (guild_id, user_id, track_name, artist, album, spotify_track_id, duration_ms)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, params);
-
-    // Update last_seen for this guild's tracking entry
-    await runAsync(`
-      UPDATE tracked_users SET last_seen = CURRENT_TIMESTAMP
-      WHERE user_id = ? AND guild_id = ?
-    `, [userId, guild.guild_id]);
+    await logListen(guild.guild_id, userId, trackName, artist, album, spotifyTrackId, durationMs);
   }
 }
 
@@ -456,12 +493,47 @@ export function getDbPath() {
   return DB_FILE;
 }
 
+// Get all opted-out users
+export async function getOptedOutUsers() {
+  return await allAsync(`SELECT user_id, username, opted_out_at FROM global_optout ORDER BY opted_out_at DESC`);
+}
+
+// Get all guilds with listening data
+export async function getAllGuildsWithStats() {
+  return await allAsync(`
+    SELECT
+      guild_id,
+      COUNT(DISTINCT user_id) as user_count,
+      COUNT(*) as total_listens,
+      COUNT(DISTINCT track_name || artist) as unique_tracks
+    FROM spotify_listens
+    GROUP BY guild_id
+    ORDER BY total_listens DESC
+  `);
+}
+
+// Get all users with listening data (across all guilds)
+export async function getAllUsersWithStats() {
+  return await allAsync(`
+    SELECT
+      user_id,
+      COUNT(DISTINCT guild_id) as guild_count,
+      COUNT(*) as total_listens,
+      COUNT(DISTINCT track_name || artist) as unique_tracks,
+      MAX(started_at) as last_listen
+    FROM spotify_listens
+    GROUP BY user_id
+    ORDER BY total_listens DESC
+  `);
+}
+
 // Export all stats
 export async function exportAllStats() {
   const allTime = await allAsync(`SELECT * FROM spotify_listens`);
   const weekly = await allAsync(`SELECT * FROM spotify_listens_weekly`);
-  const tracked = await allAsync(`SELECT * FROM tracked_users`);
-  return { allTime, weekly, tracked };
+  const tracked = await allAsync(`SELECT * FROM tracked_users`); // Legacy
+  const optedOut = await allAsync(`SELECT * FROM global_optout`);
+  return { allTime, weekly, tracked, optedOut };
 }
 
 export default db;

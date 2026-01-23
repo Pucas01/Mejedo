@@ -8,8 +8,9 @@ Tracks what everyone in your Discord server is listening to on Spotify via Disco
 - 📊 Personal and server-wide statistics
 - 🔥 Weekly recap with top songs/artists
 - 🎤 All-time stats with top tracks and artists
-- 🔒 Admin-controlled tracking list
+- 🔒 **Opt-out by default** - everyone is tracked unless they choose to opt out
 - 💻 Web-based admin panel for managing stats
+- 🔐 User privacy controls via `/trackmusic` commands
 
 ## How It Works
 
@@ -17,7 +18,8 @@ When someone connects Spotify to Discord, their currently playing song shows up 
 
 **Requirements:**
 - Users must have Spotify connected to Discord
-- Users must be added to the tracking list by an admin
+- Spotify tracking must be enabled for the server (via `/features toggle`)
+- Users are tracked by default (opt-out system)
 
 ## Commands
 
@@ -42,16 +44,16 @@ View Spotify listening statistics with flexible options.
 - `/spotifystats user:@Alice` - Alice's stats
 - `/spotifystats scope:Server type:Tracks Only` - Server top tracks only
 
+**`/trackmusic optout`**
+Opt yourself out of Spotify tracking across all servers with the bot.
+
+**`/trackmusic optin`**
+Opt yourself back into Spotify tracking (removes opt-out).
+
+**`/trackmusic status`**
+Check if you're currently opted in or out of tracking.
+
 ### Admin Commands
-
-**`/trackmusic add @user`**
-Add a user to the Spotify tracking list.
-
-**`/trackmusic remove @user`**
-Remove a user from tracking (keeps existing stats).
-
-**`/trackmusic list`**
-List all users currently being tracked.
 
 **`/forcerecap [type]`**
 Force post a weekly recap.
@@ -80,7 +82,9 @@ Weekly stats reset after each recap.
 **Tables:**
 - `spotify_listens` - All-time listening history
 - `spotify_listens_weekly` - Weekly stats (reset on recap)
-- `tracked_users` - List of users being tracked
+- `global_optout` - Users who have opted out of tracking
+- `tracked_users` - Legacy table (no longer used in opt-out system)
+- `global_optin` - Legacy table (kept for migration)
 
 ## Admin Panel
 
@@ -117,12 +121,12 @@ Base path: `/api/spotify-stats`
 
 ```
 backend/routes/discord-bot/
-├── spotifyStatsDb.js       # Database functions
-├── spotifyTracker.js       # Presence tracking & recap
+├── spotifyStatsDb.js       # Database functions (opt-out system)
+├── spotifyTracker.js       # Presence tracking & recap (tracks everyone by default)
 ├── spotifyStatsApi.js      # API routes
 └── commands/
     ├── spotifystats.js     # Stats command (personal/server)
-    ├── trackmusic.js       # Admin tracking management
+    ├── trackmusic.js       # User opt-out/opt-in management
     └── forcerecap.js       # Updated to include music
 
 app/components/admin/
@@ -141,19 +145,17 @@ app/components/admin/
    ```
    ⚠️ **Important:** Spotify tracking is **disabled by default** when the bot joins a server.
 
-3. **Add users to tracking**
-   ```
-   /trackmusic add @user1
-   /trackmusic add @user2
-   ```
-
-4. **Make sure users have Spotify connected to Discord**
+3. **Make sure users have Spotify connected to Discord**
    - Discord Settings → Connections → Spotify
+
+4. **That's it!** Everyone is automatically tracked unless they opt out.
+   - Users can opt out with `/trackmusic optout`
+   - Users can opt back in with `/trackmusic optin`
 
 5. **Test it!**
    - Have someone play a song on Spotify
    - Wait a few seconds for presence to update
-   - Check with `/spotifystats user:@user`
+   - Check with `/spotifystats`
 
 6. **Configure recap channel** (optional)
    - Use existing word stats recap channel
@@ -163,25 +165,27 @@ app/components/admin/
 
 1. Bot monitors Discord presence updates
 2. When a user starts playing a song on Spotify, Discord shows it in their presence
-3. Bot checks if user is in tracking list
-4. If yes, extracts song info (track name, artist, album, Spotify ID)
-5. Logs to database (both all-time and weekly tables)
-6. Prevents duplicate logs for same song
+3. Bot checks if Spotify tracking is enabled for the server
+4. Bot checks if user has opted out globally
+5. If user hasn't opted out, extracts song info (track name, artist, album, Spotify ID)
+6. Logs to database (both all-time and weekly tables)
+7. Prevents duplicate logs for same song (waits 10 seconds of continuous play)
 
 ## Privacy
 
-- Only tracks users explicitly added by admins via `/trackmusic add`
+- **Opt-out by default:** Everyone is tracked unless they choose to opt out
 - Only tracks data already publicly visible in Discord (presence)
-- Users can see their own stats anytime
-- Admins can remove users from tracking anytime
+- Users can opt out anytime with `/trackmusic optout`
+- Users can check their status with `/trackmusic status`
+- Users can opt back in with `/trackmusic optin`
+- Opt-out is global across all servers
+- Existing listening history is preserved even when opted out
 
 ## Example Usage
 
 ```bash
-# Admin adds tracking for everyone
-/trackmusic add @Alice
-/trackmusic add @Bob
-/trackmusic add @Charlie
+# Enable Spotify tracking (admin)
+/features toggle feature:Spotify Tracking enabled:True
 
 # Users check their stats
 /spotifystats scope:Personal
@@ -191,6 +195,15 @@ app/components/admin/
 /spotifystats
 /spotifystats type:Tracks Only
 /spotifystats type:Artists Only
+
+# User opts out of tracking
+/trackmusic optout
+
+# User checks their tracking status
+/trackmusic status
+
+# User opts back in
+/trackmusic optin
 
 # Admin forces a preview recap
 /forcerecap music

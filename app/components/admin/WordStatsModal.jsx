@@ -268,9 +268,6 @@ export default function WordStatsModal({ show, onClose }) {
           )}
         </div>
 
-        <div className="px-4 py-3 bg-[#090909] border-t border-[#39ff14]/30 text-gray-500 text-xs">
-          Export to backup, import to restore. Clear removes all data for that server.
-        </div>
       </div>
     </div>
   );

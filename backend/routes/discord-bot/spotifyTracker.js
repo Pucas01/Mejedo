@@ -1,6 +1,6 @@
 import {
-  logListenToAllGuilds,
-  isUserTrackedGlobally,
+  logListen,
+  isGloballyOptedOut,
   getWeeklyTopTracks,
   getWeeklyTopArtists,
   getWeeklyTopListeners,
@@ -91,7 +91,7 @@ function startLoopDetection(client) {
 
           // Schedule a new log after 10 seconds
           const logTimeout = setTimeout(async () => {
-            await logListenToAllGuilds(userId, trackData.trackName, trackData.artist, trackData.album, trackData.trackId, trackData.durationMs);
+            await logListen(guildId, userId, trackData.trackName, trackData.artist, trackData.album, trackData.trackId, trackData.durationMs);
             const track = currentlyPlaying.get(userId);
             if (track) {
               track.lastLogTime = Date.now();
@@ -136,9 +136,9 @@ export function registerSpotifyTracking(client) {
       const enabled = await isFeatureEnabled(guildId, 'spotify_tracking');
       if (!enabled) return;
 
-      // Check if this user is tracked in ANY guild (global check to avoid duplicate tracking)
-      const tracked = await isUserTrackedGlobally(userId);
-      if (!tracked) return;
+      // Check if user has globally opted OUT (new opt-out system: everyone tracked by default)
+      const optedOut = await isGloballyOptedOut(userId);
+      if (optedOut) return;
 
       // Find Spotify activity in the new presence
       const spotifyActivity = newPresence.activities.find(
@@ -186,7 +186,7 @@ export function registerSpotifyTracking(client) {
 
             // Schedule a new log after 10 seconds
             const logTimeout = setTimeout(async () => {
-              await logListenToAllGuilds(userId, trackName, artist, album, trackId, durationMs);
+              await logListen(guildId, userId, trackName, artist, album, trackId, durationMs);
               const track = currentlyPlaying.get(userId);
               if (track) {
                 track.lastLogTime = Date.now();
@@ -220,7 +220,7 @@ export function registerSpotifyTracking(client) {
 
             // Schedule a new log after 10 seconds
             const logTimeout = setTimeout(async () => {
-              await logListenToAllGuilds(userId, trackName, artist, album, trackId, durationMs);
+              await logListen(guildId, userId, trackName, artist, album, trackId, durationMs);
               const track = currentlyPlaying.get(userId);
               if (track) {
                 track.lastLogTime = Date.now();
@@ -250,8 +250,8 @@ export function registerSpotifyTracking(client) {
 
       // Schedule log after 10 seconds of continuous play
       const logTimeout = setTimeout(async () => {
-        // Log to ALL guilds where this user is tracked
-        await logListenToAllGuilds(userId, trackName, artist, album, trackId, durationMs);
+        // Log to this guild
+        await logListen(guildId, userId, trackName, artist, album, trackId, durationMs);
 
         // Mark as logged
         const track = currentlyPlaying.get(userId);

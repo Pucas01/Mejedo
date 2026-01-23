@@ -90,17 +90,19 @@ export default function AnnouncementsModal({ show, onClose }) {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#121217] border-2 border-[#39ff14] w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <WindowDecoration title="Announcements Manager" showControls={false} />
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 animate-fadeIn"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[800px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
+        <WindowDecoration title="Announcements Manager" onClose={onClose} />
 
-        <div className="p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {/* Header */}
           <div className="space-y-2">
             <h2 className="text-[#39ff14] text-xl font-bold">Send Announcement</h2>
-            <p className="text-gray-400 text-sm">
-              Broadcast messages to all servers with announcements enabled
-            </p>
           </div>
 
           {/* Configured Channels */}
@@ -110,7 +112,7 @@ export default function AnnouncementsModal({ show, onClose }) {
               <p className="text-gray-400 text-sm">Loading...</p>
             ) : channels.length === 0 ? (
               <p className="text-gray-400 text-sm">
-                No announcement channels configured yet. Use <code className="bg-[#121217] px-1">/setannouncements</code> in your server.
+                No announcement channels configured yet.
               </p>
             ) : (
               <div className="space-y-2">
@@ -154,9 +156,6 @@ export default function AnnouncementsModal({ show, onClose }) {
                 placeholder="Enter your announcement message here..."
                 maxLength={1000}
               />
-              <p className="text-gray-400 text-xs mt-1">
-                {announcement.message.length}/1000 characters
-              </p>
             </div>
 
             <div>
@@ -252,17 +251,6 @@ export default function AnnouncementsModal({ show, onClose }) {
             >
               {sending ? "Sending..." : "Send Announcement"}
             </Button>
-          </div>
-
-          {/* Instructions */}
-          <div className="border-t border-[#39ff14] pt-4 space-y-2 text-xs text-gray-400">
-            <p className="font-bold text-[#39ff14]">How to set up announcements:</p>
-            <ol className="list-decimal list-inside space-y-1 ml-2">
-              <li>In your Discord server, use <code className="bg-[#121217] px-1">/features toggle</code></li>
-              <li>Select "Announcements" and enable it</li>
-              <li>Use <code className="bg-[#121217] px-1">/setannouncements</code> to set the channel</li>
-              <li>Announcements sent from here will appear in all configured servers</li>
-            </ol>
           </div>
         </div>
       </div>

@@ -1,266 +1,120 @@
-import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 import {
-  addTrackedUser,
-  removeTrackedUser,
-  getTrackedUsers,
-  isUserTracked,
-  setGlobalOptIn,
-  removeGlobalOptIn,
-  isGloballyOptedIn,
-  getGuildsTrackingUser,
+  setGlobalOptOut,
+  removeGlobalOptOut,
+  isGloballyOptedOut,
 } from '../spotifyStatsDb.js';
-import { isFeatureEnabled } from '../wordStatsDb.js';
 
 export default {
   data: new SlashCommandBuilder()
     .setName('trackmusic')
-    .setDescription('Manage Spotify tracking for users')
+    .setDescription('Manage your Spotify tracking preferences')
     .addSubcommand(subcommand =>
       subcommand
-        .setName('add')
-        .setDescription('Add a user to Spotify tracking (Admin only)')
-        .addUserOption(option =>
-          option
-            .setName('user')
-            .setDescription('User to track')
-            .setRequired(true)
-        )
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName('remove')
-        .setDescription('Remove a user from Spotify tracking (Admin only)')
-        .addUserOption(option =>
-          option
-            .setName('user')
-            .setDescription('User to stop tracking')
-            .setRequired(true)
-        )
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName('list')
-        .setDescription('List all tracked users (Admin only)')
+        .setName('optout')
+        .setDescription('Opt out of Spotify tracking across all servers')
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('optin')
-        .setDescription('Opt yourself into tracking across all servers you share with the bot')
+        .setDescription('Opt back into Spotify tracking (removes opt-out)')
     )
     .addSubcommand(subcommand =>
       subcommand
-        .setName('optout')
-        .setDescription('Opt yourself out of tracking and remove your data from all servers')
+        .setName('status')
+        .setDescription('Check your current tracking status')
     )
     .setIntegrationTypes([0])
     .setContexts([0]),
 
   async execute(interaction) {
     const subcommand = interaction.options.getSubcommand();
-    const guildId = interaction.guild.id;
+    const user = interaction.user;
 
-    // Check admin permissions for admin-only subcommands
-    const adminCommands = ['add', 'remove', 'list'];
-    if (adminCommands.includes(subcommand)) {
-      const member = interaction.member;
-      if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
-        await interaction.reply({
-          content: 'You need Administrator permissions to use this command.',
-          ephemeral: true
-        });
+    if (subcommand === 'optout') {
+      await interaction.deferReply({ ephemeral: true });
+
+      // Check if already opted out
+      const alreadyOptedOut = await isGloballyOptedOut(user.id);
+      if (alreadyOptedOut) {
+        await interaction.editReply('You are already opted out of Spotify tracking.');
         return;
       }
+
+      // Set opt-out flag
+      await setGlobalOptOut(user.id, user.username);
+
+      const message = `✅ **Opt-out complete!**
+
+You have been opted out of Spotify tracking across all servers.
+
+**What this means:**
+• The bot will no longer track what you listen to on Spotify
+• Your existing listening history remains in the database
+• To completely delete your data, contact a server administrator
+
+**Want to opt back in?**
+Use \`/trackmusic optin\` to resume tracking.`;
+
+      await interaction.editReply(message);
+      console.log(`[Spotify] User ${user.username} opted out of tracking`);
     }
+    else if (subcommand === 'optin') {
+      await interaction.deferReply({ ephemeral: true });
 
-    if (subcommand === 'add') {
-      const user = interaction.options.getUser('user');
-
-      // Check if already tracked in this guild
-      const tracked = await isUserTracked(user.id, guildId);
-      if (tracked) {
-        await interaction.reply({
-          content: `${user.username} is already being tracked in this server!`,
-          ephemeral: true
-        });
+      // Check if currently opted out
+      const optedOut = await isGloballyOptedOut(user.id);
+      if (!optedOut) {
+        await interaction.editReply('You are already opted into Spotify tracking (not opted out).');
         return;
       }
 
-      // Add user to tracking
-      await addTrackedUser(user.id, guildId, user.username);
+      // Remove opt-out flag
+      await removeGlobalOptOut(user.id);
 
-      await interaction.reply({
-        content: `Now tracking Spotify activity for ${user.username}!\n\nMake sure they have Spotify connected to Discord for tracking to work.`,
-        ephemeral: true
-      });
+      const message = `✅ **Opt-in complete!**
+
+You have been opted back into Spotify tracking!
+
+**What this means:**
+• The bot will now track what you listen to on Spotify
+• Tracking only works in servers where Spotify tracking is enabled
+• Make sure you have Spotify connected to Discord for tracking to work
+
+**Want to opt out again?**
+Use \`/trackmusic optout\` to stop tracking.`;
+
+      await interaction.editReply(message);
+      console.log(`[Spotify] User ${user.username} opted back in to tracking`);
     }
-    else if (subcommand === 'remove') {
-      const user = interaction.options.getUser('user');
-
-      // Check if tracked in this guild
-      const tracked = await isUserTracked(user.id, guildId);
-      if (!tracked) {
-        await interaction.reply({
-          content: `${user.username} is not being tracked in this server.`,
-          ephemeral: true
-        });
-        return;
-      }
-
-      // Remove user from tracking in this guild
-      await removeTrackedUser(user.id, guildId);
-
-      await interaction.reply({
-        content: `Stopped tracking Spotify activity for ${user.username}.\n\nNote: Their existing stats remain in the database.`,
-        ephemeral: true
-      });
-    }
-    else if (subcommand === 'list') {
-      const trackedUsers = await getTrackedUsers(guildId);
-
-      if (trackedUsers.length === 0) {
-        await interaction.reply({
-          content: 'No users are currently being tracked in this server. Use `/trackmusic add @user` to start tracking.',
-          ephemeral: true
-        });
-        return;
-      }
-
-      const userList = trackedUsers
-        .map((u, i) => `${i + 1}. <@${u.user_id}> (${u.username})`)
-        .join('\n');
+    else if (subcommand === 'status') {
+      const optedOut = await isGloballyOptedOut(user.id);
 
       const embed = {
-        title: 'Tracked Users',
-        description: userList,
-        color: 0x1db954,
-        footer: { text: `${trackedUsers.length} user(s) being tracked` }
+        title: 'Your Spotify Tracking Status',
+        color: optedOut ? 0xff5555 : 0x1db954,
+        fields: [
+          {
+            name: 'Status',
+            value: optedOut ? '**Opted Out** ❌' : '**Opted In** ✅',
+            inline: true
+          },
+          {
+            name: 'What this means',
+            value: optedOut
+              ? 'You are **not being tracked**. The bot will not log your Spotify activity.'
+              : 'You are **being tracked** in servers where Spotify tracking is enabled.',
+            inline: false
+          }
+        ],
+        footer: {
+          text: optedOut
+            ? 'Use /trackmusic optin to opt back in'
+            : 'Use /trackmusic optout to opt out'
+        }
       };
 
       await interaction.reply({ embeds: [embed], ephemeral: true });
-    }
-    else if (subcommand === 'optin') {
-      // User opts themselves into tracking across all servers
-      const user = interaction.user;
-      const client = interaction.client;
-
-      await interaction.deferReply({ ephemeral: true });
-
-      // Set global opt-in flag so user is auto-tracked in future servers they join
-      await setGlobalOptIn(user.id, user.username);
-
-      const addedServers = [];
-      const alreadyTrackedServers = [];
-      const disabledServers = [];
-
-      // Loop through all guilds the bot is in
-      for (const [guildId, guild] of client.guilds.cache) {
-        // Check if user is a member of this guild
-        try {
-          const member = await guild.members.fetch(user.id).catch(() => null);
-          if (!member) continue; // User not in this guild
-
-          // Check if Spotify tracking is enabled for this guild
-          const enabled = await isFeatureEnabled(guildId, 'spotify_tracking');
-          if (!enabled) {
-            disabledServers.push(guild.name);
-            continue;
-          }
-
-          // Check if already tracked
-          const tracked = await isUserTracked(user.id, guildId);
-          if (tracked) {
-            alreadyTrackedServers.push(guild.name);
-            continue;
-          }
-
-          // Add to tracking
-          await addTrackedUser(user.id, guildId, user.username);
-          addedServers.push(guild.name);
-        } catch (error) {
-          console.error(`Error checking guild ${guildId}:`, error);
-        }
-      }
-
-      // Build response message
-      let message = `Tracking opt-in complete!\n\n`;
-
-      if (addedServers.length > 0) {
-        message += `**Added to ${addedServers.length} server(s):**\n${addedServers.map(s => `• ${s}`).join('\n')}\n\n`;
-      }
-
-      if (alreadyTrackedServers.length > 0) {
-        message += `**Already tracking in ${alreadyTrackedServers.length} server(s):**\n${alreadyTrackedServers.map(s => `• ${s}`).join('\n')}\n\n`;
-      }
-
-      if (disabledServers.length > 0) {
-        message += `**Skipped ${disabledServers.length} server(s) (tracking disabled):**\n${disabledServers.map(s => `• ${s}`).join('\n')}\n\n`;
-      }
-
-      if (addedServers.length === 0 && alreadyTrackedServers.length === 0) {
-        message = `No servers available for tracking. Either:\n• You're not in any servers with the bot\n• All servers have Spotify tracking disabled\n• You're already tracked everywhere`;
-      }
-
-      message += `\nMake sure you have Spotify connected to Discord for tracking to work!`;
-
-      await interaction.editReply(message);
-    }
-    else if (subcommand === 'optout') {
-      // User opts themselves out of tracking across all servers
-      const user = interaction.user;
-      const client = interaction.client;
-
-      await interaction.deferReply({ ephemeral: true });
-
-      // Check if user is globally opted in
-      const globallyOptedIn = await isGloballyOptedIn(user.id);
-
-      // Get all guilds where user is currently tracked
-      const trackedGuilds = await getGuildsTrackingUser(user.id);
-
-      if (trackedGuilds.length === 0 && !globallyOptedIn) {
-        await interaction.editReply('You are not being tracked in any servers.');
-        return;
-      }
-
-      const removedServers = [];
-
-      // Remove from all tracked guilds
-      for (const guildData of trackedGuilds) {
-        const guildId = guildData.guild_id;
-        try {
-          const guild = client.guilds.cache.get(guildId);
-          if (guild) {
-            await removeTrackedUser(user.id, guildId);
-            removedServers.push(guild.name);
-          } else {
-            // Guild not in cache, still remove from database
-            await removeTrackedUser(user.id, guildId);
-            removedServers.push(`Server ${guildId}`);
-          }
-        } catch (error) {
-          console.error(`Error removing user from guild ${guildId}:`, error);
-        }
-      }
-
-      // Remove global opt-in flag
-      if (globallyOptedIn) {
-        await removeGlobalOptIn(user.id);
-      }
-
-      // Build response message
-      let message = `Tracking opt-out complete!\n\n`;
-
-      if (removedServers.length > 0) {
-        message += `**Removed from ${removedServers.length} server(s):**\n${removedServers.map(s => `• ${s}`).join('\n')}\n\n`;
-      }
-
-      if (globallyOptedIn) {
-        message += `**Global opt-in disabled:** You will no longer be automatically tracked in new servers.\n\n`;
-      }
-
-      message += `Your listening history has been preserved in the database. To completely delete your data, contact a server administrator.`;
-
-      await interaction.editReply(message);
     }
   },
 };

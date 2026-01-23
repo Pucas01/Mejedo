@@ -6,7 +6,7 @@ import { registerWordTracking, startWeeklyRecap, stopWeeklyRecap } from './wordT
 import { registerSpotifyTracking, startSpotifyRecap, stopSpotifyRecap } from './spotifyTracker.js';
 import { registerTemperatureConverter } from './temperatureConverter.js';
 import { initializeGuildSettings, isFeatureEnabled } from './wordStatsDb.js';
-import { isGloballyOptedIn, addTrackedUser, isUserTracked, removeAllTrackedUsersForGuild, removeUserFromGuild } from './spotifyStatsDb.js';
+import { migrateOptInToOptOut } from './spotifyStatsDb.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,6 +61,10 @@ class DiscordBot {
 
       // Initialize temperature converter
       registerTemperatureConverter(this.client);
+
+      // Run migration from opt-in to opt-out system
+      await migrateOptInToOptOut();
+      console.log('Spotify tracking migration completed (opt-in → opt-out)');
     } catch (error) {
       console.error('Failed to login Discord bot:', error);
     }
@@ -121,60 +125,9 @@ class DiscordBot {
       }
     });
 
-    // Auto-track users who have globally opted in when they join a new guild
-    this.client.on('guildMemberAdd', async (member) => {
-      try {
-        const userId = member.id;
-        const guildId = member.guild.id;
-
-        // Check if user has globally opted in
-        const optedIn = await isGloballyOptedIn(userId);
-        if (!optedIn) return;
-
-        // Check if Spotify tracking is enabled for this guild
-        const enabled = await isFeatureEnabled(guildId, 'spotify_tracking');
-        if (!enabled) return;
-
-        // Check if already tracked (shouldn't be, but safety check)
-        const alreadyTracked = await isUserTracked(userId, guildId);
-        if (alreadyTracked) return;
-
-        // Auto-add to tracking
-        await addTrackedUser(userId, guildId, member.user.username);
-        console.log(`[Auto-Track] Added ${member.user.username} to Spotify tracking in ${member.guild.name} (global opt-in)`);
-      } catch (error) {
-        console.error('Error auto-tracking user on guild join:', error);
-      }
-    });
-
-    // Clean up tracked users when bot leaves a guild
-    this.client.on('guildDelete', async (guild) => {
-      try {
-        console.log(`Bot removed from guild: ${guild.name} (${guild.id})`);
-        await removeAllTrackedUsersForGuild(guild.id);
-        console.log(`Cleaned up tracked users for guild: ${guild.name}`);
-      } catch (error) {
-        console.error(`Error cleaning up guild ${guild.id}:`, error);
-      }
-    });
-
-    // Clean up tracked user when they leave a guild
-    this.client.on('guildMemberRemove', async (member) => {
-      try {
-        const userId = member.id;
-        const guildId = member.guild.id;
-
-        // Check if user was being tracked in this guild
-        const wasTracked = await isUserTracked(userId, guildId);
-        if (!wasTracked) return;
-
-        // Remove from tracking for this guild
-        await removeUserFromGuild(userId, guildId);
-        console.log(`[Cleanup] Removed ${member.user?.username || userId} from Spotify tracking in ${member.guild.name} (user left guild)`);
-      } catch (error) {
-        console.error('Error cleaning up user on guild leave:', error);
-      }
-    });
+    // Note: With the new opt-out system, no cleanup is needed.
+    // Users are tracked by default unless they opt out globally.
+    // The opt-out status persists across all guilds.
 
     this.client.on('interactionCreate', async (interaction) => {
       if (!interaction.isChatInputCommand() && !interaction.isMessageContextMenuCommand()) return;
