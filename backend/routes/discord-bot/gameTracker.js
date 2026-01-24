@@ -34,10 +34,10 @@ export function setupGameTracking(client) {
         await handleGameStart(guildId, userId, newGame);
       }
       else if (oldGame && !newGame) {
-        await handleGameStop(guildId, userId);
+        await handleGameStop(guildId, userId, client);
       }
       else if (oldGame && newGame && oldGame.name !== newGame.name) {
-        await handleGameStop(guildId, userId);
+        await handleGameStop(guildId, userId, client);
         await handleGameStart(guildId, userId, newGame);
       }
     } catch (error) {
@@ -54,69 +54,72 @@ export function setupGameTracking(client) {
   console.log('Game tracking setup complete');
 }
 
-async function checkStreaksAndNotify(client) {
-  const today = new Date().toISOString().split('T')[0];
+async function checkStreakForUser(client, userId) {
+  try {
+    const isEnabled = await gameStatsDb.isStreakDMsEnabled(userId);
+    if (!isEnabled) return;
 
+    const today = new Date().toISOString().split('T')[0];
+
+    const streaks = await gameStatsDb.getAllGameStreaks(userId);
+
+    const notifiableStreaks = streaks.filter(s => s.streak > 1);
+
+    if (notifiableStreaks.length === 0) {
+      return;
+    }
+
+    const lastCheck = lastStreakCheck.get(userId);
+    const previousStreaks = lastCheck?.streaks || {};
+
+    const hasNewOrUpdated = notifiableStreaks.some(s =>
+      !previousStreaks[s.game_name] || previousStreaks[s.game_name] !== s.streak
+    );
+
+    if (!hasNewOrUpdated) {
+      return;
+    }
+
+    const currentStreaks = {};
+    notifiableStreaks.forEach(s => {
+      currentStreaks[s.game_name] = s.streak;
+    });
+
+    try {
+      const user = await client.users.fetch(userId);
+
+      const streakText = notifiableStreaks
+        .map(s => `🔥 **${s.streak}-day streak**: ${s.game_name}`)
+        .join('\n');
+
+      const embed = {
+        title: 'Your Gaming Streaks Updated!',
+        description: streakText,
+        color: 0x39ff14,
+        footer: {
+          text: 'Hey, yeah you, listen up, 67.'
+        },
+        timestamp: new Date().toISOString()
+      };
+
+      await user.send({ embeds: [embed] });
+      console.log(`[Streak DM] Sent streak update to user ${userId}`);
+    } catch (dmError) {
+      console.error(`[Streak DM] Could not send DM to user ${userId}:`, dmError.message);
+    }
+
+    lastStreakCheck.set(userId, { date: today, streaks: currentStreaks });
+  } catch (error) {
+    console.error(`[Streak Check] Error checking streak for user ${userId}:`, error);
+  }
+}
+
+async function checkStreaksAndNotify(client) {
   try {
     const optedInUsers = await gameStatsDb.allAsync('SELECT user_id FROM streak_dm_optin');
 
     for (const { user_id } of optedInUsers) {
-      try {
-        const lastCheck = lastStreakCheck.get(user_id);
-        if (lastCheck && lastCheck.date === today) {
-          continue;
-        }
-
-        const streaks = await gameStatsDb.getAllGameStreaks(user_id);
-
-        const notifiableStreaks = streaks.filter(s => s.streak > 1);
-
-        if (notifiableStreaks.length === 0) {
-          lastStreakCheck.set(user_id, { date: today, streaks: {} });
-          continue;
-        }
-
-        const previousStreaks = lastCheck?.streaks || {};
-        const hasNewOrUpdated = notifiableStreaks.some(s =>
-          !previousStreaks[s.game_name] || previousStreaks[s.game_name] !== s.streak
-        );
-
-        if (!hasNewOrUpdated) {
-          continue;
-        }
-
-        const currentStreaks = {};
-        notifiableStreaks.forEach(s => {
-          currentStreaks[s.game_name] = s.streak;
-        });
-
-        try {
-          const user = await client.users.fetch(user_id);
-
-          const streakText = notifiableStreaks
-            .map(s => `🔥 **${s.streak}-day streak**: ${s.game_name}`)
-            .join('\n');
-
-          const embed = {
-            title: 'Your Gaming Streaks Updated!',
-            description: streakText,
-            color: 0x39ff14,
-            footer: {
-              text: 'Hey, yeah you, listen up, 67.'
-            },
-            timestamp: new Date().toISOString()
-          };
-
-          await user.send({ embeds: [embed] });
-          console.log(`[Streak DM] Sent streak update to user ${user_id}`);
-        } catch (dmError) {
-          console.error(`[Streak DM] Could not send DM to user ${user_id}:`, dmError.message);
-        }
-
-        lastStreakCheck.set(user_id, { date: today, streaks: currentStreaks });
-      } catch (userError) {
-        console.error(`[Streak Check] Error processing user ${user_id}:`, userError);
-      }
+      await checkStreakForUser(client, user_id);
     }
   } catch (error) {
     console.error('[Streak Check] Error checking streaks:', error);
@@ -158,7 +161,7 @@ async function handleGameStart(guildId, userId, game) {
   console.log(`[Game Tracker] ${userId} started playing ${gameName} in guild ${guildId}`);
 }
 
-async function handleGameStop(guildId, userId) {
+async function handleGameStop(guildId, userId, client) {
   const session = activeSessions.get(userId);
 
   if (session) {
@@ -168,6 +171,8 @@ async function handleGameStop(guildId, userId) {
 
     const duration = Math.floor((Date.now() - session.startTime) / 1000 / 60);
     console.log(`[Game Tracker] ${userId} stopped playing ${session.gameName} (${duration}m)`);
+
+    await checkStreakForUser(client, userId);
   }
 }
 
