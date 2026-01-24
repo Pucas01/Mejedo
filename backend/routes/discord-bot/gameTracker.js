@@ -188,7 +188,7 @@ async function handleGameStop(guildId, userId, client) {
 async function updateActiveSessionCheckpoints() {
   for (const [userId, session] of activeSessions.entries()) {
     try {
-      await gameStatsDb.endGameSession(session.guildId, userId, session.sessionId);
+      await gameStatsDb.updateSessionCheckpoint(session.guildId, userId, session.sessionId);
     } catch (error) {
       console.error(`Error updating checkpoint for user ${userId}:`, error);
     }
