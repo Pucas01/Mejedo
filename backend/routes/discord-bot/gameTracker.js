@@ -218,11 +218,11 @@ async function handleGameStop(guildId, userId, client) {
 async function updateActiveSessionCheckpoints() {
   // Update end times for all active sessions as checkpoints
   // This prevents data loss if bot crashes during long sessions
-  // We just update the end_time of the existing session without creating new ones
+  // We update the end_time without ending the session
   for (const [userId, session] of activeSessions.entries()) {
     try {
-      // Just update the end_time, don't create a new session
-      await gameStatsDb.endGameSession(session.guildId, userId, session.sessionId);
+      // Update checkpoint without ending the session
+      await gameStatsDb.updateSessionCheckpoint(session.guildId, userId, session.sessionId);
     } catch (error) {
       console.error(`Error updating checkpoint for user ${userId}:`, error);
     }
