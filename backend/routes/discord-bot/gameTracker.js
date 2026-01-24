@@ -41,11 +41,11 @@ export function setupGameTracking(client) {
       }
       // User stopped playing a game
       else if (oldGame && !newGame) {
-        await handleGameStop(guildId, userId);
+        await handleGameStop(guildId, userId, client);
       }
       // User switched games
       else if (oldGame && newGame && oldGame.name !== newGame.name) {
-        await handleGameStop(guildId, userId);
+        await handleGameStop(guildId, userId, client);
         await handleGameStart(guildId, userId, newGame);
       }
     } catch (error) {
@@ -64,79 +64,82 @@ export function setupGameTracking(client) {
   console.log('Game tracking setup complete');
 }
 
-// Check streaks and send DMs to opted-in users
-async function checkStreaksAndNotify(client) {
-  const today = new Date().toISOString().split('T')[0];
+// Check streaks for a single user and send DM if needed
+async function checkStreakForUser(client, userId) {
+  try {
+    // Check if user has streak DMs enabled
+    const isEnabled = await gameStatsDb.isStreakDMsEnabled(userId);
+    if (!isEnabled) return;
 
+    const today = new Date().toISOString().split('T')[0];
+
+    // Get current streaks
+    const streaks = await gameStatsDb.getAllGameStreaks(userId);
+
+    // Filter out 1-day streaks
+    const notifiableStreaks = streaks.filter(s => s.streak > 1);
+
+    if (notifiableStreaks.length === 0) {
+      return;
+    }
+
+    // Check if any streaks have changed since last check
+    const lastCheck = lastStreakCheck.get(userId);
+    const previousStreaks = lastCheck?.streaks || {};
+
+    const hasNewOrUpdated = notifiableStreaks.some(s =>
+      !previousStreaks[s.game_name] || previousStreaks[s.game_name] !== s.streak
+    );
+
+    if (!hasNewOrUpdated) {
+      return;
+    }
+
+    // Build streak map for tracking
+    const currentStreaks = {};
+    notifiableStreaks.forEach(s => {
+      currentStreaks[s.game_name] = s.streak;
+    });
+
+    // Send DM
+    try {
+      const user = await client.users.fetch(userId);
+
+      const streakText = notifiableStreaks
+        .map(s => `🔥 **${s.streak}-day streak**: ${s.game_name}`)
+        .join('\n');
+
+      const embed = {
+        title: 'Your Gaming Streaks Updated!',
+        description: streakText,
+        color: 0x39ff14,
+        footer: {
+          text: 'Hey, yeah you, listen up, 67.'
+        },
+        timestamp: new Date().toISOString()
+      };
+
+      await user.send({ embeds: [embed] });
+      console.log(`[Streak DM] Sent streak update to user ${userId}`);
+    } catch (dmError) {
+      console.error(`[Streak DM] Could not send DM to user ${userId}:`, dmError.message);
+    }
+
+    // Update last check
+    lastStreakCheck.set(userId, { date: today, streaks: currentStreaks });
+  } catch (error) {
+    console.error(`[Streak Check] Error checking streak for user ${userId}:`, error);
+  }
+}
+
+// Check streaks and send DMs to opted-in users (scheduled hourly check)
+async function checkStreaksAndNotify(client) {
   try {
     // Get all users who have streak DMs enabled
     const optedInUsers = await gameStatsDb.allAsync('SELECT user_id FROM streak_dm_optin');
 
     for (const { user_id } of optedInUsers) {
-      try {
-        // Skip if we already checked this user today
-        const lastCheck = lastStreakCheck.get(user_id);
-        if (lastCheck && lastCheck.date === today) {
-          continue;
-        }
-
-        // Get current streaks
-        const streaks = await gameStatsDb.getAllGameStreaks(user_id);
-
-        // Filter out 1-day streaks
-        const notifiableStreaks = streaks.filter(s => s.streak > 1);
-
-        if (notifiableStreaks.length === 0) {
-          // Update last check even if no streaks
-          lastStreakCheck.set(user_id, { date: today, streaks: {} });
-          continue;
-        }
-
-        // Check if any streaks have changed since yesterday
-        const previousStreaks = lastCheck?.streaks || {};
-        const hasNewOrUpdated = notifiableStreaks.some(s =>
-          !previousStreaks[s.game_name] || previousStreaks[s.game_name] !== s.streak
-        );
-
-        if (!hasNewOrUpdated) {
-          continue;
-        }
-
-        // Build streak map for tracking
-        const currentStreaks = {};
-        notifiableStreaks.forEach(s => {
-          currentStreaks[s.game_name] = s.streak;
-        });
-
-        // Send DM
-        try {
-          const user = await client.users.fetch(user_id);
-
-          const streakText = notifiableStreaks
-            .map(s => `🔥 **${s.streak}-day streak**: ${s.game_name}`)
-            .join('\n');
-
-          const embed = {
-            title: 'Your Gaming Streaks Updated!',
-            description: streakText,
-            color: 0x39ff14,
-            footer: {
-              text: 'Hey, yeah you, listen up, 67.'
-            },
-            timestamp: new Date().toISOString()
-          };
-
-          await user.send({ embeds: [embed] });
-          console.log(`[Streak DM] Sent streak update to user ${user_id}`);
-        } catch (dmError) {
-          console.error(`[Streak DM] Could not send DM to user ${user_id}:`, dmError.message);
-        }
-
-        // Update last check
-        lastStreakCheck.set(user_id, { date: today, streaks: currentStreaks });
-      } catch (userError) {
-        console.error(`[Streak Check] Error processing user ${user_id}:`, userError);
-      }
+      await checkStreakForUser(client, user_id);
     }
   } catch (error) {
     console.error('[Streak Check] Error checking streaks:', error);
@@ -184,7 +187,7 @@ async function handleGameStart(guildId, userId, game) {
   console.log(`[Game Tracker] ${userId} started playing ${gameName} in guild ${guildId}`);
 }
 
-async function handleGameStop(guildId, userId) {
+async function handleGameStop(guildId, userId, client) {
   const session = activeSessions.get(userId);
 
   if (session) {
@@ -196,6 +199,9 @@ async function handleGameStop(guildId, userId) {
 
     const duration = Math.floor((Date.now() - session.startTime) / 1000 / 60); // minutes
     console.log(`[Game Tracker] ${userId} stopped playing ${session.gameName} (${duration}m)`);
+
+    // Check for new streaks immediately after stopping
+    await checkStreakForUser(client, userId);
   }
 }
 
