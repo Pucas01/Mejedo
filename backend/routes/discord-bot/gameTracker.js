@@ -180,13 +180,6 @@ async function updateActiveSessionCheckpoints() {
   for (const [userId, session] of activeSessions.entries()) {
     try {
       await gameStatsDb.endGameSession(session.guildId, userId, session.sessionId);
-      const newSessionId = await gameStatsDb.startGameSession(
-        session.guildId,
-        userId,
-        session.gameName,
-        session.gameId
-      );
-      session.sessionId = newSessionId;
     } catch (error) {
       console.error(`Error updating checkpoint for user ${userId}:`, error);
     }
