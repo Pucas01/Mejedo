@@ -84,6 +84,16 @@ db.serialize(() => {
     )
   `);
 
+  // Track last streak check to prevent duplicate DMs on bot restart
+  db.run(`
+    CREATE TABLE IF NOT EXISTS streak_dm_last_check (
+      user_id TEXT PRIMARY KEY,
+      last_check_date TEXT NOT NULL,
+      streaks_json TEXT NOT NULL,
+      updated_at INTEGER DEFAULT (strftime('%s', 'now'))
+    )
+  `);
+
   // Indexes for performance
   db.run(`
     CREATE INDEX IF NOT EXISTS idx_game_sessions_guild_user
@@ -586,6 +596,36 @@ export function isStreakDMsEnabled(userId) {
       else resolve(row !== undefined);
     });
   });
+}
+
+// Save last streak check to prevent duplicate DMs on restart
+export async function saveLastStreakCheck(userId, date, streaks) {
+  validateSnowflake(userId, 'User ID');
+
+  const streaksJson = JSON.stringify(streaks);
+
+  return runAsync(`
+    INSERT OR REPLACE INTO streak_dm_last_check (user_id, last_check_date, streaks_json, updated_at)
+    VALUES (?, ?, ?, strftime('%s', 'now'))
+  `, [userId, date, streaksJson]);
+}
+
+// Load last streak check
+export async function getLastStreakCheck(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  const row = await getAsync(`
+    SELECT last_check_date, streaks_json
+    FROM streak_dm_last_check
+    WHERE user_id = ?
+  `, [userId]);
+
+  if (!row) return null;
+
+  return {
+    date: row.last_check_date,
+    streaks: JSON.parse(row.streaks_json)
+  };
 }
 
 // Consolidate duplicate sessions caused by checkpoint system

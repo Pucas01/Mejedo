@@ -84,7 +84,15 @@ async function checkStreakForUser(client, userId) {
     }
 
     // Check if any streaks have changed since last check
-    const lastCheck = lastStreakCheck.get(userId);
+    // First try memory, then database
+    let lastCheck = lastStreakCheck.get(userId);
+    if (!lastCheck) {
+      lastCheck = await gameStatsDb.getLastStreakCheck(userId);
+      if (lastCheck) {
+        lastStreakCheck.set(userId, lastCheck);
+      }
+    }
+
     const previousStreaks = lastCheck?.streaks || {};
 
     const hasNewOrUpdated = notifiableStreaks.some(s =>
@@ -125,8 +133,10 @@ async function checkStreakForUser(client, userId) {
       console.error(`[Streak DM] Could not send DM to user ${userId}:`, dmError.message);
     }
 
-    // Update last check
-    lastStreakCheck.set(userId, { date: today, streaks: currentStreaks });
+    // Update last check in memory AND database
+    const checkData = { date: today, streaks: currentStreaks };
+    lastStreakCheck.set(userId, checkData);
+    await gameStatsDb.saveLastStreakCheck(userId, today, currentStreaks);
   } catch (error) {
     console.error(`[Streak Check] Error checking streak for user ${userId}:`, error);
   }
