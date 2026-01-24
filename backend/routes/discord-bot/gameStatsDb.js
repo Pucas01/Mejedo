@@ -6,6 +6,8 @@ import { validateSnowflake, validateText, validateLimit } from './validation.js'
 const dbPath = path.join(process.cwd(), 'config', 'game-stats.db');
 const db = new sqlite3.Database(dbPath);
 
+export { db };
+
 // Promisified helpers
 function runAsync(sql, params = []) {
   return new Promise((resolve, reject) => {
@@ -584,4 +586,103 @@ export function isStreakDMsEnabled(userId) {
       else resolve(row !== undefined);
     });
   });
+}
+
+// Consolidate duplicate sessions caused by checkpoint system
+// Merges consecutive sessions of the same game that are within 6 minutes of each other
+export async function consolidateDuplicateSessions() {
+  console.log('[Consolidate] Starting session consolidation...');
+
+  // Get all users and their games
+  const users = await allAsync(`
+    SELECT DISTINCT guild_id, user_id, game_name
+    FROM game_sessions
+    WHERE end_time IS NOT NULL
+    ORDER BY guild_id, user_id, game_name
+  `);
+
+  let totalMerged = 0;
+
+  for (const { guild_id, user_id, game_name } of users) {
+    // Get all sessions for this user/game combination, ordered by time
+    const sessions = await allAsync(`
+      SELECT id, start_time, end_time, duration_seconds
+      FROM game_sessions
+      WHERE guild_id = ?
+        AND user_id = ?
+        AND game_name = ?
+        AND end_time IS NOT NULL
+      ORDER BY start_time ASC
+    `, [guild_id, user_id, game_name]);
+
+    if (sessions.length < 2) continue;
+
+    // Find consecutive sessions to merge (within 6 minutes = 360 seconds)
+    let i = 0;
+    while (i < sessions.length - 1) {
+      const current = sessions[i];
+      const mergeable = [current];
+      let j = i + 1;
+
+      // Find all consecutive sessions within 6 minutes
+      while (j < sessions.length) {
+        const next = sessions[j];
+        const gap = next.start_time - mergeable[mergeable.length - 1].end_time;
+
+        if (gap <= 360) { // 6 minutes gap
+          mergeable.push(next);
+          j++;
+        } else {
+          break;
+        }
+      }
+
+      // If we found sessions to merge
+      if (mergeable.length > 1) {
+        const firstSession = mergeable[0];
+        const lastSession = mergeable[mergeable.length - 1];
+
+        // Update the first session to span the entire time range
+        await runAsync(`
+          UPDATE game_sessions
+          SET end_time = ?,
+              duration_seconds = ? - start_time
+          WHERE id = ?
+        `, [lastSession.end_time, lastSession.end_time, firstSession.id]);
+
+        // Do the same for weekly table
+        await runAsync(`
+          UPDATE game_sessions_weekly
+          SET end_time = ?,
+              duration_seconds = ? - start_time
+          WHERE id = ?
+        `, [lastSession.end_time, lastSession.end_time, firstSession.id]);
+
+        // Delete the duplicate sessions
+        const idsToDelete = mergeable.slice(1).map(s => s.id);
+        if (idsToDelete.length > 0) {
+          const placeholders = idsToDelete.map(() => '?').join(',');
+          await runAsync(`
+            DELETE FROM game_sessions
+            WHERE id IN (${placeholders})
+          `, idsToDelete);
+
+          await runAsync(`
+            DELETE FROM game_sessions_weekly
+            WHERE id IN (${placeholders})
+          `, idsToDelete);
+
+          totalMerged += idsToDelete.length;
+        }
+
+        console.log(`[Consolidate] Merged ${mergeable.length} sessions for ${game_name} (user ${user_id})`);
+      }
+
+      // Move to next unprocessed session
+      i = j;
+    }
+  }
+
+  console.log(`[Consolidate] Consolidation complete. Merged ${totalMerged} duplicate sessions.`);
+  return totalMerged;
 }
