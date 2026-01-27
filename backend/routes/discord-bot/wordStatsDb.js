@@ -5,9 +5,7 @@ import { validateSnowflake, validateWord } from './validation.js';
 const DB_FILE = path.join(process.cwd(), 'config', 'word-stats.db');
 const db = new sqlite3.Database(DB_FILE);
 
-// Create tables
 db.serialize(() => {
-  // All-time word stats
   db.run(`CREATE TABLE IF NOT EXISTS word_stats (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT NOT NULL,
@@ -17,7 +15,6 @@ db.serialize(() => {
     UNIQUE(guild_id, user_id, word)
   )`);
 
-  // Weekly word stats (reset after recap)
   db.run(`CREATE TABLE IF NOT EXISTS word_stats_weekly (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT NOT NULL,
@@ -27,7 +24,6 @@ db.serialize(() => {
     UNIQUE(guild_id, user_id, word)
   )`);
 
-  // Guild settings table
   db.run(`CREATE TABLE IF NOT EXISTS guild_settings (
     guild_id TEXT PRIMARY KEY,
     recap_channel_id TEXT,
@@ -41,11 +37,10 @@ db.serialize(() => {
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // Create indexes for faster queries
   db.run(`CREATE INDEX IF NOT EXISTS idx_word_stats_guild ON word_stats(guild_id)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_word_stats_weekly_guild ON word_stats_weekly(guild_id)`);
 
-  // Migration: Add missing columns to guild_settings if they don't exist
+  // Add missing columns to guild_settings if they don't exist
   db.all(`PRAGMA table_info(guild_settings)`, (err, columns) => {
     if (err) {
       console.error('[Migration] Error checking guild_settings columns:', err);
@@ -55,7 +50,6 @@ db.serialize(() => {
     const columnNames = columns.map(col => col.name);
     const migrations = [];
 
-    // Check for all feature flag columns
     if (!columnNames.includes('word_tracking_enabled')) {
       migrations.push({
         column: 'word_tracking_enabled',
@@ -91,7 +85,6 @@ db.serialize(() => {
       });
     }
 
-    // Run migrations sequentially
     if (migrations.length > 0) {
       console.log(`[Migration] Found ${migrations.length} missing columns in guild_settings, adding them...`);
 
@@ -119,7 +112,6 @@ db.serialize(() => {
   });
 });
 
-// Promisified helpers
 function runAsync(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
@@ -138,13 +130,10 @@ function allAsync(sql, params = []) {
   });
 }
 
-// Increment word count in both tables
 export async function incrementWordCount(guildId, userId, word) {
-  // Validate inputs
   validateSnowflake(guildId, 'Guild ID');
   validateSnowflake(userId, 'User ID');
 
-  // Validate word (silently skip invalid words instead of throwing)
   try {
     validateWord(word);
   } catch (error) {
@@ -152,14 +141,12 @@ export async function incrementWordCount(guildId, userId, word) {
     return;
   }
 
-  // All-time stats
   await runAsync(`
     INSERT INTO word_stats (guild_id, user_id, word, count)
     VALUES (?, ?, ?, 1)
     ON CONFLICT(guild_id, user_id, word) DO UPDATE SET count = count + 1
   `, [guildId, userId, word]);
 
-  // Weekly stats
   await runAsync(`
     INSERT INTO word_stats_weekly (guild_id, user_id, word, count)
     VALUES (?, ?, ?, 1)
@@ -167,13 +154,10 @@ export async function incrementWordCount(guildId, userId, word) {
   `, [guildId, userId, word]);
 }
 
-// Get server-wide top words (all-time)
-// If stopWords set is provided, filters them out
 export async function getTopWords(guildId, limit = 10, stopWords = null) {
-  // Validate inputs
   validateSnowflake(guildId, 'Guild ID');
 
-  // Fetch extra results to account for filtering
+  // Fetch extra results to account for stop word filtering
   const fetchLimit = stopWords ? limit * 5 : limit;
   const results = await allAsync(`
     SELECT word, SUM(count) as total_count
@@ -190,10 +174,7 @@ export async function getTopWords(guildId, limit = 10, stopWords = null) {
   return results;
 }
 
-// Get user's top words (all-time)
-// If stopWords set is provided, filters them out
 export async function getTopWordsForUser(guildId, userId, limit = 10, stopWords = null) {
-  // Validate inputs
   validateSnowflake(guildId, 'Guild ID');
   validateSnowflake(userId, 'User ID');
 
@@ -212,21 +193,25 @@ export async function getTopWordsForUser(guildId, userId, limit = 10, stopWords 
   return results;
 }
 
-// Get server-wide top words (weekly)
-export async function getWeeklyTopWords(guildId, limit = 10) {
+export async function getWeeklyTopWords(guildId, limit = 10, stopWords = null) {
   validateSnowflake(guildId, 'Guild ID');
+  const fetchLimit = stopWords ? limit * 5 : limit;
 
-  return await allAsync(`
+  const results = await allAsync(`
     SELECT word, SUM(count) as total_count
     FROM word_stats_weekly
     WHERE guild_id = ?
     GROUP BY word
     ORDER BY total_count DESC
     LIMIT ?
-  `, [guildId, limit]);
+  `, [guildId, fetchLimit]);
+
+  if (stopWords) {
+    return results.filter(r => !stopWords.has(r.word)).slice(0, limit);
+  }
+  return results;
 }
 
-// Get top users by word count (weekly)
 export async function getWeeklyTopUsers(guildId, limit = 5) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -240,14 +225,12 @@ export async function getWeeklyTopUsers(guildId, limit = 5) {
   `, [guildId, limit]);
 }
 
-// Reset weekly stats for a guild
 export async function resetWeeklyStats(guildId) {
   validateSnowflake(guildId, 'Guild ID');
 
   await runAsync(`DELETE FROM word_stats_weekly WHERE guild_id = ?`, [guildId]);
 }
 
-// Get total word count for guild (weekly)
 export async function getWeeklyTotalCount(guildId) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -259,7 +242,6 @@ export async function getWeeklyTotalCount(guildId) {
   return result[0]?.total || 0;
 }
 
-// Get all guilds with stats
 export async function getAllGuilds() {
   return await allAsync(`
     SELECT
@@ -277,19 +259,16 @@ export async function getAllGuilds() {
   `);
 }
 
-// Get all stats for export
 export async function exportAllStats() {
   const allTime = await allAsync(`SELECT guild_id, user_id, word, count FROM word_stats`);
   const weekly = await allAsync(`SELECT guild_id, user_id, word, count FROM word_stats_weekly`);
   return { allTime, weekly };
 }
 
-// Import stats (clears existing and imports new)
 export async function importStats(data) {
   await runAsync(`DELETE FROM word_stats`);
   await runAsync(`DELETE FROM word_stats_weekly`);
 
-  // Import all-time stats
   if (data.allTime && data.allTime.length > 0) {
     for (const row of data.allTime) {
       await runAsync(`
@@ -299,7 +278,6 @@ export async function importStats(data) {
     }
   }
 
-  // Import weekly stats
   if (data.weekly && data.weekly.length > 0) {
     for (const row of data.weekly) {
       await runAsync(`
@@ -310,7 +288,6 @@ export async function importStats(data) {
   }
 }
 
-// Clear all stats for a guild
 export async function clearGuildStats(guildId) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -318,12 +295,10 @@ export async function clearGuildStats(guildId) {
   await runAsync(`DELETE FROM word_stats_weekly WHERE guild_id = ?`, [guildId]);
 }
 
-// Get database file path
 export function getDbPath() {
   return DB_FILE;
 }
 
-// Get guild settings
 export async function getGuildSettings(guildId) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -333,7 +308,6 @@ export async function getGuildSettings(guildId) {
   return results[0] || null;
 }
 
-// Set recap channel and schedule for a guild
 export async function setRecapChannel(guildId, channelId, day = 0, hour = 12) {
   validateSnowflake(guildId, 'Guild ID');
   validateSnowflake(channelId, 'Channel ID');
@@ -349,7 +323,6 @@ export async function setRecapChannel(guildId, channelId, day = 0, hour = 12) {
   `, [guildId, channelId, day, hour, channelId, day, hour]);
 }
 
-// Get all guilds with recap channels configured
 export async function getAllRecapChannels() {
   return await allAsync(`
     SELECT guild_id, recap_channel_id, recap_day, recap_hour
@@ -358,23 +331,19 @@ export async function getAllRecapChannels() {
   `);
 }
 
-// Initialize guild settings (called when bot joins a server)
 export async function initializeGuildSettings(guildId) {
   validateSnowflake(guildId, 'Guild ID');
 
-  // Check if settings already exist
   const existing = await getGuildSettings(guildId);
   if (existing) {
-    return; // Already initialized, don't change anything
+    return;
   }
 
-  // Check if server has existing word stats data (for migration)
+  // Auto-enable features if guild already has data (for migration)
   const hasWordStats = await allAsync(`
     SELECT COUNT(*) as count FROM word_stats WHERE guild_id = ? LIMIT 1
   `, [guildId]);
 
-  // Check if server has existing Spotify stats data
-  // We need to check the spotify_listens table from the other database
   let hasSpotifyStatsCount = 0;
   try {
     const spotifyDbPath = path.join(process.cwd(), 'config', 'spotify-stats.db');
@@ -388,16 +357,11 @@ export async function initializeGuildSettings(guildId) {
     });
     hasSpotifyStatsCount = spotifyStats?.count || 0;
   } catch (error) {
-    // Spotify DB might not exist yet, that's okay
     console.log(`[Migration] Could not check Spotify stats for guild ${guildId}:`, error.message);
   }
-
-  // Auto-enable features if existing data is found
   const wordEnabled = hasWordStats[0]?.count > 0 ? 1 : 0;
   const spotifyEnabled = hasSpotifyStatsCount > 0 ? 1 : 0;
 
-  // Use INSERT OR IGNORE to avoid conflicts, only insert basic columns
-  // The migration will add announcement columns if they don't exist
   await runAsync(`
     INSERT OR IGNORE INTO guild_settings (guild_id, word_tracking_enabled, spotify_tracking_enabled)
     VALUES (?, ?, ?)
@@ -408,14 +372,10 @@ export async function initializeGuildSettings(guildId) {
   }
 }
 
-// Update feature flags for a guild
 export async function updateFeatureFlags(guildId, wordTracking, spotifyTracking, gameTracking = null, announcements = null) {
   validateSnowflake(guildId, 'Guild ID');
 
-  // Ensure guild settings exist first
   await initializeGuildSettings(guildId);
-
-  // Build UPDATE statement based on provided parameters
   const fields = ['word_tracking_enabled = ?', 'spotify_tracking_enabled = ?'];
   const values = [wordTracking ? 1 : 0, spotifyTracking ? 1 : 0];
 
@@ -439,12 +399,11 @@ export async function updateFeatureFlags(guildId, wordTracking, spotifyTracking,
   `, values);
 }
 
-// Check if a feature is enabled for a guild
 export async function isFeatureEnabled(guildId, feature) {
   validateSnowflake(guildId, 'Guild ID');
 
   const settings = await getGuildSettings(guildId);
-  if (!settings) return false; // Default to disabled
+  if (!settings) return false;
 
   if (feature === 'word_tracking') {
     return settings.word_tracking_enabled === 1;
@@ -457,7 +416,6 @@ export async function isFeatureEnabled(guildId, feature) {
   return false;
 }
 
-// Set announcement channel for a guild
 export async function setAnnouncementChannel(guildId, channelId) {
   validateSnowflake(guildId, 'Guild ID');
   validateSnowflake(channelId, 'Channel ID');
@@ -471,7 +429,6 @@ export async function setAnnouncementChannel(guildId, channelId) {
   `, [guildId, channelId, channelId]);
 }
 
-// Get all guilds with announcements enabled and channel configured
 export async function getAllAnnouncementChannels() {
   return await allAsync(`
     SELECT guild_id, announcement_channel_id
@@ -480,14 +437,10 @@ export async function getAllAnnouncementChannels() {
   `);
 }
 
-// GDPR: Delete ALL data for a user across all guilds
 export async function deleteAllUserWordData(userId) {
   validateSnowflake(userId, 'User ID');
 
-  // Delete from all-time word stats
   await runAsync(`DELETE FROM word_stats WHERE user_id = ?`, [userId]);
-
-  // Delete from weekly word stats
   await runAsync(`DELETE FROM word_stats_weekly WHERE user_id = ?`, [userId]);
 
   console.log(`[GDPR] Deleted all word data for user ${userId}`);

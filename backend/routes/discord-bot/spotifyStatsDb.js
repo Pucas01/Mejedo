@@ -13,9 +13,7 @@ import {
 const DB_FILE = path.join(process.cwd(), 'config', 'spotify-stats.db');
 const db = new sqlite3.Database(DB_FILE);
 
-// Create tables
 db.serialize(() => {
-  // All-time Spotify listening stats
   db.run(`CREATE TABLE IF NOT EXISTS spotify_listens (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT NOT NULL,
@@ -28,7 +26,6 @@ db.serialize(() => {
     duration_ms INTEGER
   )`);
 
-  // Weekly listening stats (for recap)
   db.run(`CREATE TABLE IF NOT EXISTS spotify_listens_weekly (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT NOT NULL,
@@ -41,7 +38,6 @@ db.serialize(() => {
     duration_ms INTEGER
   )`);
 
-  // Track which users we're actively tracking (for privacy/opt-in)
   // Composite key allows same user to be tracked in multiple servers
   db.run(`CREATE TABLE IF NOT EXISTS tracked_users (
     user_id TEXT NOT NULL,
@@ -52,29 +48,24 @@ db.serialize(() => {
     PRIMARY KEY (user_id, guild_id)
   )`);
 
-  // Global opt-OUT tracking (users who don't want to be tracked)
-  // New default: everyone is tracked unless they opt out
   db.run(`CREATE TABLE IF NOT EXISTS global_optout (
     user_id TEXT PRIMARY KEY,
     username TEXT,
     opted_out_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // Legacy opt-in table (kept for migration, will be removed in future)
   db.run(`CREATE TABLE IF NOT EXISTS global_optin (
     user_id TEXT PRIMARY KEY,
     username TEXT,
     opted_in_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // Create indexes for faster queries
   db.run(`CREATE INDEX IF NOT EXISTS idx_spotify_listens_guild ON spotify_listens(guild_id)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_spotify_listens_user ON spotify_listens(user_id)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_spotify_listens_weekly_guild ON spotify_listens_weekly(guild_id)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_spotify_listens_track ON spotify_listens(spotify_track_id)`);
 });
 
-// Promisified helpers
 function runAsync(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
@@ -102,7 +93,6 @@ function getAsync(sql, params = []) {
   });
 }
 
-// Add a user to tracking list for a specific guild
 export async function addTrackedUser(userId, guildId, username) {
   validateSnowflake(userId, 'User ID');
   validateSnowflake(guildId, 'Guild ID');
@@ -114,7 +104,6 @@ export async function addTrackedUser(userId, guildId, username) {
   `, [userId, guildId, sanitizedUsername]);
 }
 
-// Remove a user from tracking list for a specific guild
 export async function removeTrackedUser(userId, guildId) {
   validateSnowflake(userId, 'User ID');
   validateSnowflake(guildId, 'Guild ID');
@@ -122,21 +111,18 @@ export async function removeTrackedUser(userId, guildId) {
   await runAsync(`DELETE FROM tracked_users WHERE user_id = ? AND guild_id = ?`, [userId, guildId]);
 }
 
-// Get all tracked users for a specific guild
 export async function getTrackedUsers(guildId) {
   validateSnowflake(guildId, 'Guild ID');
 
   return await allAsync(`SELECT * FROM tracked_users WHERE guild_id = ? ORDER BY username`, [guildId]);
 }
 
-// Get all guilds where a user is tracked
 export async function getGuildsTrackingUser(userId) {
   validateSnowflake(userId, 'User ID');
 
   return await allAsync(`SELECT guild_id FROM tracked_users WHERE user_id = ?`, [userId]);
 }
 
-// Check if user is tracked in a specific guild
 export async function isUserTracked(userId, guildId) {
   validateSnowflake(userId, 'User ID');
   validateSnowflake(guildId, 'Guild ID');
@@ -145,7 +131,6 @@ export async function isUserTracked(userId, guildId) {
   return result !== undefined;
 }
 
-// Check if user is tracked in ANY guild
 export async function isUserTrackedGlobally(userId) {
   validateSnowflake(userId, 'User ID');
 
@@ -153,7 +138,6 @@ export async function isUserTrackedGlobally(userId) {
   return result !== undefined;
 }
 
-// Set global opt-OUT flag for a user (they don't want to be tracked)
 export async function setGlobalOptOut(userId, username) {
   validateSnowflake(userId, 'User ID');
   const sanitizedUsername = validateUsername(username);
@@ -165,7 +149,6 @@ export async function setGlobalOptOut(userId, username) {
   `, [userId, sanitizedUsername]);
 }
 
-// Check if user has globally opted OUT
 export async function isGloballyOptedOut(userId) {
   validateSnowflake(userId, 'User ID');
 
@@ -173,14 +156,12 @@ export async function isGloballyOptedOut(userId) {
   return result !== undefined;
 }
 
-// Remove global opt-OUT flag for a user (they want to be tracked again)
 export async function removeGlobalOptOut(userId) {
   validateSnowflake(userId, 'User ID');
 
   await runAsync(`DELETE FROM global_optout WHERE user_id = ?`, [userId]);
 }
 
-// LEGACY: Check if user has globally opted in (for migration)
 export async function isGloballyOptedIn(userId) {
   validateSnowflake(userId, 'User ID');
 
@@ -188,23 +169,13 @@ export async function isGloballyOptedIn(userId) {
   return result !== undefined;
 }
 
-// Migration function: Convert all opted-in users to NOT opted-out (run once on startup)
 export async function migrateOptInToOptOut() {
   try {
-    // Get all users who explicitly opted in
     const optedInUsers = await allAsync(`SELECT user_id, username FROM global_optin`);
 
     if (optedInUsers.length > 0) {
       console.log(`[Migration] Found ${optedInUsers.length} users with explicit opt-in. They will continue to be tracked (not added to opt-out list).`);
     }
-
-    // We don't need to do anything - users who opted in before are now tracked by default
-    // Only users who were NOT opted in before might want to opt out now
-    // This is handled by the new opt-out command
-
-    // Optionally: Clear the legacy table after migration
-    // await runAsync(`DELETE FROM global_optin`);
-    // console.log('[Migration] Cleared legacy global_optin table');
 
     return true;
   } catch (error) {
@@ -213,9 +184,7 @@ export async function migrateOptInToOptOut() {
   }
 }
 
-// Log a song listen to a specific guild
 export async function logListen(guildId, userId, trackName, artist, album, spotifyTrackId, durationMs) {
-  // Validate inputs
   validateSnowflake(guildId, 'Guild ID');
   validateSnowflake(userId, 'User ID');
   const sanitizedTrack = validateTrackName(trackName);
@@ -226,31 +195,25 @@ export async function logListen(guildId, userId, trackName, artist, album, spoti
 
   const params = [guildId, userId, sanitizedTrack, sanitizedArtist, sanitizedAlbum, sanitizedTrackId, sanitizedDuration];
 
-  // All-time stats
   await runAsync(`
     INSERT INTO spotify_listens (guild_id, user_id, track_name, artist, album, spotify_track_id, duration_ms)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `, params);
 
-  // Weekly stats
   await runAsync(`
     INSERT INTO spotify_listens_weekly (guild_id, user_id, track_name, artist, album, spotify_track_id, duration_ms)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `, params);
 }
 
-// LEGACY: Log a song listen to ALL guilds where the user is tracked (for backward compatibility)
 export async function logListenToAllGuilds(userId, trackName, artist, album, spotifyTrackId, durationMs) {
-  // Get all guilds tracking this user
   const guilds = await getGuildsTrackingUser(userId);
 
-  // Log to each guild
   for (const guild of guilds) {
     await logListen(guild.guild_id, userId, trackName, artist, album, spotifyTrackId, durationMs);
   }
 }
 
-// Get top tracks for server (all-time)
 export async function getTopTracks(guildId, limit = 10) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -269,7 +232,6 @@ export async function getTopTracks(guildId, limit = 10) {
   `, [guildId, limit]);
 }
 
-// Get top artists for server (all-time)
 export async function getTopArtists(guildId, limit = 10) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -287,7 +249,6 @@ export async function getTopArtists(guildId, limit = 10) {
   `, [guildId, limit]);
 }
 
-// Get top tracks for a user (all-time)
 export async function getTopTracksForUser(guildId, userId, limit = 10) {
   validateSnowflake(guildId, 'Guild ID');
   validateSnowflake(userId, 'User ID');
@@ -306,7 +267,6 @@ export async function getTopTracksForUser(guildId, userId, limit = 10) {
   `, [guildId, userId, limit]);
 }
 
-// Get top artists for a user (all-time)
 export async function getTopArtistsForUser(guildId, userId, limit = 10) {
   validateSnowflake(guildId, 'Guild ID');
   validateSnowflake(userId, 'User ID');
@@ -324,7 +284,6 @@ export async function getTopArtistsForUser(guildId, userId, limit = 10) {
   `, [guildId, userId, limit]);
 }
 
-// Get weekly top tracks
 export async function getWeeklyTopTracks(guildId, limit = 10) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -343,7 +302,6 @@ export async function getWeeklyTopTracks(guildId, limit = 10) {
   `, [guildId, limit]);
 }
 
-// Get weekly top artists
 export async function getWeeklyTopArtists(guildId, limit = 10) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -360,7 +318,6 @@ export async function getWeeklyTopArtists(guildId, limit = 10) {
   `, [guildId, limit]);
 }
 
-// Get weekly total listen count
 export async function getWeeklyTotalCount(guildId) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -372,7 +329,6 @@ export async function getWeeklyTotalCount(guildId) {
   return result?.total || 0;
 }
 
-// Get most active listeners (weekly)
 export async function getWeeklyTopListeners(guildId, limit = 5) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -389,14 +345,12 @@ export async function getWeeklyTopListeners(guildId, limit = 5) {
   `, [guildId, limit]);
 }
 
-// Reset weekly stats
 export async function resetWeeklyStats(guildId) {
   validateSnowflake(guildId, 'Guild ID');
 
   await runAsync(`DELETE FROM spotify_listens_weekly WHERE guild_id = ?`, [guildId]);
 }
 
-// Get user's listening stats summary (guild-specific)
 export async function getUserStats(guildId, userId) {
   validateSnowflake(guildId, 'Guild ID');
   validateSnowflake(userId, 'User ID');
@@ -426,7 +380,6 @@ export async function getUserStats(guildId, userId) {
   };
 }
 
-// Get user's listening stats summary (global across all guilds)
 export async function getGlobalUserStats(userId) {
   validateSnowflake(userId, 'User ID');
 
@@ -455,7 +408,6 @@ export async function getGlobalUserStats(userId) {
   };
 }
 
-// Get top tracks for a user globally (across all guilds)
 export async function getGlobalTopTracksForUser(userId, limit = 10) {
   return await allAsync(`
     SELECT
@@ -471,7 +423,6 @@ export async function getGlobalTopTracksForUser(userId, limit = 10) {
   `, [userId, limit]);
 }
 
-// Get top artists for a user globally (across all guilds)
 export async function getGlobalTopArtistsForUser(userId, limit = 10) {
   return await allAsync(`
     SELECT
@@ -486,9 +437,7 @@ export async function getGlobalTopArtistsForUser(userId, limit = 10) {
   `, [userId, limit]);
 }
 
-// Get music compatibility between two users (shared artists/tracks)
 export async function getMusicCompatibility(guildId, userId1, userId2) {
-  // Get shared artists
   const sharedArtists = await allAsync(`
     SELECT
       artist,
@@ -501,7 +450,6 @@ export async function getMusicCompatibility(guildId, userId1, userId2) {
     LIMIT 5
   `, [guildId, userId1, userId2]);
 
-  // Get shared tracks
   const sharedTracks = await allAsync(`
     SELECT
       track_name,
@@ -515,7 +463,6 @@ export async function getMusicCompatibility(guildId, userId1, userId2) {
     LIMIT 5
   `, [guildId, userId1, userId2]);
 
-  // Calculate compatibility percentage
   const user1Artists = await getAsync(`
     SELECT COUNT(DISTINCT artist) as total
     FROM spotify_listens
@@ -536,11 +483,10 @@ export async function getMusicCompatibility(guildId, userId1, userId2) {
   return {
     sharedArtists,
     sharedTracks,
-    compatibilityPercent: Math.min(compatibilityPercent, 100), // Cap at 100%
+    compatibilityPercent: Math.min(compatibilityPercent, 100),
   };
 }
 
-// Clear all stats for a guild
 export async function clearGuildStats(guildId) {
   validateSnowflake(guildId, 'Guild ID');
 
@@ -548,12 +494,10 @@ export async function clearGuildStats(guildId) {
   await runAsync(`DELETE FROM spotify_listens_weekly WHERE guild_id = ?`, [guildId]);
 }
 
-// Remove all tracked users for a guild (when bot leaves)
 export async function removeAllTrackedUsersForGuild(guildId) {
   await runAsync(`DELETE FROM tracked_users WHERE guild_id = ?`, [guildId]);
 }
 
-// Remove user from a specific guild (when user leaves guild)
 export async function removeUserFromGuild(userId, guildId) {
   validateSnowflake(userId, 'User ID');
   validateSnowflake(guildId, 'Guild ID');
@@ -561,39 +505,26 @@ export async function removeUserFromGuild(userId, guildId) {
   await runAsync(`DELETE FROM tracked_users WHERE user_id = ? AND guild_id = ?`, [userId, guildId]);
 }
 
-// GDPR: Delete ALL data for a user across all guilds
 export async function deleteAllUserData(userId) {
   validateSnowflake(userId, 'User ID');
 
-  // Delete from all-time listening stats
   await runAsync(`DELETE FROM spotify_listens WHERE user_id = ?`, [userId]);
-
-  // Delete from weekly listening stats
   await runAsync(`DELETE FROM spotify_listens_weekly WHERE user_id = ?`, [userId]);
-
-  // Delete from tracked users list
   await runAsync(`DELETE FROM tracked_users WHERE user_id = ?`, [userId]);
-
-  // Delete from opt-out list
   await runAsync(`DELETE FROM global_optout WHERE user_id = ?`, [userId]);
-
-  // Delete from legacy opt-in list
   await runAsync(`DELETE FROM global_optin WHERE user_id = ?`, [userId]);
 
   console.log(`[GDPR] Deleted all Spotify data for user ${userId}`);
 }
 
-// Get database file path
 export function getDbPath() {
   return DB_FILE;
 }
 
-// Get all opted-out users
 export async function getOptedOutUsers() {
   return await allAsync(`SELECT user_id, username, opted_out_at FROM global_optout ORDER BY opted_out_at DESC`);
 }
 
-// Get all guilds with listening data
 export async function getAllGuildsWithStats() {
   return await allAsync(`
     SELECT
@@ -607,7 +538,6 @@ export async function getAllGuildsWithStats() {
   `);
 }
 
-// Get all users with listening data (across all guilds)
 export async function getAllUsersWithStats() {
   return await allAsync(`
     SELECT
@@ -622,11 +552,10 @@ export async function getAllUsersWithStats() {
   `);
 }
 
-// Export all stats
 export async function exportAllStats() {
   const allTime = await allAsync(`SELECT * FROM spotify_listens`);
   const weekly = await allAsync(`SELECT * FROM spotify_listens_weekly`);
-  const tracked = await allAsync(`SELECT * FROM tracked_users`); // Legacy
+  const tracked = await allAsync(`SELECT * FROM tracked_users`);
   const optedOut = await allAsync(`SELECT * FROM global_optout`);
   return { allTime, weekly, tracked, optedOut };
 }

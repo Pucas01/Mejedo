@@ -15,7 +15,6 @@ export default {
     try {
       const userId = interaction.user.id;
 
-      // Check if user has streak DMs enabled
       const isEnabled = await gameStatsDb.isStreakDMsEnabled(userId);
 
       if (!isEnabled) {
@@ -29,10 +28,8 @@ export default {
         return;
       }
 
-      // Get current streaks
       const streaks = await gameStatsDb.getAllGameStreaks(userId);
 
-      // For testing, allow all streaks (including 1-day)
       if (streaks.length === 0) {
         await interaction.editReply({
           embeds: [{
@@ -44,15 +41,12 @@ export default {
         return;
       }
 
-      // Show which streaks will be included
       const notifiableStreaks = streaks.filter(s => s.streak > 1);
       const oneDay = streaks.filter(s => s.streak === 1);
 
-      // Send test DM
       try {
         const user = await interaction.client.users.fetch(userId);
 
-        // For testing, include all streaks
         const streakText = streaks
           .map(s => `🔥 **${s.streak}-day streak**: ${s.game_name}`)
           .join('\n');
@@ -69,7 +63,6 @@ export default {
 
         await user.send({ embeds: [embed] });
 
-        // Build info message
         const fields = [];
 
         if (notifiableStreaks.length > 0) {

@@ -7,7 +7,6 @@ import { startDiscordBot, stopDiscordBot, getBotStatus } from "../../server.js";
 const router = express.Router();
 const CONFIG_FILE = path.join(process.cwd(), "config", "discord-bot.json");
 
-// GET /api/discord-bot-config - Get current bot configuration (admin only)
 router.get("/", requireAuth, (req, res) => {
   try {
     if (!fs.existsSync(CONFIG_FILE)) {
@@ -16,7 +15,6 @@ router.get("/", requireAuth, (req, res) => {
 
     const config = JSON.parse(fs.readFileSync(CONFIG_FILE, "utf-8"));
 
-    // Don't send the full token to the frontend, just indicate if it's set
     const safeConfig = {
       ...config,
       token: config.token ? "***SET***" : "",
@@ -33,19 +31,15 @@ router.get("/", requireAuth, (req, res) => {
   }
 });
 
-// PUT /api/discord-bot-config - Update bot configuration (admin only)
 router.put("/", requireAuth, (req, res) => {
   try {
     const { token, clientId, guildId, recapChannelId, enabled } = req.body;
 
-    // Read existing config
     let config = {};
     if (fs.existsSync(CONFIG_FILE)) {
       config = JSON.parse(fs.readFileSync(CONFIG_FILE, "utf-8"));
     }
 
-    // Update config with new values
-    // Only update token if a new one is provided (not the placeholder)
     if (token && token !== "***SET***") {
       config.token = token;
     }
@@ -55,10 +49,8 @@ router.put("/", requireAuth, (req, res) => {
     if (recapChannelId !== undefined) config.recapChannelId = recapChannelId;
     if (enabled !== undefined) config.enabled = enabled;
 
-    // Write updated config
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 
-    // Return safe config (without full token)
     const safeConfig = {
       ...config,
       token: config.token ? "***SET***" : ""
@@ -75,7 +67,6 @@ router.put("/", requireAuth, (req, res) => {
   }
 });
 
-// GET /api/discord-bot-config/status - Get bot status (admin only)
 router.get("/status", requireAuth, (req, res) => {
   try {
     if (!fs.existsSync(CONFIG_FILE)) {
@@ -101,7 +92,6 @@ router.get("/status", requireAuth, (req, res) => {
   }
 });
 
-// POST /api/discord-bot-config/start - Start the bot (admin only)
 router.post("/start", requireAuth, async (req, res) => {
   try {
     const result = await startDiscordBot();
@@ -112,7 +102,6 @@ router.post("/start", requireAuth, async (req, res) => {
   }
 });
 
-// POST /api/discord-bot-config/stop - Stop the bot (admin only)
 router.post("/stop", requireAuth, async (req, res) => {
   try {
     const result = await stopDiscordBot();
@@ -123,11 +112,9 @@ router.post("/stop", requireAuth, async (req, res) => {
   }
 });
 
-// POST /api/discord-bot-config/restart - Restart the bot (admin only)
 router.post("/restart", requireAuth, async (req, res) => {
   try {
     await stopDiscordBot();
-    // Wait a bit before starting
     await new Promise(resolve => setTimeout(resolve, 1000));
     const result = await startDiscordBot();
     res.json(result);

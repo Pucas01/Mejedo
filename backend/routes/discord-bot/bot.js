@@ -24,7 +24,6 @@ class DiscordBot {
       return;
     }
 
-    // Create Discord client
     this.client = new Client({
       intents: [
         GatewayIntentBits.Guilds,
@@ -34,37 +33,27 @@ class DiscordBot {
       ]
     });
 
-    // Load commands
     await this.loadCommands();
-
-    // Register event handlers
     this.registerEvents();
 
-    // Login
     try {
       await this.client.login(config.token);
       console.log('Discord bot logged in successfully');
 
-      // Register slash commands
       await this.registerSlashCommands(config);
 
-      // Initialize word tracking
       registerWordTracking(this.client);
       startWeeklyRecap(this.client);
 
-      // Initialize Spotify tracking
       registerSpotifyTracking(this.client);
       startSpotifyRecap(this.client);
 
-      // Initialize game tracking
       initializeGameTracking();
       setupGameTracking(this.client);
       startGameRecap(this.client);
 
-      // Initialize temperature converter
       registerTemperatureConverter(this.client);
 
-      // Run migration from opt-in to opt-out system
       await migrateOptInToOptOut();
       console.log('Spotify tracking migration completed (opt-in → opt-out)');
     } catch (error) {
@@ -111,10 +100,8 @@ class DiscordBot {
     this.client.once('ready', () => {
       console.log(`Discord bot ready! Logged in as ${this.client.user.tag}`);
 
-      // Set bot status with server count
       this.updateBotStatus();
 
-      // Initialize settings for all guilds the bot is in
       this.client.guilds.cache.forEach(async (guild) => {
         try {
           await initializeGuildSettings(guild.id);
@@ -125,31 +112,22 @@ class DiscordBot {
       });
     });
 
-    // Initialize settings when bot joins a new guild
     this.client.on('guildCreate', async (guild) => {
       console.log(`Bot joined new guild: ${guild.name} (${guild.id})`);
       try {
         await initializeGuildSettings(guild.id);
         console.log(`Initialized settings for new guild: ${guild.name} (features disabled by default)`);
 
-        // Update bot status with new server count
         this.updateBotStatus();
       } catch (error) {
         console.error(`Failed to initialize settings for guild ${guild.id}:`, error);
       }
     });
 
-    // Update status when bot leaves a guild
     this.client.on('guildDelete', (guild) => {
       console.log(`Bot removed from guild: ${guild.name} (${guild.id})`);
-
-      // Update bot status with new server count
       this.updateBotStatus();
     });
-
-    // Note: With the new opt-out system, no cleanup is needed.
-    // Users are tracked by default unless they opt out globally.
-    // The opt-out status persists across all guilds.
 
     this.client.on('interactionCreate', async (interaction) => {
       if (!interaction.isChatInputCommand() && !interaction.isMessageContextMenuCommand()) return;
@@ -197,13 +175,11 @@ class DiscordBot {
 
       let data;
       if (config.guildId) {
-        // Register commands for a specific guild (faster for development)
         data = await rest.put(
           Routes.applicationGuildCommands(config.clientId, config.guildId),
           { body: commands },
         );
       } else {
-        // Register commands globally
         data = await rest.put(
           Routes.applicationCommands(config.clientId),
           { body: commands },
@@ -224,13 +200,11 @@ class DiscordBot {
     if (this.client) {
       console.log('Stopping Discord bot...');
 
-      // Stop scheduled tasks first
       stopWeeklyRecap();
       stopSpotifyRecap();
       stopGameRecap();
       console.log('Stopped scheduled tasks');
 
-      // Flush any pending Spotify logs
       try {
         const { flushPendingLogs } = await import('./spotifyTracker.js');
         await flushPendingLogs();
@@ -239,7 +213,6 @@ class DiscordBot {
         console.error('Error flushing Spotify logs:', error);
       }
 
-      // Stop game tracking and end active sessions
       try {
         stopGameTracking();
         console.log('Stopped game tracking');
@@ -247,7 +220,6 @@ class DiscordBot {
         console.error('Error stopping game tracking:', error);
       }
 
-      // Set status to offline before destroying
       try {
         if (this.client.user) {
           await this.client.user.setPresence({
@@ -256,14 +228,12 @@ class DiscordBot {
           });
           console.log('Bot status set to offline');
 
-          // Wait a moment for Discord to process the status update
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       } catch (error) {
         console.error('Error setting bot status to offline:', error);
       }
 
-      // Destroy the client connection
       await this.client.destroy();
       this.client = null;
       this.commands.clear();
@@ -275,7 +245,6 @@ class DiscordBot {
     return this.client !== null && this.client.isReady();
   }
 
-  // Broadcast announcement to all configured announcement channels
   async broadcastAnnouncement(title, message, color = 0x39ff14) {
     if (!this.isRunning()) {
       throw new Error('Bot is not running');
@@ -301,7 +270,6 @@ class DiscordBot {
           continue;
         }
 
-        // Check if bot has permission to send messages
         const permissions = channel.permissionsFor(channel.guild.members.me);
         if (!permissions || !permissions.has(['SendMessages', 'EmbedLinks'])) {
           results.failed.push({
@@ -312,7 +280,6 @@ class DiscordBot {
           continue;
         }
 
-        // Create embed
         const embed = {
           title,
           description: message,
@@ -321,7 +288,6 @@ class DiscordBot {
           footer: { text: 'Mejedo Announcement' }
         };
 
-        // Send message
         await channel.send({ embeds: [embed] });
 
         results.successful.push({
