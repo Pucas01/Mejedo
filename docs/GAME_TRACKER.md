@@ -6,9 +6,12 @@ Tracks gaming activity via Discord presence, measuring hours played instead of p
 
 - Automatic tracking via Discord presence (no external API needed)
 - Personal and server-wide statistics
+- Gaming streaks (consecutive days playing the same game)
+- Longest streak ever tracking
+- Optional DM notifications for streak updates (2+ day streaks)
 - Weekly recap with top games and gamers
 - All-time stats tracking
-- Opt-out by default (everyone tracked unless they opt out)
+- Opt-in by default (everyone tracked unless they opt out)
 - Web-based admin panel for managing stats
 - GDPR-compliant data deletion
 
@@ -54,8 +57,20 @@ Opt yourself out of game tracking across all servers with the bot.
 **`/track optin type:Gaming`**
 Opt yourself back into game tracking (removes opt-out).
 
+**`/track optout type:Streak DMs`**
+Disable streak DM notifications (you'll still be tracked, but won't get DM alerts for streaks).
+
+**`/track optin type:Streak DMs`**
+Enable streak DM notifications (get DMs when your gaming streaks update, 2+ day streaks only).
+
 **`/track status`**
-Check if you're currently opted in or out of tracking (shows both music and gaming status).
+Check if you're currently opted in or out of tracking (shows music, gaming, and streak DM status).
+
+**`/hopon user:@someone game:GameName [image/imageurl]`**
+Request someone to hop on a game with you. Game name autocompletes from their top played games. Optionally attach a custom image or provide an image URL.
+
+**`/bottime`**
+Show the current bot time (UTC) and when streaks reset (midnight UTC).
 
 ### Admin Commands
 
@@ -83,6 +98,8 @@ Shows:
 
 Weekly stats reset after each recap.
 
+**Note:** Set the recap channel and schedule with `/setrecap` command (defaults to Sunday at 12:00 PM).
+
 ## Database
 
 **Location:** `config/game-stats.db` (SQLite)
@@ -90,7 +107,10 @@ Weekly stats reset after each recap.
 **Tables:**
 - `game_sessions` - All-time session history
 - `game_sessions_weekly` - Weekly stats (reset on recap)
+- `game_streaks` - Current streaks for each user/game combination
+- `game_streaks_history` - Historical record of all streaks
 - `global_optout_gaming` - Users who have opted out
+- `streak_dm_optout` - Users who opted out of streak DM notifications
 
 **Session Structure:**
 ```sql
@@ -145,11 +165,14 @@ Base path: `/api/game-stats`
 ```
 backend/routes/discord-bot/
 ├── gameStatsDb.js          # Database functions
-├── gameTracker.js          # Presence tracking & recap
+├── gameTracker.js          # Presence tracking, streaks & recap
 ├── gameStatsApi.js         # API routes
 └── commands/
     ├── gamestats.js        # Stats command
-    └── trackgaming.js      # Opt-out/opt-in management
+    ├── track.js            # Opt-out/opt-in management (music, gaming, streakdms)
+    ├── hopon.js            # Request to hop on game
+    ├── bottime.js          # Show bot time & streak reset
+    └── teststreakdm.js     # Test streak DM notifications
 
 config/
 └── game-stats.db           # SQLite database
@@ -169,6 +192,7 @@ config/
 3. **That's it!** Everyone is automatically tracked unless they opt out.
    - Users can opt out with `/track optout type:Gaming`
    - Users can opt back in with `/track optin type:Gaming`
+   - Users can disable streak DM notifications with `/track optout type:Streak DMs`
 
 4. **Test it!**
    - Have someone play a game
@@ -200,11 +224,12 @@ config/
 
 ## Privacy
 
-- **Opt-out by default:** Everyone is tracked unless they choose to opt out
+- **Opt-in by default:** Everyone is tracked unless they choose to opt out
 - Only tracks data already publicly visible in Discord (presence)
 - Users can opt out anytime with `/track optout type:Gaming`
 - Users can check their status with `/track status`
 - Users can opt back in with `/track optin type:Gaming`
+- Users can disable streak DM notifications with `/track optout type:Streak DMs`
 - Opt-out is global across all servers with the bot
 - Existing gaming history is preserved even when opted out
 - `/deletedata` command permanently removes all gaming data (GDPR compliance)
@@ -246,6 +271,13 @@ config/
 **Personal stats:**
 ```
 Your Gaming Stats (All-Time)
+
+Current Streaks:
+🔥 5-day streak: Minecraft
+🔥 3-day streak: Valorant
+
+Longest Streak Ever:
+12-day streak: League of Legends
 
 Summary:
 Total Gaming: 89.4 hours

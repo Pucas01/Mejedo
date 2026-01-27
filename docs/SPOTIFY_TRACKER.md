@@ -8,7 +8,7 @@ Tracks what everyone in your Discord server is listening to on Spotify via Disco
 - 📊 Personal and server-wide statistics
 - 🔥 Weekly recap with top songs/artists
 - 🎤 All-time stats with top tracks and artists
-- 🔒 **Opt-out by default** - everyone is tracked unless they choose to opt out
+- 🔒 **Opt-in by default** - everyone is tracked unless they choose to opt out
 - 💻 Web-based admin panel for managing stats
 - 🔐 User privacy controls via `/track` commands
 
@@ -55,13 +55,17 @@ Check if you're currently opted in or out of tracking.
 
 ### Admin Commands
 
+**`/features toggle feature:Spotify Tracking enabled:True/False`**
+Enable or disable Spotify tracking for the server.
+
 **`/forcerecap [type]`**
 Force post a weekly recap.
 
 Options:
 - `words` - Word stats only
 - `music` - Music stats only
-- `both` - Both recaps (default)
+- `gaming` - Gaming stats only
+- `all` - All recaps (default)
 
 ## Weekly Recap
 
@@ -126,8 +130,9 @@ backend/routes/discord-bot/
 ├── spotifyStatsApi.js      # API routes
 └── commands/
     ├── spotifystats.js     # Stats command (personal/server)
-    ├── trackmusic.js       # User opt-out/opt-in management
-    └── forcerecap.js       # Updated to include music
+    ├── track.js            # User opt-out/opt-in management (music, gaming, streakdms)
+    ├── features.js         # Server feature management (admin)
+    └── forcerecap.js       # Force weekly recap (all types)
 
 app/components/admin/
 ├── SpotifyStatsModal.jsx   # Admin panel UI
@@ -173,13 +178,14 @@ app/components/admin/
 
 ## Privacy
 
-- **Opt-out by default:** Everyone is tracked unless they choose to opt out
+- **Opt-in by default:** Everyone is tracked unless they choose to opt out
 - Only tracks data already publicly visible in Discord (presence)
 - Users can opt out anytime with `/track optout type:Music`
 - Users can check their status with `/track status`
 - Users can opt back in with `/track optin type:Music`
-- Opt-out is global across all servers
+- Opt-out is global across all servers with the bot
 - Existing listening history is preserved even when opted out
+- `/deletedata` command permanently removes all Spotify data (GDPR compliance)
 
 ## Example Usage
 
@@ -207,6 +213,10 @@ app/components/admin/
 
 # Admin forces a preview recap
 /forcerecap music
+/forcerecap all
+
+# Admin checks feature status
+/features status
 ```
 
 ## Tips

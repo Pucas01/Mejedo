@@ -416,6 +416,50 @@ Next.js proxies `/api/*` to `http://127.0.0.1:4000/api/*`
 
 Configured in [next.config.mjs](../next.config.mjs)
 
+## Discord Bot
+
+See dedicated documentation:
+- [Discord Bot Overview](DISCORD_BOT.md) - Commands, features, configuration
+- [Game Tracker](GAME_TRACKER.md) - Gaming activity tracking system
+- [Spotify Tracker](SPOTIFY_TRACKER.md) - Spotify listening tracking system
+
+### Discord Bot API Endpoints
+
+**Bot Config** (`/api/discord-bot-config`)
+- `GET /` - Get config
+- `PUT /` - Update config
+- `GET /status` - Bot status
+- `POST /start` - Start bot
+- `POST /stop` - Stop bot
+- `POST /restart` - Restart bot
+
+**Word Stats** (`/api/word-stats`)
+- `GET /guilds` - List all servers with stats
+- `GET /guild/:id` - Get server's top words
+- `DELETE /guild/:id` - Clear server's stats
+- `GET /export` - Export all stats as JSON
+- `POST /import` - Import stats from JSON
+
+**Game Stats** (`/api/game-stats`)
+- `GET /guilds` - List all servers with game stats
+- `GET /guild/:id` - Get server's game stats
+- `GET /user/:userId` - Get user's global game stats
+- `DELETE /guild/:id` - Clear server's game stats
+- `GET /export` - Export all game stats as JSON
+- `POST /import` - Import game stats from JSON
+
+**Spotify Stats** (`/api/spotify-stats`)
+- `GET /guilds` - List all servers with Spotify stats
+- `GET /guild/:id` - Get server's Spotify stats
+- `GET /user/:userId` - Get user's global Spotify stats
+- `DELETE /guild/:id` - Clear server's Spotify stats
+- `GET /export` - Export all Spotify stats as JSON
+- `POST /import` - Import Spotify stats from JSON
+
+**Announcements** (`/api/announcements`)
+- `POST /` - Send announcement to all enabled servers
+- `GET /guilds` - Get all guilds with announcements enabled
+
 ## Security Notes
 
 ⚠️ **Image upload endpoint has no auth check** - Anyone can upload
@@ -436,6 +480,10 @@ config/shitposts.json
 config/ado-*.json
 config/speedrunLeaderboard.json
 config/Spotify.json           # API credentials
+config/discord-bot.json       # Discord bot config
+config/word-stats.db          # Discord word stats
+config/game-stats.db          # Discord game stats
+config/spotify-stats.db       # Discord Spotify stats
 public/uploads/               # All uploaded files
 ```
 

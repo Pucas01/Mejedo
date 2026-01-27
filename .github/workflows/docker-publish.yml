@@ -3,6 +3,11 @@ name: Build and Publish Docker Image
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'README.md'
+      - 'MIGRATION_OPT_OUT.md'
 
 permissions:
   contents: read
