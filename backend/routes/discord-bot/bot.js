@@ -130,6 +130,26 @@ class DiscordBot {
     });
 
     this.client.on('interactionCreate', async (interaction) => {
+      if (interaction.isAutocomplete()) {
+        const command = this.commands.get(interaction.commandName);
+
+        if (!command) {
+          console.error(`No command matching ${interaction.commandName} was found.`);
+          return;
+        }
+
+        if (!command.autocomplete) {
+          return;
+        }
+
+        try {
+          await command.autocomplete(interaction);
+        } catch (error) {
+          console.error('Error handling autocomplete:', error);
+        }
+        return;
+      }
+
       if (!interaction.isChatInputCommand() && !interaction.isMessageContextMenuCommand()) return;
 
       const command = this.commands.get(interaction.commandName);
