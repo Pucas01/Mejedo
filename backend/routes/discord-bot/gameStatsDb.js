@@ -6,6 +6,8 @@ import { validateSnowflake, validateText, validateLimit } from './validation.js'
 const dbPath = path.join(process.cwd(), 'config', 'game-stats.db');
 const db = new sqlite3.Database(dbPath);
 
+export { db };
+
 function runAsync(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
@@ -77,6 +79,15 @@ db.serialize(() => {
   `);
 
   db.run(`
+    CREATE TABLE IF NOT EXISTS streak_dm_last_check (
+      user_id TEXT PRIMARY KEY,
+      last_check_date TEXT NOT NULL,
+      streaks_json TEXT NOT NULL,
+      updated_at INTEGER DEFAULT (strftime('%s', 'now'))
+    )
+  `);
+
+  db.run(`
     CREATE INDEX IF NOT EXISTS idx_game_sessions_guild_user
     ON game_sessions(guild_id, user_id)
   `);
@@ -113,6 +124,31 @@ export async function startGameSession(guildId, userId, gameName, gameId = null)
   `, [guildId, userId, sanitizedGameName, sanitizedGameId, startTime]);
 
   return result.lastID;
+}
+
+export async function updateSessionCheckpoint(guildId, userId, sessionId) {
+  validateSnowflake(guildId, 'Guild ID');
+  validateSnowflake(userId, 'User ID');
+
+  const currentTime = Math.floor(Date.now() / 1000);
+
+  await runAsync(`
+    UPDATE game_sessions
+    SET end_time = ?,
+        duration_seconds = ? - start_time
+    WHERE guild_id = ?
+      AND user_id = ?
+      AND id = ?
+  `, [currentTime, currentTime, guildId, userId, sessionId]);
+
+  await runAsync(`
+    UPDATE game_sessions_weekly
+    SET end_time = ?,
+        duration_seconds = ? - start_time
+    WHERE guild_id = ?
+      AND user_id = ?
+      AND id = ?
+  `, [currentTime, currentTime, guildId, userId, sessionId]);
 }
 
 export async function endGameSession(guildId, userId, sessionId = null) {
@@ -405,6 +441,7 @@ export async function getGlobalTopGamesForUser(userId, limit = 10) {
 export async function getGameStreak(userId, gameName) {
   validateSnowflake(userId, 'User ID');
   const sanitizedGameName = validateText(gameName, 'Game name', 200);
+
   const days = await allAsync(`
     SELECT DISTINCT DATE(start_time, 'unixepoch') as play_date
     FROM game_sessions
@@ -419,6 +456,7 @@ export async function getGameStreak(userId, gameName) {
   let streak = 0;
   const today = new Date().toISOString().split('T')[0];
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
   const mostRecentPlay = days[0].play_date;
   if (mostRecentPlay !== today && mostRecentPlay !== yesterday) {
     return 0;
@@ -442,6 +480,8 @@ export async function getGameStreak(userId, gameName) {
 
 export async function getAllGameStreaks(userId) {
   validateSnowflake(userId, 'User ID');
+
+  const games = await allAsync(`
     SELECT DISTINCT game_name
     FROM game_sessions
     WHERE user_id = ?
@@ -494,6 +534,7 @@ export async function getLongestStreakEver(userId) {
     for (let i = 1; i < days.length; i++) {
       const prevDate = new Date(days[i - 1].play_date);
       const currDate = new Date(days[i].play_date);
+
       const dayDiff = Math.floor((currDate - prevDate) / (1000 * 60 * 60 * 24));
 
       if (dayDiff === 1) {
@@ -537,4 +578,120 @@ export function isStreakDMsEnabled(userId) {
       else resolve(row !== undefined);
     });
   });
+}
+
+export async function saveLastStreakCheck(userId, date, streaks) {
+  validateSnowflake(userId, 'User ID');
+
+  const streaksJson = JSON.stringify(streaks);
+
+  return runAsync(`
+    INSERT OR REPLACE INTO streak_dm_last_check (user_id, last_check_date, streaks_json, updated_at)
+    VALUES (?, ?, ?, strftime('%s', 'now'))
+  `, [userId, date, streaksJson]);
+}
+
+export async function getLastStreakCheck(userId) {
+  validateSnowflake(userId, 'User ID');
+
+  const row = await getAsync(`
+    SELECT last_check_date, streaks_json
+    FROM streak_dm_last_check
+    WHERE user_id = ?
+  `, [userId]);
+
+  if (!row) return null;
+
+  return {
+    date: row.last_check_date,
+    streaks: JSON.parse(row.streaks_json)
+  };
+}
+
+export async function consolidateDuplicateSessions() {
+  console.log('[Consolidate] Starting session consolidation...');
+
+  const users = await allAsync(`
+    SELECT DISTINCT guild_id, user_id, game_name
+    FROM game_sessions
+    WHERE end_time IS NOT NULL
+    ORDER BY guild_id, user_id, game_name
+  `);
+
+  let totalMerged = 0;
+
+  for (const { guild_id, user_id, game_name } of users) {
+    const sessions = await allAsync(`
+      SELECT id, start_time, end_time, duration_seconds
+      FROM game_sessions
+      WHERE guild_id = ?
+        AND user_id = ?
+        AND game_name = ?
+        AND end_time IS NOT NULL
+      ORDER BY start_time ASC
+    `, [guild_id, user_id, game_name]);
+
+    if (sessions.length < 2) continue;
+
+    let i = 0;
+    while (i < sessions.length - 1) {
+      const current = sessions[i];
+      const mergeable = [current];
+      let j = i + 1;
+
+      while (j < sessions.length) {
+        const next = sessions[j];
+        const gap = next.start_time - mergeable[mergeable.length - 1].end_time;
+
+        if (gap <= 360) {
+          mergeable.push(next);
+          j++;
+        } else {
+          break;
+        }
+      }
+
+      if (mergeable.length > 1) {
+        const firstSession = mergeable[0];
+        const lastSession = mergeable[mergeable.length - 1];
+
+        await runAsync(`
+          UPDATE game_sessions
+          SET end_time = ?,
+              duration_seconds = ? - start_time
+          WHERE id = ?
+        `, [lastSession.end_time, lastSession.end_time, firstSession.id]);
+
+        await runAsync(`
+          UPDATE game_sessions_weekly
+          SET end_time = ?,
+              duration_seconds = ? - start_time
+          WHERE id = ?
+        `, [lastSession.end_time, lastSession.end_time, firstSession.id]);
+
+        const idsToDelete = mergeable.slice(1).map(s => s.id);
+        if (idsToDelete.length > 0) {
+          const placeholders = idsToDelete.map(() => '?').join(',');
+          await runAsync(`
+            DELETE FROM game_sessions
+            WHERE id IN (${placeholders})
+          `, idsToDelete);
+
+          await runAsync(`
+            DELETE FROM game_sessions_weekly
+            WHERE id IN (${placeholders})
+          `, idsToDelete);
+
+          totalMerged += idsToDelete.length;
+        }
+
+        console.log(`[Consolidate] Merged ${mergeable.length} sessions for ${game_name} (user ${user_id})`);
+      }
+
+      i = j;
+    }
+  }
+
+  console.log(`[Consolidate] Consolidation complete. Merged ${totalMerged} duplicate sessions.`);
+  return totalMerged;
 }
