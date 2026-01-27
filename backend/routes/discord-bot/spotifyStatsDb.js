@@ -508,13 +508,9 @@ export async function deleteAllUserData(userId) {
   validateSnowflake(userId, 'User ID');
 
   await runAsync(`DELETE FROM spotify_listens WHERE user_id = ?`, [userId]);
-
   await runAsync(`DELETE FROM spotify_listens_weekly WHERE user_id = ?`, [userId]);
-
   await runAsync(`DELETE FROM tracked_users WHERE user_id = ?`, [userId]);
-
   await runAsync(`DELETE FROM global_optout WHERE user_id = ?`, [userId]);
-
   await runAsync(`DELETE FROM global_optin WHERE user_id = ?`, [userId]);
 
   console.log(`[GDPR] Deleted all Spotify data for user ${userId}`);

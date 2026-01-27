@@ -34,7 +34,6 @@ class DiscordBot {
     });
 
     await this.loadCommands();
-
     this.registerEvents();
 
     try {
@@ -127,7 +126,6 @@ class DiscordBot {
 
     this.client.on('guildDelete', (guild) => {
       console.log(`Bot removed from guild: ${guild.name} (${guild.id})`);
-
       this.updateBotStatus();
     });
 

@@ -32,11 +32,9 @@ export function setupGameTracking(client) {
 
       if (!oldGame && newGame) {
         await handleGameStart(guildId, userId, newGame);
-      }
-      else if (oldGame && !newGame) {
+      } else if (oldGame && !newGame) {
         await handleGameStop(guildId, userId);
-      }
-      else if (oldGame && newGame && oldGame.name !== newGame.name) {
+      } else if (oldGame && newGame && oldGame.name !== newGame.name) {
         await handleGameStop(guildId, userId);
         await handleGameStart(guildId, userId, newGame);
       }
@@ -68,7 +66,6 @@ async function checkStreaksAndNotify(client) {
         }
 
         const streaks = await gameStatsDb.getAllGameStreaks(user_id);
-
         const notifiableStreaks = streaks.filter(s => s.streak > 1);
 
         if (notifiableStreaks.length === 0) {
@@ -163,7 +160,6 @@ async function handleGameStop(guildId, userId) {
 
   if (session) {
     await gameStatsDb.endGameSession(guildId, userId, session.sessionId);
-
     activeSessions.delete(userId);
 
     const duration = Math.floor((Date.now() - session.startTime) / 1000 / 60);

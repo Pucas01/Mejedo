@@ -35,7 +35,6 @@ let recapInterval = null;
 export function registerWordTracking(client) {
   client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
-
     if (!message.guild) return;
 
     const enabled = await isFeatureEnabled(message.guild.id, 'word_tracking');
@@ -98,8 +97,7 @@ function formatWordList(words) {
       const emojiMatch = w.word.match(/^([a-z_]{2,})(\d{17,20})$/i);
       if (emojiMatch) {
         word = `<:${emojiMatch[1]}:${emojiMatch[2]}>`;
-      }
-      else if (/^\d{17,20}$/.test(w.word)) {
+      } else if (/^\d{17,20}$/.test(w.word)) {
         word = `<@${w.word}>`;
       }
 
@@ -125,7 +123,7 @@ export async function postWeeklyRecap(client, channelId, resetStats = true) {
   const guildId = channel.guild.id;
 
   try {
-    const topWords = await getWeeklyTopWords(guildId, 10);
+    const topWords = await getWeeklyTopWords(guildId, 10, STOP_WORDS);
     const topUsers = await getWeeklyTopUsers(guildId, 5);
     const totalWords = await getWeeklyTotalCount(guildId);
 

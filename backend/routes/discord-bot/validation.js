@@ -1,4 +1,3 @@
-
 export function isValidSnowflake(id) {
   if (typeof id !== 'string') return false;
   return /^\d{17,20}$/.test(id);
@@ -25,7 +24,6 @@ export function validateText(text, maxLength = 500, fieldName = 'Text') {
   }
 
   const sanitized = text.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
-
   return sanitized;
 }
 

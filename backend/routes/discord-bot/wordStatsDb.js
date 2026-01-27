@@ -191,17 +191,23 @@ export async function getTopWordsForUser(guildId, userId, limit = 10, stopWords 
   return results;
 }
 
-export async function getWeeklyTopWords(guildId, limit = 10) {
+export async function getWeeklyTopWords(guildId, limit = 10, stopWords = null) {
   validateSnowflake(guildId, 'Guild ID');
+  const fetchLimit = stopWords ? limit * 5 : limit;
 
-  return await allAsync(`
+  const results = await allAsync(`
     SELECT word, SUM(count) as total_count
     FROM word_stats_weekly
     WHERE guild_id = ?
     GROUP BY word
     ORDER BY total_count DESC
     LIMIT ?
-  `, [guildId, limit]);
+  `, [guildId, fetchLimit]);
+
+  if (stopWords) {
+    return results.filter(r => !stopWords.has(r.word)).slice(0, limit);
+  }
+  return results;
 }
 
 export async function getWeeklyTopUsers(guildId, limit = 5) {
@@ -350,7 +356,6 @@ export async function initializeGuildSettings(guildId) {
   } catch (error) {
     console.log(`[Migration] Could not check Spotify stats for guild ${guildId}:`, error.message);
   }
-
   const wordEnabled = hasWordStats[0]?.count > 0 ? 1 : 0;
   const spotifyEnabled = hasSpotifyStatsCount > 0 ? 1 : 0;
 
@@ -368,7 +373,6 @@ export async function updateFeatureFlags(guildId, wordTracking, spotifyTracking,
   validateSnowflake(guildId, 'Guild ID');
 
   await initializeGuildSettings(guildId);
-
   const fields = ['word_tracking_enabled = ?', 'spotify_tracking_enabled = ?'];
   const values = [wordTracking ? 1 : 0, spotifyTracking ? 1 : 0];
 
@@ -434,7 +438,6 @@ export async function deleteAllUserWordData(userId) {
   validateSnowflake(userId, 'User ID');
 
   await runAsync(`DELETE FROM word_stats WHERE user_id = ?`, [userId]);
-
   await runAsync(`DELETE FROM word_stats_weekly WHERE user_id = ?`, [userId]);
 
   console.log(`[GDPR] Deleted all word data for user ${userId}`);

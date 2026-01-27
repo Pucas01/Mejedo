@@ -405,7 +405,6 @@ export async function getGlobalTopGamesForUser(userId, limit = 10) {
 export async function getGameStreak(userId, gameName) {
   validateSnowflake(userId, 'User ID');
   const sanitizedGameName = validateText(gameName, 'Game name', 200);
-
   const days = await allAsync(`
     SELECT DISTINCT DATE(start_time, 'unixepoch') as play_date
     FROM game_sessions
@@ -420,7 +419,6 @@ export async function getGameStreak(userId, gameName) {
   let streak = 0;
   const today = new Date().toISOString().split('T')[0];
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
   const mostRecentPlay = days[0].play_date;
   if (mostRecentPlay !== today && mostRecentPlay !== yesterday) {
     return 0;
@@ -444,8 +442,6 @@ export async function getGameStreak(userId, gameName) {
 
 export async function getAllGameStreaks(userId) {
   validateSnowflake(userId, 'User ID');
-
-  const games = await allAsync(`
     SELECT DISTINCT game_name
     FROM game_sessions
     WHERE user_id = ?
@@ -498,7 +494,6 @@ export async function getLongestStreakEver(userId) {
     for (let i = 1; i < days.length; i++) {
       const prevDate = new Date(days[i - 1].play_date);
       const currDate = new Date(days[i].play_date);
-
       const dayDiff = Math.floor((currDate - prevDate) / (1000 * 60 * 60 * 24));
 
       if (dayDiff === 1) {
