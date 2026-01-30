@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useTheme } from "../../../hooks/useTheme";
 import { useCurrentUser } from "../../../hooks/CurrentUser";
 import Button from "../../ui/Button";
+import WindowDecoration from "../../window/WindowDecoration";
 
 export default function FNFLeaderboardWidget({ isMinimized }) {
   const { theme } = useTheme();
@@ -15,6 +16,7 @@ export default function FNFLeaderboardWidget({ isMinimized }) {
   const [error, setError] = useState(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupUsername, setSetupUsername] = useState("");
+  const [showGameModal, setShowGameModal] = useState(false);
 
   const loadScores = async () => {
     try {
@@ -157,6 +159,14 @@ export default function FNFLeaderboardWidget({ isMinimized }) {
                 {refreshing ? "Refreshing..." : "Refresh Scores"}
               </Button>
             )}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowGameModal(true)}
+              className="w-full"
+            >
+              Play FNF
+            </Button>
           </div>
         )}
       </div>
@@ -224,6 +234,27 @@ export default function FNFLeaderboardWidget({ isMinimized }) {
           </p>
         </div>
       )}
+
+{showGameModal && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4">
+    <div className="aspect-[16/9] h-full flex flex-col bg-black border-2 border-[#39ff14] shadow-[0_0_20px_rgba(57,255,20,0.3)]">
+      
+<WindowDecoration
+        title="Friday Night Funkin'"
+        onClose={() => setShowGameModal(false)}
+      >
+      </WindowDecoration>
+      <div className="flex-1 w-full relative overflow-hidden bg-black">
+        <iframe
+          src="/funkin-html5/index.html"
+          className="absolute top-0 left-0 w-full h-full border-0"
+          allow="autoplay; fullscreen"
+          title="FNF Game"
+        />
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
