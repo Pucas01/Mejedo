@@ -4,6 +4,7 @@ import * as wordStatsDb from './wordStatsDb.js';
 
 const activeSessions = new Map(); // userId -> { guildId, gameName, gameId, startTime }
 const lastStreakCheck = new Map(); // userId -> { date, streaks: { gameName: streakCount } }
+const streakCheckLocks = new Map(); // userId -> timestamp of last DM sent (for debouncing)
 let recapInterval = null;
 let streakCheckInterval = null;
 
@@ -69,6 +70,14 @@ async function checkStreakForUser(client, userId) {
     const isEnabled = await gameStatsDb.isStreakDMsEnabled(userId);
     if (!isEnabled) return;
 
+    // Debounce: Don't send DM if we sent one within the last 5 minutes
+    const lastDMTime = streakCheckLocks.get(userId);
+    const now = Date.now();
+    if (lastDMTime && (now - lastDMTime) < 5 * 60 * 1000) {
+      console.log(`[Streak DM] Skipping check for user ${userId} - DM sent ${Math.floor((now - lastDMTime) / 1000)}s ago`);
+      return;
+    }
+
     const today = new Date().toISOString().split('T')[0];
 
     // Get current streaks
@@ -127,6 +136,9 @@ async function checkStreakForUser(client, userId) {
 
       await user.send({ embeds: [embed] });
       console.log(`[Streak DM] Sent streak update to user ${userId}`);
+
+      // Set debounce lock to prevent duplicate DMs
+      streakCheckLocks.set(userId, Date.now());
     } catch (dmError) {
       console.error(`[Streak DM] Could not send DM to user ${userId}:`, dmError.message);
     }
