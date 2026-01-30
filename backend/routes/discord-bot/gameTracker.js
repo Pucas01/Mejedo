@@ -4,6 +4,7 @@ import * as wordStatsDb from './wordStatsDb.js';
 
 const activeSessions = new Map();
 const lastStreakCheck = new Map();
+const streakCheckLocks = new Map();
 let recapInterval = null;
 let streakCheckInterval = null;
 
@@ -57,6 +58,13 @@ async function checkStreakForUser(client, userId) {
     const isEnabled = await gameStatsDb.isStreakDMsEnabled(userId);
     if (!isEnabled) return;
 
+    const lastDMTime = streakCheckLocks.get(userId);
+    const now = Date.now();
+    if (lastDMTime && (now - lastDMTime) < 5 * 60 * 1000) {
+      console.log(`[Streak DM] Skipping check for user ${userId} - DM sent ${Math.floor((now - lastDMTime) / 1000)}s ago`);
+      return;
+    }
+
     const today = new Date().toISOString().split('T')[0];
 
     const streaks = await gameStatsDb.getAllGameStreaks(userId);
@@ -109,6 +117,8 @@ async function checkStreakForUser(client, userId) {
 
       await user.send({ embeds: [embed] });
       console.log(`[Streak DM] Sent streak update to user ${userId}`);
+
+      streakCheckLocks.set(userId, Date.now());
     } catch (dmError) {
       console.error(`[Streak DM] Could not send DM to user ${userId}:`, dmError.message);
     }
