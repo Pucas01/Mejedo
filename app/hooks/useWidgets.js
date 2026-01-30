@@ -80,6 +80,9 @@ export function WidgetProvider({ children, mascotVisible, onToggleMascot }) {
       // Game area 300x400 + stats + controls + padding + border + header
       defaultWidth = 350; // 300 (game) + padding + border
       defaultHeight = 580; // 400 (game) + stats + controls + header
+    } else if (type === 'fnf-leaderboard') {
+      defaultWidth = 450;
+      defaultHeight = 550;
     } else if (type === 'hoyolab') {
       defaultWidth = 400;
       defaultHeight = 500;

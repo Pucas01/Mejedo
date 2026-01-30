@@ -33,6 +33,9 @@ function WidgetWindow({ widget }) {
       } else if (widget.type === 'rhythm') {
         const module = await import('./widgets/RhythmGameWidget');
         setWidgetContent(() => module.default);
+      } else if (widget.type === 'fnf-leaderboard') {
+        const module = await import('./widgets/FNFLeaderboardWidget');
+        setWidgetContent(() => module.default);
       } else if (widget.type === 'hoyolab') {
         const module = await import('./widgets/HoYoLabWidget');
         setWidgetContent(() => module.default);
@@ -107,6 +110,8 @@ function WidgetWindow({ widget }) {
         return 'Pong';
       case 'rhythm':
         return 'Rhythm Game';
+      case 'fnf-leaderboard':
+        return 'FNF Leaderboards';
       case 'hoyolab':
         return 'HoYoLab - ZZZ';
       default:

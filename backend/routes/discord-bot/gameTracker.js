@@ -9,8 +9,6 @@ let streakCheckInterval = null;
 
 export function setupGameTracking(client) {
   console.log('[Game Tracker] Setting up game tracking...');
-  console.log('[Game Tracker] IMPORTANT: Presence Intent must be enabled in Discord Developer Portal');
-  console.log('[Game Tracker] https://discord.com/developers/applications -> Your Bot -> Bot -> Privileged Gateway Intents -> Presence Intent (ON)');
 
   // Track presence changes
   client.on('presenceUpdate', async (oldPresence, newPresence) => {
