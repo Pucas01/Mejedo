@@ -1,10 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useTheme } from "../../../hooks/useTheme";
+import { useCurrentUser } from "../../../hooks/CurrentUser";
 import Button from "../../ui/Button";
 
 export default function FNFLeaderboardWidget({ isMinimized }) {
   const { theme } = useTheme();
+  const { isAdmin } = useCurrentUser();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [myScores, setMyScores] = useState([]);
@@ -13,24 +15,6 @@ export default function FNFLeaderboardWidget({ isMinimized }) {
   const [error, setError] = useState(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupUsername, setSetupUsername] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  // Check if user is admin
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      try {
-        const res = await fetch("/api/auth/status", {
-          credentials: "include"
-        });
-        const data = await res.json();
-        setIsAdmin(data.isAuthenticated);
-      } catch (err) {
-        console.error("Failed to check admin status:", err);
-        setIsAdmin(false);
-      }
-    };
-    checkAdminStatus();
-  }, []);
 
   // Load stored scores
   const loadScores = async () => {
