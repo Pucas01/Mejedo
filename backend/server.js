@@ -24,6 +24,7 @@ import nintendoRoute from "./routes/integrations/nintendo.js"
 import discordRoute from "./routes/integrations/discord.js"
 import hoyolabRoute from "./routes/integrations/hoyolab.js"
 import discordWebhookConfigRoute from "./routes/integrations/discord-webhook-config.js"
+import newgroundsRoute from "./routes/integrations/newgrounds.js"
 
 import adoRoute from "./routes/ado/ado.js"
 import adoToursRoute from "./routes/ado/ado-tours.js"
@@ -128,6 +129,7 @@ app.use("/api/ado-awards-scraper", adoAwardsScraperRoute);
 app.use("/api/ado-discography", adoDiscographyRoute);
 app.use("/api/miku-discography", mikuDiscographyRoute);
 app.use("/api/hoyolab", hoyolabRoute);
+app.use("/api/newgrounds", newgroundsRoute);
 app.use("/api/discord-webhook-config", requireAuth, discordWebhookConfigRoute);
 app.use("/api/discord-bot-config", discordBotConfigRoute);
 app.use("/api/word-stats", wordStatsApiRoute);
@@ -200,6 +202,56 @@ if (botConfig.enabled) {
 } else {
   console.log('Discord bot is disabled in config.');
 }
+
+const FNF_SCORES_FILE = path.join(CONFIG_DIR, "fnf-scores.json");
+let fnfScoresInterval = null;
+
+async function refreshFNFScores() {
+  try {
+    if (!fs.existsSync(FNF_SCORES_FILE)) {
+      console.log('[FNF] No scores file found, skipping auto-refresh');
+      return;
+    }
+
+    const data = JSON.parse(fs.readFileSync(FNF_SCORES_FILE, 'utf-8'));
+    if (!data.username) {
+      console.log('[FNF] No username configured, skipping auto-refresh');
+      return;
+    }
+
+    console.log(`[FNF] Auto-refreshing scores for ${data.username}...`);
+    const response = await fetch('http://localhost:4000/api/newgrounds/fnf/refresh-scores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: data.username })
+    });
+
+    const result = await response.json();
+    console.log(`[FNF] Auto-refresh complete: ${result.scores?.length || 0} scores found`);
+  } catch (error) {
+    console.error('[FNF] Auto-refresh failed:', error);
+  }
+}
+
+function scheduleFNFRefresh() {
+  const now = new Date();
+  const next3AM = new Date(now);
+  next3AM.setHours(3, 0, 0, 0);
+
+  if (next3AM <= now) {
+    next3AM.setDate(next3AM.getDate() + 1);
+  }
+
+  const msUntil3AM = next3AM - now;
+  console.log(`[FNF] Next score refresh scheduled for ${next3AM.toLocaleString()}`);
+
+  setTimeout(() => {
+    refreshFNFScores();
+    fnfScoresInterval = setInterval(refreshFNFScores, 24 * 60 * 60 * 1000);
+  }, msUntil3AM);
+}
+
+scheduleFNFRefresh();
 
 let isShuttingDown = false;
 

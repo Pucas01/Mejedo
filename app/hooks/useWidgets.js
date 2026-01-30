@@ -69,6 +69,9 @@ export function WidgetProvider({ children, mascotVisible, onToggleMascot }) {
     } else if (type === 'rhythm') {
       defaultWidth = 350;
       defaultHeight = 580;
+    } else if (type === 'fnf-leaderboard') {
+      defaultWidth = 450;
+      defaultHeight = 550;
     } else if (type === 'hoyolab') {
       defaultWidth = 400;
       defaultHeight = 500;
