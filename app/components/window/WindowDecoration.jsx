@@ -22,7 +22,7 @@ export default function WindowDecoration({
   onClose,
   onMinimize,
   showControls = true,
-  theme = "futaba" // Default theme
+  theme = "futaba", // Default theme
 }) {
   const { unlock } = useAchievements();
 

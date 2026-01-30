@@ -11,6 +11,24 @@ const nextConfig = {
     NEXT_PUBLIC_APP_VERSION: version,
   },
   
+  async headers() {
+    return [
+      {
+        source: "/funkin-html5/:path*",
+        headers: [
+          {
+            key: "Cross-Origin-Embedder-Policy",
+            value: "require-corp",
+          },
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
+          },
+        ],
+      },
+    ];
+  },
+
   // Your existing configuration
   async rewrites() {
     return [
