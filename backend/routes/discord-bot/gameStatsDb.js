@@ -136,31 +136,33 @@ export async function startGameSession(guildId, userId, gameName, gameId = null)
   return result.lastID;
 }
 
-// Update session checkpoint (updates end_time but keeps session active)
+// Update session checkpoint (updates duration but keeps session active)
 export async function updateSessionCheckpoint(guildId, userId, sessionId) {
   validateSnowflake(guildId, 'Guild ID');
   validateSnowflake(userId, 'User ID');
 
   const currentTime = Math.floor(Date.now() / 1000);
 
-  // Update the session's end_time and duration without closing it
+  // Update ONLY duration_seconds for checkpoint protection
+  // CRITICAL: Do NOT set end_time here - that would mark the session as complete
+  // and cause duplicates when the user continues playing
   await runAsync(`
     UPDATE game_sessions
-    SET end_time = ?,
-        duration_seconds = ? - start_time
+    SET duration_seconds = ? - start_time
     WHERE guild_id = ?
       AND user_id = ?
       AND id = ?
-  `, [currentTime, currentTime, guildId, userId, sessionId]);
+      AND end_time IS NULL
+  `, [currentTime, guildId, userId, sessionId]);
 
   await runAsync(`
     UPDATE game_sessions_weekly
-    SET end_time = ?,
-        duration_seconds = ? - start_time
+    SET duration_seconds = ? - start_time
     WHERE guild_id = ?
       AND user_id = ?
       AND id = ?
-  `, [currentTime, currentTime, guildId, userId, sessionId]);
+      AND end_time IS NULL
+  `, [currentTime, guildId, userId, sessionId]);
 }
 
 // End an active game session

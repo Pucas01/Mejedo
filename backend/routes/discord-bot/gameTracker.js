@@ -2,7 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import * as gameStatsDb from './gameStatsDb.js';
 import * as wordStatsDb from './wordStatsDb.js';
 
-const activeSessions = new Map(); // userId -> { guildId, gameName, gameId, startTime }
+const activeSessions = new Map(); // 'guildId-userId' -> { sessionId, guildId, gameName, gameId, startTime }
 const lastStreakCheck = new Map(); // userId -> { date, streaks: { gameName: streakCount } }
 const streakCheckLocks = new Map(); // userId -> timestamp of last DM sent (for debouncing)
 let recapInterval = null;
@@ -195,8 +195,9 @@ async function handleGameStart(guildId, userId, game) {
   // Store in database
   const sessionId = await gameStatsDb.startGameSession(guildId, userId, gameName, gameId);
 
-  // Track in memory
-  activeSessions.set(userId, {
+  // Track in memory with composite key (guildId-userId) to support multi-guild users
+  const sessionKey = `${guildId}-${userId}`;
+  activeSessions.set(sessionKey, {
     sessionId,
     guildId,
     gameName,
@@ -208,14 +209,15 @@ async function handleGameStart(guildId, userId, game) {
 }
 
 async function handleGameStop(guildId, userId, client) {
-  const session = activeSessions.get(userId);
+  const sessionKey = `${guildId}-${userId}`;
+  const session = activeSessions.get(sessionKey);
 
   if (session) {
     // End session in database
     await gameStatsDb.endGameSession(guildId, userId, session.sessionId);
 
     // Remove from memory
-    activeSessions.delete(userId);
+    activeSessions.delete(sessionKey);
 
     const duration = Math.floor((Date.now() - session.startTime) / 1000 / 60); // minutes
     console.log(`[Game Tracker] ${userId} stopped playing ${session.gameName} (${duration}m)`);
@@ -228,13 +230,15 @@ async function handleGameStop(guildId, userId, client) {
 async function updateActiveSessionCheckpoints() {
   // Update end times for all active sessions as checkpoints
   // This prevents data loss if bot crashes during long sessions
-  // We update the end_time without ending the session
-  for (const [userId, session] of activeSessions.entries()) {
+  // We update the duration without ending the session
+  for (const [sessionKey, session] of activeSessions.entries()) {
     try {
+      // Extract userId from composite key (guildId-userId)
+      const userId = sessionKey.split('-')[1];
       // Update checkpoint without ending the session
       await gameStatsDb.updateSessionCheckpoint(session.guildId, userId, session.sessionId);
     } catch (error) {
-      console.error(`Error updating checkpoint for user ${userId}:`, error);
+      console.error(`Error updating checkpoint for session ${sessionKey}:`, error);
     }
   }
 
@@ -325,11 +329,13 @@ export function stopGameTracking() {
   console.log('Stopping game tracking...');
 
   // End all active sessions
-  for (const [userId, session] of activeSessions.entries()) {
+  for (const [sessionKey, session] of activeSessions.entries()) {
     try {
+      // Extract userId from composite key (guildId-userId)
+      const userId = sessionKey.split('-')[1];
       gameStatsDb.endGameSession(session.guildId, userId, session.sessionId);
     } catch (error) {
-      console.error(`Error ending session for user ${userId}:`, error);
+      console.error(`Error ending session for ${sessionKey}:`, error);
     }
   }
 
