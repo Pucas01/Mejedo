@@ -167,7 +167,8 @@ async function handleGameStart(guildId, userId, game) {
 
   const sessionId = await gameStatsDb.startGameSession(guildId, userId, gameName, gameId);
 
-  activeSessions.set(userId, {
+  const sessionKey = `${guildId}-${userId}`;
+  activeSessions.set(sessionKey, {
     sessionId,
     guildId,
     gameName,
@@ -179,12 +180,13 @@ async function handleGameStart(guildId, userId, game) {
 }
 
 async function handleGameStop(guildId, userId, client) {
-  const session = activeSessions.get(userId);
+  const sessionKey = `${guildId}-${userId}`;
+  const session = activeSessions.get(sessionKey);
 
   if (session) {
     await gameStatsDb.endGameSession(guildId, userId, session.sessionId);
 
-    activeSessions.delete(userId);
+    activeSessions.delete(sessionKey);
 
     const duration = Math.floor((Date.now() - session.startTime) / 1000 / 60);
     console.log(`[Game Tracker] ${userId} stopped playing ${session.gameName} (${duration}m)`);
@@ -194,11 +196,12 @@ async function handleGameStop(guildId, userId, client) {
 }
 
 async function updateActiveSessionCheckpoints() {
-  for (const [userId, session] of activeSessions.entries()) {
+  for (const [sessionKey, session] of activeSessions.entries()) {
     try {
+      const userId = sessionKey.split('-')[1];
       await gameStatsDb.updateSessionCheckpoint(session.guildId, userId, session.sessionId);
     } catch (error) {
-      console.error(`Error updating checkpoint for user ${userId}:`, error);
+      console.error(`Error updating checkpoint for session ${sessionKey}:`, error);
     }
   }
 
@@ -278,11 +281,12 @@ export async function postGameRecap(client, guildId, resetStats = true) {
 export function stopGameTracking() {
   console.log('Stopping game tracking...');
 
-  for (const [userId, session] of activeSessions.entries()) {
+  for (const [sessionKey, session] of activeSessions.entries()) {
     try {
+      const userId = sessionKey.split('-')[1];
       gameStatsDb.endGameSession(session.guildId, userId, session.sessionId);
     } catch (error) {
-      console.error(`Error ending session for user ${userId}:`, error);
+      console.error(`Error ending session for ${sessionKey}:`, error);
     }
   }
 

@@ -134,21 +134,21 @@ export async function updateSessionCheckpoint(guildId, userId, sessionId) {
 
   await runAsync(`
     UPDATE game_sessions
-    SET end_time = ?,
-        duration_seconds = ? - start_time
+    SET duration_seconds = ? - start_time
     WHERE guild_id = ?
       AND user_id = ?
       AND id = ?
-  `, [currentTime, currentTime, guildId, userId, sessionId]);
+      AND end_time IS NULL
+  `, [currentTime, guildId, userId, sessionId]);
 
   await runAsync(`
     UPDATE game_sessions_weekly
-    SET end_time = ?,
-        duration_seconds = ? - start_time
+    SET duration_seconds = ? - start_time
     WHERE guild_id = ?
       AND user_id = ?
       AND id = ?
-  `, [currentTime, currentTime, guildId, userId, sessionId]);
+      AND end_time IS NULL
+  `, [currentTime, guildId, userId, sessionId]);
 }
 
 export async function endGameSession(guildId, userId, sessionId = null) {
