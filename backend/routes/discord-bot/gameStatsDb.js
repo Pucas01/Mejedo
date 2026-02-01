@@ -438,15 +438,20 @@ export function getDbPath() {
 export async function getGlobalUserStats(userId) {
   validateSnowflake(userId, 'User ID');
 
+  // Deduplicate sessions that appear in multiple guilds
+  // by grouping on (user_id, game_name, start_time)
   return await getAsync(`
     SELECT
       COUNT(*) as total_sessions,
       COUNT(DISTINCT game_name) as unique_games,
       SUM(duration_seconds) as total_seconds,
       AVG(duration_seconds) as avg_session_seconds
-    FROM game_sessions
-    WHERE user_id = ?
-      AND end_time IS NOT NULL
+    FROM (
+      SELECT DISTINCT user_id, game_name, start_time, duration_seconds
+      FROM game_sessions
+      WHERE user_id = ?
+        AND end_time IS NOT NULL
+    )
   `, [userId]);
 }
 
@@ -455,14 +460,19 @@ export async function getGlobalTopGamesForUser(userId, limit = 10) {
   validateSnowflake(userId, 'User ID');
   validateLimit(limit);
 
+  // Deduplicate sessions that appear in multiple guilds
+  // by using DISTINCT on (user_id, game_name, start_time)
   return await allAsync(`
     SELECT
       game_name,
       SUM(duration_seconds) as total_seconds,
       COUNT(*) as session_count
-    FROM game_sessions
-    WHERE user_id = ?
-      AND end_time IS NOT NULL
+    FROM (
+      SELECT DISTINCT user_id, game_name, start_time, duration_seconds
+      FROM game_sessions
+      WHERE user_id = ?
+        AND end_time IS NOT NULL
+    )
     GROUP BY game_name
     ORDER BY total_seconds DESC
     LIMIT ?
