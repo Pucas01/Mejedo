@@ -73,6 +73,28 @@ router.get('/guild/:guildId/stats', requireAuth, async (req, res) => {
   }
 });
 
+router.get('/user/:userId', requireAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const stats = await gameStatsDb.getGlobalUserStats(userId);
+    const topGames = await gameStatsDb.getGlobalTopGamesForUser(userId, limit);
+    const streaks = await gameStatsDb.getAllGameStreaks(userId);
+    const longestStreak = await gameStatsDb.getLongestStreakEver(userId);
+
+    res.json({
+      stats: stats || {},
+      topGames: topGames || [],
+      currentStreaks: streaks || [],
+      longestStreak: longestStreak || null
+    });
+  } catch (error) {
+    console.error('Error fetching user global stats:', error);
+    res.status(500).json({ error: 'Failed to fetch user global stats' });
+  }
+});
+
 router.get('/export', requireAuth, async (req, res) => {
   try {
     const data = await gameStatsDb.exportAllData();

@@ -414,9 +414,12 @@ export async function getGlobalUserStats(userId) {
       COUNT(DISTINCT game_name) as unique_games,
       SUM(duration_seconds) as total_seconds,
       AVG(duration_seconds) as avg_session_seconds
-    FROM game_sessions
-    WHERE user_id = ?
-      AND end_time IS NOT NULL
+    FROM (
+      SELECT DISTINCT user_id, game_name, start_time, duration_seconds
+      FROM game_sessions
+      WHERE user_id = ?
+        AND end_time IS NOT NULL
+    )
   `, [userId]);
 }
 
@@ -429,9 +432,12 @@ export async function getGlobalTopGamesForUser(userId, limit = 10) {
       game_name,
       SUM(duration_seconds) as total_seconds,
       COUNT(*) as session_count
-    FROM game_sessions
-    WHERE user_id = ?
-      AND end_time IS NOT NULL
+    FROM (
+      SELECT DISTINCT user_id, game_name, start_time, duration_seconds
+      FROM game_sessions
+      WHERE user_id = ?
+        AND end_time IS NOT NULL
+    )
     GROUP BY game_name
     ORDER BY total_seconds DESC
     LIMIT ?
