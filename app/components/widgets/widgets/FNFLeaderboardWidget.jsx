@@ -133,7 +133,7 @@ export default function FNFLeaderboardWidget({ isMinimized }) {
               </>
             ) : (
               <p className="text-xs text-gray-500">
-                Contact admin to set up score tracking
+                Contact MEEEE to setup score tracking
               </p>
             )}
           </div>
@@ -230,7 +230,7 @@ export default function FNFLeaderboardWidget({ isMinimized }) {
           <div className={`border ${theme.colors.border} p-4 text-center`}>
             <p className="text-gray-400 mb-2">No scores found</p>
             <p className="text-xs text-gray-500">
-              Make sure you've played FNF on Newgrounds
+              Fucking IDIOT
             </p>
           </div>
         )
