@@ -15,7 +15,6 @@ export default function MikuContent({ idol }) {
 
   const infoCommand = "cat ~/miku/info.txt";
 
-  // Intersection observer for info section
   useEffect(() => {
     const observerOptions = {
       threshold: 0.1,
@@ -41,7 +40,6 @@ export default function MikuContent({ idol }) {
     };
   }, [infoInView]);
 
-  // Info terminal typing animation
   useEffect(() => {
     if (!infoInView) return;
 
@@ -59,7 +57,7 @@ export default function MikuContent({ idol }) {
 
   return (
     <div className="flex flex-col gap-4 text-xl min-h-screen text-white justify-start">
-      {/* Info terminal */}
+      
       <div ref={infoRef} className="bg-[#121217] min-h-[540px] border-2 border-[#39c5bb] shadow-lg relative flex flex-col overflow-hidden">
         <WindowDecoration title="Miku - info.txt" showControls={true} theme={theme.name} />
         <div className="p-8 flex-1 relative">
@@ -112,10 +110,10 @@ export default function MikuContent({ idol }) {
         </div>
       </div>
 
-      {/* Discography component */}
+      
       <Discography idolId="miku" />
 
-      {/* External Links */}
+      
       <div className="bg-[#121217] border-2 border-[#39c5bb] shadow-lg relative flex flex-col overflow-hidden">
         <WindowDecoration title="Miku - ~/links" showControls={true} theme={theme.name} />
         <div className="p-8">

@@ -15,11 +15,9 @@ export default function Idols() {
   const { setThemeName } = useTheme();
   const { updateStats } = useAchievements();
 
-  // Update theme when idol changes
   useEffect(() => {
     setThemeName(selectedIdol === "miku" ? "miku" : "ado");
 
-    // Track Miku profile view for achievement
     if (selectedIdol === "miku") {
       updateStats("viewedMikuProfile", true);
     }
@@ -29,7 +27,7 @@ export default function Idols() {
     if (newIdolId === selectedIdol) return;
 
     setIsTransitioning(true);
-    // Scroll to top smoothly
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => {
       setSelectedIdol(newIdolId);

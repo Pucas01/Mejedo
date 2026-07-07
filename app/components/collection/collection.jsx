@@ -11,19 +11,15 @@ export default function CollectionPage() {
   const { isAdmin } = useCurrentUser();
   const { updateStats } = useAchievements();
 
-  // Data
   const [consoles, setConsoles] = useState([]);
   const [manga, setManga] = useState([]);
 
-  // Loaders
   const [loadingConsoles, setLoadingConsoles] = useState(true);
   const [loadingManga, setLoadingManga] = useState(true);
 
-  // Selected items (detail view triggers)
   const [selectedConsole, setSelectedConsole] = useState(null);
   const [selectedManga, setSelectedManga] = useState(null);
 
-  // Wrap setters to track views for achievements
   const handleSelectConsole = (c) => {
     setSelectedConsole(c);
     if (c && c.id !== "new") {
@@ -38,7 +34,6 @@ export default function CollectionPage() {
     }
   };
 
-  // Fetch consoles
   const fetchConsoles = async () => {
     const res = await fetch("/api/consoles");
     const data = await res.json();
@@ -46,7 +41,6 @@ export default function CollectionPage() {
     setLoadingConsoles(false);
   };
 
-  // Fetch manga
   const fetchManga = async () => {
     const res = await fetch("/api/manga");
     const data = await res.json();
@@ -55,7 +49,7 @@ export default function CollectionPage() {
   };
 
   useEffect(() => {
-    // Parallelize the fetches instead of sequential
+
     Promise.all([fetchConsoles(), fetchManga()]);
   }, []);
 

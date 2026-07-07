@@ -17,7 +17,6 @@ export default function BlogPost({ post, onBack }) {
   const parsedHTML = useMemo(() => {
     if (!post.body) return "";
 
-
     const processedMarkdown = post.body.replace(
       /!\[(.*?)\]\((.*?)\)\{width=(\d+)(?:\s*height=(\d+))?\}/g,
       (_, alt, src, width, height) => {

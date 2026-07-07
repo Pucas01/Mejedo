@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef, memo } from "react";
 import { useAchievements } from "../../hooks/useAchievements";
 
-// Tips and easter eggs the mascot can say
 const tips = [
   "Try clicking the header title!",
   "Try imputing the konami code!",
@@ -35,7 +34,6 @@ const tips = [
   "Fun fact there are about ããã¼ãªãã¾ããã¤ãï¼ amount of these lines",
 ];
 
-// Shuffle array using Fisher-Yates algorithm
 const shuffleArray = (array) => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -47,26 +45,24 @@ const shuffleArray = (array) => {
 
 function Mascot() {
   const [frame, setFrame] = useState(0);
-  const [bubbleState, setBubbleState] = useState("hidden"); // "hidden" | "entering" | "visible" | "exiting"
+  const [bubbleState, setBubbleState] = useState("hidden");
   const [currentTip, setCurrentTip] = useState("");
   const [isHovered, setIsHovered] = useState(false);
   const [bounceKey, setBounceKey] = useState(0);
   const [isExcited, setIsExcited] = useState(false);
   const [pendingExcited, setPendingExcited] = useState(null);
-  const [size, setSize] = useState("md"); // "sm" | "md" | "lg"
+  const [size, setSize] = useState("md");
   const hideTimeoutRef = useRef(null);
   const tipQueueRef = useRef([]);
   const animationSpeedRef = useRef(500);
 
-  // Achievement integration
   let achievements = null;
   try {
     achievements = useAchievements();
   } catch {
-    // Not wrapped in AchievementProvider yet
+
   }
 
-  // React to achievement unlocks
   useEffect(() => {
     if (achievements?.pendingAchievement) {
       const achievement = achievements.pendingAchievement;
@@ -74,7 +70,6 @@ function Mascot() {
     }
   }, [achievements?.pendingAchievement]);
 
-  // Responsive sizing based on screen width
   useEffect(() => {
     const updateSize = () => {
       const width = window.innerWidth;
@@ -98,7 +93,6 @@ function Mascot() {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
-  // Size configurations
   const sizeConfig = {
     xs: { mascot: 56, container: "h-14", bubble: "max-w-[160px] text-xs px-2 py-1.5", padding: "p-1" },
     sm: { mascot: 72, container: "h-18", bubble: "max-w-[190px] text-sm px-3 py-2", padding: "p-1.5" },
@@ -110,7 +104,6 @@ function Mascot() {
 
   const config = sizeConfig[size];
 
-  // Animation loop - swap between frame 0 and 1 (faster when excited)
   useEffect(() => {
     const interval = setInterval(() => {
       setFrame((prev) => (prev === 0 ? 1 : 0));
@@ -119,7 +112,6 @@ function Mascot() {
     return () => clearInterval(interval);
   }, [isExcited]);
 
-  // Apply pending excitement state at frame 0 (start of animation cycle)
   useEffect(() => {
     if (frame === 0 && pendingExcited !== null) {
       setIsExcited(pendingExcited);
@@ -128,7 +120,6 @@ function Mascot() {
     }
   }, [frame, pendingExcited]);
 
-  // Get next tip from shuffled queue (reshuffles when empty)
   const getNextTip = () => {
     if (tipQueueRef.current.length === 0) {
       tipQueueRef.current = shuffleArray(tips);
@@ -136,9 +127,8 @@ function Mascot() {
     return tipQueueRef.current.pop();
   };
 
-  // Show a random tip periodically or on click
   const showRandomTip = (customMessage = null) => {
-    // Clear any existing timeout
+
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
     }
@@ -147,39 +137,33 @@ function Mascot() {
     setCurrentTip(nextTip);
     setBubbleState("entering");
 
-    // Only queue excitement if not already excited (prevents animation jank on rapid clicks)
     if (!isExcited && pendingExcited !== true) {
       setPendingExcited(true);
     }
 
-    // Transition to visible after enter animation
     setTimeout(() => {
       setBubbleState("visible");
     }, 300);
 
-    // Calm down after 2 seconds (queue it to wait for cycle)
     setTimeout(() => {
       setPendingExcited(false);
     }, 3000);
 
-    // Start exit after 5 seconds
     hideTimeoutRef.current = setTimeout(() => {
       setBubbleState("exiting");
-      // Remove from DOM after exit animation
+
       setTimeout(() => {
         setBubbleState("hidden");
       }, 250);
     }, 5000);
   };
 
-  // Occasionally show a tip automatically
   useEffect(() => {
-    // Show first tip after 10 seconds
+
     const initialTimeout = setTimeout(() => {
       showRandomTip();
     }, 10000);
 
-    // Then show tips every 30-60 seconds randomly
     const interval = setInterval(() => {
       if (bubbleState === "hidden" && Math.random() > 0.5) {
         showRandomTip();
@@ -195,7 +179,6 @@ function Mascot() {
     };
   }, [bubbleState]);
 
-  // Trigger bounce animation on frame change (only on frame 0 = up position)
   useEffect(() => {
     if (frame === 0) {
       setBounceKey((prev) => prev + 1);
@@ -215,23 +198,23 @@ function Mascot() {
 
   return (
     <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end">
-      {/* Speech bubble - positioned above mascot */}
+      
       {bubbleState !== "hidden" && (
         <div className={`relative mb-4 transition-transform duration-200 ${isHovered ? "-translate-y-2" : ""} ${getBubbleClass()}`}>
           <div className={`bg-[#121217] border-2 border-[#39ff14] ${config.bubble} text-white`}>
             {currentTip}
           </div>
-          {/* Speech bubble tail - pointing down towards mascot on right side */}
+          
           <div className="absolute -bottom-2 right-6 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#39ff14]" />
           <div className="absolute -bottom-1 right-[26px] w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#121217]" />
         </div>
       )}
 
-      {/* Mascot box */}
+      
       <div
         className={`transition-transform duration-200 cursor-pointer ${isHovered ? "scale-110" : ""}`}
         onClick={() => {
-          // Track mascot clicks for achievement
+
           if (achievements?.updateStats) {
             achievements.updateStats("mascotClicks", 1);
           }
@@ -241,7 +224,7 @@ function Mascot() {
         onMouseLeave={() => setIsHovered(false)}
       >
         <div className={`bg-[#121217] border-2 border-[#39ff14] ${config.padding} pb-0`}>
-          {/* Character container - anchored to bottom with bounce */}
+          
           <div className={`${config.container} flex items-end justify-center`}>
             <img
               key={bounceKey}

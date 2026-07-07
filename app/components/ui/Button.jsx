@@ -2,18 +2,6 @@
 
 import { useTheme } from "../../hooks/useTheme";
 
-/**
- * Windows 95/98 style button component that matches the window decoration aesthetic
- *
- * @param {Object} props
- * @param {React.ReactNode} props.children - Button content
- * @param {string} props.variant - Button variant: 'default' | 'primary' | 'danger'
- * @param {string} props.size - Button size: 'sm' | 'md' | 'lg'
- * @param {boolean} props.disabled - Disabled state
- * @param {Function} props.onClick - Click handler
- * @param {string} props.type - Button type (button, submit, reset)
- * @param {string} props.className - Additional custom classes
- */
 export default function Button({
   children,
   variant = "default",
@@ -25,7 +13,7 @@ export default function Button({
   ...props
 }) {
   const { theme } = useTheme();
-  // Base styles - Windows 95/98 beveled look
+
   const baseStyles = `
     relative
     font-jetbrains
@@ -38,7 +26,6 @@ export default function Button({
     active:translate-y-px
   `;
 
-  // Variant styles
   const variants = {
     default: `
       bg-[#c0c0c0]
@@ -83,7 +70,6 @@ export default function Button({
     `,
   };
 
-  // Size styles
   const sizes = {
     sm: "px-3 py-1 text-sm",
     md: "px-4 py-1.5 text-base",

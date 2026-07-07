@@ -32,7 +32,6 @@ Some things im good at
 
   const command = "cd /me && cat whoami.txt";
 
-  // Intersection Observer: start typing when in view
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -44,7 +43,6 @@ Some things im good at
     return () => containerRef.current && observer.unobserve(containerRef.current);
   }, []);
 
-  // Typing animation
   useEffect(() => {
     if (!startTyping) return;
 
@@ -60,7 +58,6 @@ Some things im good at
     return () => clearInterval(interval);
   }, [startTyping]);
 
-  // Format text for terminal style using ###, bullets, etc.
   const formatTerminalText = (text) => {
     return text.split("\n").map((line, idx) => (
       <p key={idx} className="mb-1 font-jetbrains">
@@ -83,7 +80,7 @@ Some things im good at
         rotation={15}
         offset={{ x: 22, y: 22 }}
       />
-      {/* Typing command */}
+      
       {!doneTyping && (
         <div className="p-6 font-jetbrains text-xl flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>
@@ -97,7 +94,7 @@ Some things im good at
         </div>
       )}
 
-      {/* Terminal output */}
+      
       {doneTyping && (
         <div className="p-6 text-md">
           <pre className="whitespace-pre-wrap">

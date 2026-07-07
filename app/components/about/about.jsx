@@ -32,24 +32,20 @@ export default function About() {
   const { unlock, unlockedAchievements } = useAchievements();
 
   const handleSocialClick = (e, url) => {
-    // If already unlocked, just open normally
+
     if (unlockedAchievements.stalker) {
       return;
     }
 
-    // Prevent default link behavior
     e.preventDefault();
 
-    // Unlock achievement first
     unlock("stalker");
 
-    // Wait for achievement toast to show, then open link
     setTimeout(() => {
       window.open(url, "_blank", "noopener,noreferrer");
     }, 2000);
   };
 
-  // First typing (fastfetch)
   useEffect(() => {
     let i = 0;
     const interval = setInterval(() => {
@@ -63,7 +59,6 @@ export default function About() {
     return () => clearInterval(interval);
   }, []);
 
-  // fetch
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -77,7 +72,6 @@ export default function About() {
     };
   }, []);
 
-  // (links)
   useEffect(() => {
     if (!startLinks) return;
     let i = 0;
@@ -155,7 +149,6 @@ export default function About() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch latest software versions
   useEffect(() => {
     async function fetchVersions() {
       try {
@@ -171,9 +164,8 @@ export default function About() {
     fetchVersions();
   }, []);
 
-  // Hide scroll indicator when user scrolls
   useEffect(() => {
-    // Only show indicator after fastfetch animation completes
+
     if (!doneFastfetch) {
       setShowScrollIndicator(false);
       setIndicatorVisible(false);
@@ -182,17 +174,16 @@ export default function About() {
 
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      // Hide after scrolling more than 100px
+
       if (scrollTop >= 100) {
         setIndicatorVisible(false);
-        // Remove from DOM after fade animation completes
+
         setTimeout(() => setShowScrollIndicator(false), 300);
       }
     };
 
-    // Show indicator once animation is done
     setShowScrollIndicator(true);
-    // Small delay to trigger CSS transition
+
     setTimeout(() => setIndicatorVisible(true), 50);
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -203,7 +194,7 @@ export default function About() {
 
   return (
     <div className="relative flex flex-col gap-4 p-4 min-h-screen text-white justify-start">
-      {/* Scroll Indicator */}
+      
       {showScrollIndicator && (
         <div
           className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1 animate-bounce transition-opacity duration-300 ${

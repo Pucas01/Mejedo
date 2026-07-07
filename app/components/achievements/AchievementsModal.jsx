@@ -26,10 +26,10 @@ export default function AchievementsModal({ show, onClose }) {
       }}
     >
       <div className={`bg-[#121217] border-2 ${theme.colors.border} shadow-lg max-w-[600px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp`}>
-        {/* Window Decoration */}
+        
         <WindowDecoration title="Achievements - trophies.txt" onClose={handleClose} theme={theme.name}/>
 
-        {/* Progress */}
+        
         <div className="px-6 py-3 bg-[#090909]">
           <div className="flex justify-between text-sm mb-2">
             <span className="text-gray-400">Progress</span>
@@ -43,9 +43,9 @@ export default function AchievementsModal({ show, onClose }) {
           </div>
         </div>
 
-        {/* Achievements list */}
+        
         <div className="flex-1 overflow-y-auto p-6 space-y-3">
-          {/* Unlocked */}
+          
           {unlockedList.map((achievement) => (
             <div
               key={achievement.id}
@@ -60,7 +60,7 @@ export default function AchievementsModal({ show, onClose }) {
             </div>
           ))}
 
-          {/* Locked */}
+          
           {lockedList.map((achievement) => (
             <div
               key={achievement.id}
@@ -82,7 +82,7 @@ export default function AchievementsModal({ show, onClose }) {
           ))}
         </div>
 
-        {/* Footer */}
+        
         <div className={`px-6 py-3 bg-[#090909] border-t ${theme.colors.border}/30 text-center text-gray-500 text-sm`}>
           Dude lock the fuck in and get those achievements!
         </div>

@@ -35,7 +35,6 @@ export default function ConsolesSection({
     }
   }, [selectedConsole]);
 
-  // Upload 
   const upload = async (file) => {
     if (!file) return "";
     const form = new FormData();
@@ -55,7 +54,6 @@ export default function ConsolesSection({
     }
   };
 
-  // Save console
   const saveConsole = async () => {
     if (!editData) return;
     setSaving(true);
@@ -88,7 +86,6 @@ export default function ConsolesSection({
     }
   };
 
-  // Delete console
   const deleteConsole = async () => {
     if (!editData?.id || editData.id === "new") {
       alert("Cannot delete unsaved console.");
@@ -418,7 +415,6 @@ export default function ConsolesSection({
             </div>
           </div>
 
-          {/* Footer with actions */}
           <div className="px-6 py-3 bg-[#090909] border-t border-[#39ff14]/30 flex justify-between">
             <div>
               {c.id !== "new" && (
@@ -455,9 +451,6 @@ export default function ConsolesSection({
     );
   }
 
-  // =============================================================
-  // MAIN LIST + Add Button
-  // =============================================================
   return (
     <div className="   bg-[#121217] border-2 border-[#39ff14] ">
       <WindowDecoration title="Kitty - Consoles.txt" showControls={true} />

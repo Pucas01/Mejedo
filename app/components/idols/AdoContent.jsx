@@ -23,7 +23,6 @@ export default function AdoContent({ idol }) {
   const { isAdmin } = useCurrentUser();
   const { updateStats } = useAchievements();
 
-  // Refs for intersection observer
   const infoRef = useRef(null);
   const performancesRef = useRef(null);
   const [infoInView, setInfoInView] = useState(false);
@@ -32,7 +31,6 @@ export default function AdoContent({ idol }) {
   const infoCommand = "cat ~/ado/info.txt";
   const performancesCommand = "ls -la ~/ado/performances/";
 
-  // Fetch performances from API
   const fetchPerformances = async () => {
     try {
       const res = await fetch("/api/ado");
@@ -47,7 +45,6 @@ export default function AdoContent({ idol }) {
     fetchPerformances();
   }, []);
 
-  // Intersection observer for info section
   useEffect(() => {
     const observerOptions = {
       threshold: 0.1,
@@ -73,7 +70,6 @@ export default function AdoContent({ idol }) {
     };
   }, [infoInView]);
 
-  // Intersection observer for performances section
   useEffect(() => {
     const observerOptions = {
       threshold: 0.1,
@@ -150,8 +146,6 @@ export default function AdoContent({ idol }) {
     }
   };
 
-
-  // Info terminal typing animation
   useEffect(() => {
     if (!infoInView) return;
 
@@ -167,7 +161,6 @@ export default function AdoContent({ idol }) {
     return () => clearInterval(interval);
   }, [infoInView]);
 
-  // Performances terminal typing animation
   useEffect(() => {
     if (!doneInfo || !performancesInView) return;
 
@@ -183,8 +176,6 @@ export default function AdoContent({ idol }) {
     return () => clearInterval(interval);
   }, [doneInfo, performancesInView]);
 
-
-  // Render modal using portal
   const modalContent = selectedVideo && typeof document !== 'undefined' && createPortal(
     <div
       className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-fadeIn"
@@ -225,11 +216,11 @@ export default function AdoContent({ idol }) {
 
   return (
     <>
-      {/* Video player modal - rendered via portal to document.body */}
+      
       {modalContent}
 
       <div className="flex flex-col gap-4 text-xl min-h-screen text-white justify-start">
-        {/* Info terminal */}
+        
         <div ref={infoRef} className="bg-[#121217] min-h-[540px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
         <WindowDecoration title="Ado - info.txt" showControls={true} theme={theme.name} />
         <div className="p-8 flex-1 relative">
@@ -302,16 +293,16 @@ export default function AdoContent({ idol }) {
         </div>
       </div>
 
-      {/* Tours timeline component */}
+      
       <ToursTimeline />
 
-      {/* Awards component */}
+      
       <Awards />
 
-      {/* Discography component */}
+      
       <Discography />
 
-      {/* Performances section */}
+      
       <div ref={performancesRef} className="bg-[#121217] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
           <WindowDecoration title="Ado - ~/performances" showControls={true} theme={theme.name} />
           <div className="p-8 flex-1 relative">
@@ -347,7 +338,7 @@ export default function AdoContent({ idol }) {
                   </div>
                 ) : (
                   <>
-                    {/* Video grid */}
+                    
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
                       {performances.map((perf) => (
                         <div
@@ -466,7 +457,7 @@ export default function AdoContent({ idol }) {
                   </>
                 )}
 
-                {/* External Links */}
+                
                 <div className="border-t-2 border-[#4169e1] pt-6 mt-8">
                   <h3 className="text-xl text-[#4169e1] font-bold mb-3">External Links</h3>
                   <div className="text-gray-300 space-y-2 text-base">

@@ -10,19 +10,18 @@ export default function ButtonsPage() {
 
   const myButtonCode = `<a href="https://pucas01.com"><img src="https://pucas01.com/button/button.png" alt="pucas01.com" /></a>`;
 
-  // Collection of other people's buttons
   const friendButtons = [
     { url: "https://electric-tenshi.nekoweb.org/", img: "https://file.garden/Z3nf4eZzZUtRPfhK/stuff/wvdtkw.gif", alt: "the miku-site of nekoweb... not the first but certainly one of them" },
     { url: "https://layercake.moe", img: "https://layercake.moe/assets/images/buttons/mine/layercake3.gif", alt: "its a cake but like layered" },
     { url: "https://poz.pet", img: "https://poz.pet/88x31/powered-by-poz.png", alt: "Poz, gay person on the internet" },
     { url: "https://medjed.nekoweb.org/", img: "https://medjed.nekoweb.org/assets/images/button.jpg", alt: "Medjed" },
-  // other buttons  
+
     { url: "https://julieyess.neocities.org/rhythmwebring/rhythmgamewebring", img: "https://julieyess.neocities.org/rhythmwebring/Opera1.png", alt: "Rythmgaming" },
     { url: "https://archlinux.org/download/", img: "https://herz.moe/img/buttons/archlinux.gif", alt: "ArchLinux" },
     { img: "https://poz.pet/88x31/this-site-is-miku-approved.gif", alt: "AISHITE AISHITE AISHITE MOTO MOTO" },
+    { url: "https://luuumine.com", img: "https://luuumine.com/badges/luuumine.gif", alt: "luuumine" },
   ];
 
-  // Futaba stickers
   const futabaStickers = [
     { img: "/stickers/futaba-happy.png", alt: "Futaba Happy" },
     { img: "/stickers/futaba-headphones.png", alt: "Futaba Headphones" },
@@ -46,7 +45,7 @@ export default function ButtonsPage() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      {/* My Button Section */}
+      
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative flex flex-col">
         <WindowDecoration title="Kitty - mybutton.txt" showControls={true} />
 
@@ -56,7 +55,7 @@ export default function ButtonsPage() {
             Want to be cool and stuff? Copy the code below and paste it on your website!
           </p>
 
-          {/* Button Preview */}
+          
           <div className="bg-[#090909] border border-[#39ff14] p-4 mb-4 flex items-center justify-center">
             <img
               src="/button/button.png"
@@ -66,7 +65,7 @@ export default function ButtonsPage() {
             />
           </div>
 
-          {/* Code Box */}
+          
           <div className="relative">
             <pre className="bg-[#090909] border border-[#39ff14] p-3 text-[#39ff14] text-sm overflow-x-auto font-mono">
               {myButtonCode}
@@ -83,7 +82,7 @@ export default function ButtonsPage() {
         </div>
       </div>
 
-      {/* Friends' Buttons Section */}
+      
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative flex flex-col">
         <WindowDecoration title="Kitty - buttons.txt" showControls={true} />
 
@@ -121,7 +120,7 @@ export default function ButtonsPage() {
         </div>
       </div>
 
-      {/* Futaba Stickers Section */}
+      
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative flex flex-col">
         <WindowDecoration title="Kitty - stickers.txt" showControls={true} />
 

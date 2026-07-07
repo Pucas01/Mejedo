@@ -12,7 +12,7 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [optedOutCount, setOptedOutCount] = useState(0);
-  const [activeTab, setActiveTab] = useState("stats"); // "stats", "guilds", "users"
+  const [activeTab, setActiveTab] = useState("stats");
   const [selectedGuildId, setSelectedGuildId] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -23,9 +23,9 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
   }, [show]);
 
   useEffect(() => {
-    // When guilds are loaded, auto-select a guild for the Stats tab
+
     if (allGuilds.length > 0 && !selectedGuildId) {
-      // Prefer the configured guild ID, otherwise use the first guild
+
       const guildToSelect = discordGuildId || allGuilds[0].guild_id;
       setSelectedGuildId(guildToSelect);
       fetchGuildStats(guildToSelect);
@@ -35,26 +35,23 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
   async function fetchData() {
     setLoading(true);
     try {
-      // Get opted out count (for info purposes)
+
       const exportRes = await fetch("/api/spotify-stats/export", { credentials: "include" });
       if (exportRes.ok) {
         const data = await exportRes.json();
         setOptedOutCount(data.optedOut?.length || 0);
       }
 
-      // Fetch all guilds
       const guildsRes = await fetch("/api/spotify-stats/all-guilds", { credentials: "include" });
       if (guildsRes.ok) {
         const guilds = await guildsRes.json();
         setAllGuilds(guilds);
 
-        // If no guilds exist, default to showing guilds tab
         if (guilds.length === 0) {
           setActiveTab("guilds");
         }
       }
 
-      // Fetch all users
       const usersRes = await fetch("/api/spotify-stats/all-users", { credentials: "include" });
       if (usersRes.ok) {
         const users = await usersRes.json();
@@ -72,7 +69,7 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
     if (!guildId) return;
 
     try {
-      // Fetch top tracks
+
       const tracksRes = await fetch(`/api/spotify-stats/guild/${guildId}/top-tracks?limit=10`, {
         credentials: "include"
       });
@@ -81,7 +78,6 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
         setTopTracks(tracks);
       }
 
-      // Fetch top artists
       const artistsRes = await fetch(`/api/spotify-stats/guild/${guildId}/top-artists?limit=10`, {
         credentials: "include"
       });
@@ -157,7 +153,7 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
         <WindowDecoration title="Spotify Stats Manager" onClose={onClose} />
 
         <div className="flex-1 overflow-y-auto p-4">
-          {/* Tabs */}
+          
           <div className="flex gap-2 mb-4 border-b border-[#39ff14]/30 pb-2">
             <button
               onClick={() => setActiveTab("stats")}
@@ -191,7 +187,7 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
             </button>
           </div>
 
-          {/* Export/Clear buttons */}
+          
           <div className="flex gap-3 mb-4">
             <Button variant="primary" size="sm" onClick={handleExport}>
               Export Database
@@ -304,7 +300,7 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Guild Selector */}
+              
               {allGuilds.length > 1 && (
                 <div className="mb-4">
                   <label className="text-gray-400 text-sm mb-2 block">Select Guild:</label>
@@ -326,7 +322,7 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
                 </div>
               )}
 
-              {/* System Info Section */}
+              
               <div className="p-4 bg-[#1a1a1f] border-2 border-[#39ff14]/30">
                 <h3 className="text-[#39ff14] font-bold mb-3 text-lg">
                   Tracking System
@@ -349,7 +345,7 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
                 </div>
               </div>
 
-              {/* Top Tracks Section */}
+              
               {topTracks.length > 0 && (
                 <div className="border-t border-[#39ff14]/30 pt-4">
                   <h3 className="text-[#39ff14] font-bold mb-3">
@@ -386,7 +382,7 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
                 </div>
               )}
 
-              {/* Top Artists Section */}
+              
               {topArtists.length > 0 && (
                 <div className="border-t border-[#39ff14]/30 pt-4">
                   <h3 className="text-[#39ff14] font-bold mb-3">
@@ -418,7 +414,7 @@ export default function SpotifyStatsModal({ show, onClose, discordGuildId }) {
                 </div>
               )}
 
-              {/* Empty state */}
+              
               {topTracks.length === 0 && (
                 <div className="text-gray-400 text-sm text-center py-8 border border-gray-700 bg-[#1a1a1f]">
                   No listening data yet.

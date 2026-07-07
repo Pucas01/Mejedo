@@ -36,7 +36,7 @@ export default function IdolSelector({ currentIdol, onSelect }) {
           </div>
         </div>
 
-        {/* Status bar showing current selection */}
+        
         <div className="mt-4 pt-3 border-t border-gray-700/50 flex items-center gap-2 text-xs font-mono text-gray-500">
           <span>Active Profile:</span>
           <span style={{ color: idols.find(i => i.id === currentIdol)?.color }}>

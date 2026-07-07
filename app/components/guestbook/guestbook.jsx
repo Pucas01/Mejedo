@@ -30,18 +30,15 @@ export default function GuestBook() {
   };
 
   const handleWebsiteClick = (e, url) => {
-    // If already unlocked, just open normally
+
     if (unlockedAchievements.guestbook_visitor) {
       return;
     }
 
-    // Prevent default link behavior
     e.preventDefault();
 
-    // Unlock achievement first
     unlock("guestbook_visitor");
 
-    // Wait for achievement toast to show, then open link
     setTimeout(() => {
       window.open(ensureProtocol(url), "_blank", "noopener,noreferrer");
     }, 2000);
@@ -51,7 +48,7 @@ export default function GuestBook() {
     const url = isAdmin ? "/api/guestbook/admin" : "/api/guestbook";
     const res = await fetch(url);
     const data = await res.json();
-    setMessages(data); // Backend already returns newest first
+    setMessages(data);
   };
 
   useEffect(() => {
@@ -111,7 +108,6 @@ export default function GuestBook() {
       body: JSON.stringify({ name: sanitizedName, message: sanitizedMessage, website: sanitizedWebsite }),
     });
 
-    // Unlock guestbook achievement
     unlock("guestbook_signer");
 
     setName("");

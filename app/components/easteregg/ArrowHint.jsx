@@ -9,10 +9,10 @@ const ARROW_KEYS = {
 };
 
 const ARROW_COLORS = {
-  ArrowUp: "#12fa05",    // Green
-  ArrowDown: "#00ffff",  // Cyan
-  ArrowLeft: "#c24b99",  // Purple
-  ArrowRight: "#f9393f", // Red
+  ArrowUp: "#12fa05",
+  ArrowDown: "#00ffff",
+  ArrowLeft: "#c24b99",
+  ArrowRight: "#f9393f",
 };
 
 export default function ArrowHint() {
@@ -34,7 +34,6 @@ export default function ArrowHint() {
     setArrows((prev) => [...prev, newArrow]);
     setIdCounter((prev) => prev + 1);
 
-    // Remove arrow after animation
     setTimeout(() => {
       setArrows((prev) => prev.filter((a) => a.id !== newArrow.id));
     }, 700);

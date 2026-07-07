@@ -15,13 +15,11 @@ export default function Awards() {
   const [syncingAwards, setSyncingAwards] = useState(false);
   const { isAdmin } = useCurrentUser();
 
-  // Intersection observer state
   const awardsRef = useRef(null);
   const [awardsInView, setAwardsInView] = useState(false);
 
   const awardsCommand = "cat ~/ado/awards.log";
 
-  // Fetch awards from API
   const fetchAwards = async () => {
     try {
       const res = await fetch("/api/ado-awards");
@@ -36,7 +34,6 @@ export default function Awards() {
     fetchAwards();
   }, []);
 
-  // Intersection observer for typing animation
   useEffect(() => {
     const observerOptions = {
       threshold: 0.1,
@@ -161,7 +158,6 @@ export default function Awards() {
     }
   };
 
-  // Awards terminal typing animation
   useEffect(() => {
     if (!awardsInView) return;
 
@@ -177,7 +173,6 @@ export default function Awards() {
     return () => clearInterval(interval);
   }, [awardsInView]);
 
-  // Group awards by year
   const awardsByYear = awards.reduce((acc, award) => {
     if (!acc[award.year]) {
       acc[award.year] = [];

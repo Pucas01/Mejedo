@@ -378,6 +378,126 @@ input[type="range"].retro-slider::-moz-range-thumb:active {
   box-shadow: inset -1px -1px 0 0 var(--slider-thumb-shadow-light), inset 1px 1px 0 0 var(--slider-thumb-shadow-dark);
 }
 
+@keyframes crt-flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.94; }
+  94% { opacity: 1; }
+  96% { opacity: 0.97; }
+  97% { opacity: 1; }
+}
+
+@keyframes crt-scan-glow {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes crt-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.0015); }
+}
+
+.crt-overlay {
+  overflow: hidden;
+  animation: crt-breathe 8s ease-in-out infinite;
+}
+
+.crt-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.25) 0px,
+      rgba(0, 0, 0, 0.25) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 0, 60, 0.06) 0px,
+      rgba(0, 255, 60, 0.04) 1px,
+      rgba(0, 60, 255, 0.06) 2px,
+      transparent 3px
+    );
+  mix-blend-mode: overlay;
+  animation: crt-flicker 6s infinite;
+}
+
+.crt-overlay::after {
+  content: "";
+  position: absolute;
+  inset: -4%;
+  border-radius: 50% / 8%;
+  box-shadow:
+    0 0 0 100vmax rgba(0, 0, 0, 0.55),
+    inset 0 0 12vw 3vw rgba(0, 0, 0, 0.85),
+    inset 0 0 4vw 1vw rgba(0, 0, 0, 0.6);
+}
+
+@keyframes crt-power-on-line {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.002);
+  }
+  10% {
+    opacity: 0.8;
+    transform: scaleY(0.002);
+  }
+  55% {
+    opacity: 0.8;
+    transform: scaleY(0.002);
+  }
+  85% {
+    opacity: 0.5;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
+
+.crt-power-on {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.crt-power-on::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(210, 235, 255, 0.35) 49.5%,
+    rgba(230, 245, 255, 0.5) 50%,
+    rgba(210, 235, 255, 0.35) 50.5%,
+    transparent 100%
+  );
+  animation: crt-power-on-line 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.crt-scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12vh;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(180, 255, 220, 0.05) 45%,
+    rgba(180, 255, 220, 0.09) 50%,
+    rgba(180, 255, 220, 0.05) 55%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  animation: crt-scan-glow 7s linear infinite;
+}
+
 /* ---------------- Hide scrollbar ---------------- */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE and Edge */

@@ -12,7 +12,6 @@ export default function MangaSection({
   setSelectedManga,
   refresh,
 }) {
-  // empty template for new manga
   const emptyMangaTemplate = {
     id: "",
     title: "",
@@ -37,7 +36,6 @@ export default function MangaSection({
     }
   }, [selectedManga]);
 
-  // Upload helper
   const upload = async (file) => {
     if (!file) return "";
     const form = new FormData();
@@ -57,7 +55,6 @@ export default function MangaSection({
     }
   };
 
-  // Save manga
   const saveManga = async () => {
     if (!editData) return;
     setSaving(true);
@@ -90,7 +87,6 @@ export default function MangaSection({
     }
   };
 
-  // Delete manga
   const deleteManga = async () => {
     if (!editData?.id || editData.id === "new") {
       alert("Cannot delete unsaved manga.");
@@ -203,7 +199,6 @@ export default function MangaSection({
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 animate-fadeIn">
         <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp">
-          {/* Window Decoration */}
           <WindowDecoration
             title={m.id === "new" ? "Add Manga" : "Edit Manga"}
             onClose={() => {
@@ -213,7 +208,6 @@ export default function MangaSection({
           />
 
           <div className="flex-1 overflow-y-auto p-6">
-            {/* Two column layout for manga details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               {/* Left: Form fields */}
               <div className="space-y-4">
@@ -284,7 +278,6 @@ export default function MangaSection({
                 </div>
               </div>
 
-              {/* Right: Cover preview */}
               <div className="flex items-center justify-center">
                 {m.cover ? (
                   <Image
@@ -302,7 +295,6 @@ export default function MangaSection({
               </div>
             </div>
 
-            {/* Volumes section */}
             <div className="border-t border-[#39ff14] pt-4">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-[#39ff14]">Volumes ({m.volumes?.length || 0})</h2>
@@ -354,7 +346,6 @@ export default function MangaSection({
                       dragOverIndex === i ? "border-white border-2 scale-105" : "border-[#39ff14]"
                     } ${draggedIndex === i ? "opacity-50" : ""}`}
                   >
-                    {/* Controls overlay */}
                     <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                       <Button
                         onClick={() => {
@@ -447,7 +438,6 @@ export default function MangaSection({
             </div>
           </div>
 
-          {/* Footer with actions */}
           <div className="px-6 py-3 bg-[#090909] border-t border-[#39ff14]/30 flex justify-between">
             <div>
               {m.id !== "new" && (

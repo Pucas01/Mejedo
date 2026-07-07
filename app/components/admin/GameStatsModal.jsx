@@ -34,14 +34,13 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
   async function fetchData() {
     setLoading(true);
     try {
-      // Get export data for opted out count
+
       const exportRes = await fetch("/api/game-stats/export", { credentials: "include" });
       if (exportRes.ok) {
         const data = await exportRes.json();
         setOptedOutCount(data.global_optout_gaming?.length || 0);
       }
 
-      // Fetch all guilds with game data
       const guildsRes = await fetch("/api/game-stats/all-guilds", { credentials: "include" });
       if (guildsRes.ok) {
         const guilds = await guildsRes.json();
@@ -63,7 +62,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
     if (!guildId) return;
 
     try {
-      // Fetch top games
+
       const gamesRes = await fetch(`/api/game-stats/guild/${guildId}/top-games?limit=10`, {
         credentials: "include"
       });
@@ -72,7 +71,6 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
         setTopGames(games);
       }
 
-      // Fetch top gamers
       const gamersRes = await fetch(`/api/game-stats/guild/${guildId}/top-gamers?limit=10`, {
         credentials: "include"
       });
@@ -81,7 +79,6 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
         setTopGamers(gamers);
       }
 
-      // Fetch guild stats summary
       const statsRes = await fetch(`/api/game-stats/guild/${guildId}/stats`, {
         credentials: "include"
       });
@@ -163,7 +160,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
         <WindowDecoration title="Game Stats Manager" onClose={onClose} />
 
         <div className="flex-1 overflow-y-auto p-4">
-          {/* Tabs */}
+          
           <div className="flex gap-2 mb-4 border-b border-[#39ff14]/30 pb-2">
             <button
               onClick={() => setActiveTab("stats")}
@@ -187,7 +184,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
             </button>
           </div>
 
-          {/* Export/Clear buttons */}
+          
           <div className="flex gap-3 mb-4">
             <Button variant="primary" size="sm" onClick={handleExport}>
               Export Database
@@ -262,7 +259,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Guild Selector */}
+              
               {allGuilds.length > 1 && (
                 <div className="mb-4">
                   <label className="block text-[#39ff14] text-sm font-bold mb-2">Select Guild</label>
@@ -283,7 +280,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
                 </div>
               )}
 
-              {/* Summary Stats */}
+              
               {guildStats && (
                 <div className="bg-[#1a1a1f] border border-[#39ff14] p-4 mb-4">
                   <h3 className="text-[#39ff14] font-bold mb-3">Guild Summary</h3>
@@ -308,7 +305,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
                 </div>
               )}
 
-              {/* Top Games */}
+              
               <div className="bg-[#1a1a1f] border border-[#39ff14] p-4">
                 <h3 className="text-[#39ff14] font-bold mb-3">Top Games (All-Time)</h3>
                 {topGames.length === 0 ? (
@@ -337,7 +334,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
                 )}
               </div>
 
-              {/* Top Gamers */}
+              
               <div className="bg-[#1a1a1f] border border-[#39ff14] p-4">
                 <h3 className="text-[#39ff14] font-bold mb-3">Top Gamers (All-Time)</h3>
                 {topGamers.length === 0 ? (
@@ -366,7 +363,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
                 )}
               </div>
 
-              {/* Info */}
+              
               <div className="bg-[#1a1a1f] border border-gray-700 p-3 text-xs text-gray-400">
                 <p className="mb-1">Database: config/game-stats.db</p>
                 <p className="mb-1">Opted Out Users: {optedOutCount}</p>

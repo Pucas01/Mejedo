@@ -102,10 +102,8 @@ export default function ChangelogModal({ show, onClose }) {
       }}
     >
       <div className={`bg-[#121217] border-2 ${theme.colors.border} shadow-lg max-w-[700px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp`}>
-        {/* Window Decoration */}
         <WindowDecoration title="Changelog - CHANGELOG.md" onClose={handleClose} theme={theme.name} />
 
-        {/* Terminal Header */}
         {isAdmin && (
         <div className={`px-6 py-3 bg-[#090909] border-b ${theme.colors.border}/30`}>
           <div className="font-mono flex items-center justify-between">
@@ -130,7 +128,6 @@ export default function ChangelogModal({ show, onClose }) {
         </div>
         )}
 
-        {/* Changelog list */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {loading ? (
             <div className="text-center text-gray-400">Loading changelog...</div>
@@ -139,7 +136,7 @@ export default function ChangelogModal({ show, onClose }) {
           ) : (
             versions.map((version, idx) => (
               <div key={idx} className={`border-l-2 ${theme.colors.border} pl-4 relative group`}>
-                {/* Admin controls */}
+                
                 {isAdmin && (
                   <div className="absolute -right-2 top-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
@@ -161,7 +158,7 @@ export default function ChangelogModal({ show, onClose }) {
                   </div>
                 )}
 
-                {/* Version header */}
+                
                 <div className="flex items-baseline gap-3 mb-2">
                   <h3 className={`${theme.colors.text} text-xl font-bold`}>
                     v{version.version}
@@ -169,7 +166,7 @@ export default function ChangelogModal({ show, onClose }) {
                   <span className="text-gray-500 text-sm">{version.date}</span>
                 </div>
 
-                {/* Changes by category */}
+                
                 {version.added && version.added.length > 0 && (
                   <div className="mb-3">
                     <h4 className="text-green-400 font-semibold mb-1">Things added</h4>
@@ -226,7 +223,6 @@ export default function ChangelogModal({ show, onClose }) {
           )}
         </div>
 
-        {/* Footer */}
         <div className={`px-6 py-3 bg-[#090909] border-t ${theme.colors.border}/30 text-center text-gray-500 text-sm`}>
           Stay updated with the latest changes!
         </div>

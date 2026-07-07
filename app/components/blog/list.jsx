@@ -220,7 +220,6 @@ export default function BlogList({ onSelectPost }) {
                   placeholder="Title"
                 />
 
-                {/* Single Markdown textarea */}
                 <textarea
                   id="editingBody"
                   value={editingPost.body}
@@ -229,7 +228,6 @@ export default function BlogList({ onSelectPost }) {
                   placeholder="Markdown body"
                 />
 
-                {/* Image uploads with Insert button */}
                 <label className="text-sm text-gray-400 mt-2">Upload Images to Insert:</label>
                 <input
                   type="file"
@@ -253,10 +251,8 @@ export default function BlogList({ onSelectPost }) {
                         title="Click Insert to add to Markdown"
                       />
 
-                      {/* Insert button */}
                       <Button
                         onClick={() => {
-                          // Ask user for width/height or use defaults
                           const width = prompt("Width (px)?", "400");
                           const height = prompt("Height (px)?", "300");
                           const cursorPos = document.querySelector("#editingBody").selectionStart || 0;
@@ -273,7 +269,6 @@ export default function BlogList({ onSelectPost }) {
                         Insert
                       </Button>
 
-                      {/* Remove button */}
                       <Button
                         onClick={() =>
                           setEditingPost({

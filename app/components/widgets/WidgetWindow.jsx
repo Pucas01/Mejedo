@@ -5,9 +5,8 @@ import ResizeHandles from "./ResizeHandles";
 import { useWidgets } from "../../hooks/useWidgets";
 import { useTheme } from "../../hooks/useTheme";
 
-// Widget registry
 const widgetRegistry = {
-  music: null, // Will be dynamically imported
+  music: null,
 };
 
 function WidgetWindow({ widget }) {
@@ -18,7 +17,6 @@ function WidgetWindow({ widget }) {
   const [WidgetContent, setWidgetContent] = useState(null);
   const [isMinimized, setIsMinimized] = useState(false);
 
-  // Dynamically import widget content
   useEffect(() => {
     async function loadWidget() {
       if (widget.type === 'music') {
@@ -45,7 +43,7 @@ function WidgetWindow({ widget }) {
   }, [widget.type]);
 
   const handleMouseDown = (e) => {
-    // Don't drag from buttons or if click is in content area
+
     if (e.target.closest('button') || e.target.closest('.widget-content')) return;
 
     setIsDragging(true);
@@ -59,14 +57,12 @@ function WidgetWindow({ widget }) {
   useEffect(() => {
     if (!isDragging) return;
 
-    // Prevent text selection while dragging
     document.body.style.userSelect = 'none';
 
     const handleMouseMove = (e) => {
       const newX = e.clientX - dragOffset.current.x;
       const newY = e.clientY - dragOffset.current.y;
 
-      // Constrain to viewport - keep at least 50px of header visible
       const maxX = window.innerWidth - 100;
       const maxY = window.innerHeight - 50;
 
@@ -86,7 +82,7 @@ function WidgetWindow({ widget }) {
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
-      // Re-enable text selection
+
       document.body.style.userSelect = '';
     };
   }, [isDragging, widget.id, widget.position.x, widget.position.y, widget.size.width, updatePosition]);
@@ -99,7 +95,6 @@ function WidgetWindow({ widget }) {
     setIsMinimized(!isMinimized);
   };
 
-  // Get widget title based on type
   const getTitle = () => {
     switch (widget.type) {
       case 'music':

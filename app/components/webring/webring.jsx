@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import Sticker from "../stickers/Sticker";
 import WindowDecoration from "../window/WindowDecoration.jsx";
 
-// External webring scripts to load (simple single-script webrings)
 const WEBRING_SCRIPTS = [
   {
     name: "Persona Ring",
@@ -16,7 +15,6 @@ const WEBRING_SCRIPTS = [
   },
 ];
 
-// Webrings that need more complex setup (CSS + multiple scripts + container)
 const COMPLEX_WEBRINGS = [
   {
     name: "Vocaring",
@@ -37,7 +35,6 @@ const COMPLEX_WEBRINGS = [
   },
 ];
 
-// Static HTML webrings (rendered directly)
 const STATIC_WEBRINGS = [
   {
     name: "Rhythm Game Webring",
@@ -57,17 +54,14 @@ const STATIC_WEBRINGS = [
   },
 ];
 
-// Component to load a webring script properly
 function WebringWidget({ src, name, dataWidget }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Clear any existing content
     containerRef.current.innerHTML = "";
 
-    // Create and append the script inside the container
     const script = document.createElement("script");
     script.src = src;
     if (dataWidget) {
@@ -75,7 +69,6 @@ function WebringWidget({ src, name, dataWidget }) {
     }
     containerRef.current.appendChild(script);
 
-    // Force left alignment on all child elements after script loads
     setTimeout(() => {
       if (containerRef.current) {
         const allElements = containerRef.current.querySelectorAll('*');
@@ -88,7 +81,7 @@ function WebringWidget({ src, name, dataWidget }) {
     }, 100);
 
     return () => {
-      // Cleanup on unmount
+
       if (containerRef.current) {
         containerRef.current.innerHTML = "";
       }
@@ -103,7 +96,6 @@ function WebringWidget({ src, name, dataWidget }) {
   );
 }
 
-// Component for static HTML webrings
 function StaticWebringWidget({ name, html }) {
   return (
     <div className="bg-[#121217] border-2 border-[#39ff14] p-4 transition-all hover:border-[#39ff14] hover:shadow-[0_0_15px_rgba(57,255,20,0.3)] h-full flex flex-col items-center justify-center">
@@ -113,7 +105,6 @@ function StaticWebringWidget({ name, html }) {
   );
 }
 
-// Component for complex webrings with CSS and multiple scripts
 function ComplexWebringWidget({ name, containerId, css, scripts }) {
   const containerRef = useRef(null);
   const scriptsRef = useRef([]);
@@ -121,10 +112,8 @@ function ComplexWebringWidget({ name, containerId, css, scripts }) {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Check if already has content (prevents double-load in Strict Mode)
     if (containerRef.current.querySelector(`#${containerId}`)) return;
 
-    // Check if CSS already exists
     let link = document.querySelector(`link[href="${css}"]`);
     if (!link) {
       link = document.createElement("link");
@@ -133,7 +122,6 @@ function ComplexWebringWidget({ name, containerId, css, scripts }) {
       document.head.appendChild(link);
     }
 
-    // Add override styles to align left
     const styleId = `${containerId}-override`;
     if (!document.getElementById(styleId)) {
       const style = document.createElement("style");
@@ -142,12 +130,10 @@ function ComplexWebringWidget({ name, containerId, css, scripts }) {
       document.head.appendChild(style);
     }
 
-    // Create the container div with the required ID
     const widgetContainer = document.createElement("div");
     widgetContainer.id = containerId;
     containerRef.current.appendChild(widgetContainer);
 
-    // Remove any existing scripts for this widget so they reload fresh
     scripts.forEach((src) => {
       const existingScript = document.querySelector(`script[src="${src}"]`);
       if (existingScript) {
@@ -155,7 +141,6 @@ function ComplexWebringWidget({ name, containerId, css, scripts }) {
       }
     });
 
-    // Load scripts sequentially
     const loadedScripts = [];
     const loadScripts = async () => {
       for (const src of scripts) {
@@ -173,7 +158,6 @@ function ComplexWebringWidget({ name, containerId, css, scripts }) {
     loadScripts();
     scriptsRef.current = loadedScripts;
 
-    // Cleanup on unmount - remove scripts so they reload fresh next time
     return () => {
       scriptsRef.current.forEach((script) => {
         if (script && script.parentNode) {
@@ -229,7 +213,7 @@ export default function Webring() {
 
   return (
     <div className="flex flex-col gap-6 p-4 text-xl min-h-screen text-white justify-start">
-      {/* Info terminal - compact version */}
+      
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
         <WindowDecoration title="Webring - webrings.txt" showControls={true} />
         <div className="p-6 flex-1 relative">
@@ -263,7 +247,7 @@ export default function Webring() {
         </div>
       </div>
 
-      {/* Webrings list */}
+      
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
         <WindowDecoration title="Webrings - ~/Webrings" showControls={true} />
         <div className="p-8 flex-1 relative">

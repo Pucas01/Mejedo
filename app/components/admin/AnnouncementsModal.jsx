@@ -63,7 +63,6 @@ export default function AnnouncementsModal({ show, onClose }) {
       if (res.ok) {
         setMessage(`✔ ${data.message}`);
 
-        // Show detailed results
         if (data.results.successful.length > 0) {
           console.log("Successfully sent to:", data.results.successful);
         }
@@ -71,7 +70,6 @@ export default function AnnouncementsModal({ show, onClose }) {
           console.log("Failed to send to:", data.results.failed);
         }
 
-        // Clear form on success
         setAnnouncement({
           title: "",
           message: "",
@@ -100,12 +98,12 @@ export default function AnnouncementsModal({ show, onClose }) {
         <WindowDecoration title="Announcements Manager" onClose={onClose} />
 
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {/* Header */}
+          
           <div className="space-y-2">
             <h2 className="text-[#39ff14] text-xl font-bold">Send Announcement</h2>
           </div>
 
-          {/* Configured Channels */}
+          
           <div className="bg-[#1a1a1f] border border-[#39ff14] p-4 space-y-3">
             <h3 className="text-[#39ff14] font-bold">Configured Servers</h3>
             {loading ? (
@@ -129,7 +127,7 @@ export default function AnnouncementsModal({ show, onClose }) {
             )}
           </div>
 
-          {/* Announcement Form */}
+          
           <div className="space-y-4">
             <div>
               <label className="block text-[#39ff14] text-sm font-bold mb-2">
@@ -206,7 +204,7 @@ export default function AnnouncementsModal({ show, onClose }) {
             </div>
           </div>
 
-          {/* Preview */}
+          
           <div className="bg-[#1a1a1f] border border-[#39ff14] p-4 space-y-3">
             <h3 className="text-[#39ff14] font-bold text-sm">Preview</h3>
             <div
@@ -227,14 +225,14 @@ export default function AnnouncementsModal({ show, onClose }) {
             </div>
           </div>
 
-          {/* Message Display */}
+          
           {message && (
             <div className={`p-3 border ${message.startsWith("✔") ? "border-green-400 text-green-400" : "border-red-400 text-red-400"} bg-[#1a1a1f]`}>
               {message}
             </div>
           )}
 
-          {/* Action Buttons */}
+          
           <div className="flex gap-3 justify-end">
             <Button
               variant="secondary"

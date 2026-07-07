@@ -17,19 +17,16 @@ export default function ToursTimeline() {
   const { isAdmin } = useCurrentUser();
   const { updateStats } = useAchievements();
 
-  // Timeline drag state
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const timelineRef = useRef(null);
 
-  // Intersection observer state
   const toursRef = useRef(null);
   const [toursInView, setToursInView] = useState(false);
 
   const toursCommand = "cat ~/ado/tours.log";
 
-  // Mouse drag handlers for timeline
   const handleMouseDown = (e) => {
     if (!timelineRef.current) return;
     setIsDragging(true);
@@ -59,19 +56,17 @@ export default function ToursTimeline() {
     if (!isDragging || !timelineRef.current) return;
     e.preventDefault();
     const x = e.pageX - timelineRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Scroll speed multiplier
+    const walk = (x - startX) * 2;
     timelineRef.current.scrollLeft = scrollLeft - walk;
 
-    // Trigger achievement when user scrolls the timeline
     updateStats("scrolledAdoTimeline", true);
   };
 
-  // Fetch tours from API
   const fetchTours = async () => {
     try {
       const res = await fetch("/api/ado-tours");
       const data = await res.json();
-      // Sort by date ascending (oldest first for timeline)
+
       const sorted = data.sort((a, b) => new Date(a.date) - new Date(b.date));
       setTours(sorted);
     } catch (err) {
@@ -83,10 +78,9 @@ export default function ToursTimeline() {
     fetchTours();
   }, []);
 
-  // Intersection observer for typing animation
   useEffect(() => {
     const observerOptions = {
-      threshold: 1.0, // Only trigger when entire terminal is in view
+      threshold: 1.0,
       rootMargin: "0px"
     };
 
@@ -109,18 +103,16 @@ export default function ToursTimeline() {
     };
   }, [toursInView]);
 
-  // Animate scroll from left to right after tours are loaded and animation is done
   useEffect(() => {
     if (doneTours && timelineRef.current && tours.length > 0) {
-      // First, ensure we're at the start (left)
+
       timelineRef.current.scrollLeft = 0;
 
-      // Then animate to the right after a short delay
       setTimeout(() => {
         if (timelineRef.current) {
           const start = 0;
           const end = timelineRef.current.scrollWidth - timelineRef.current.clientWidth;
-          const duration = 2000; // 2 seconds for smooth scroll
+          const duration = 2000;
           const startTime = performance.now();
 
           const animateScroll = (currentTime) => {
@@ -129,7 +121,6 @@ export default function ToursTimeline() {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
 
-            // Ease in-out cubic - smooth acceleration and deceleration
             const easeInOutCubic = progress < 0.5
               ? 4 * progress * progress * progress
               : 1 - Math.pow(-2 * progress + 2, 3) / 2;
@@ -147,7 +138,6 @@ export default function ToursTimeline() {
     }
   }, [doneTours, tours]);
 
-  // Track manual scrolling (mouse wheel, trackpad)
   useEffect(() => {
     const timeline = timelineRef.current;
     if (!timeline) return;
@@ -260,7 +250,6 @@ export default function ToursTimeline() {
     }
   };
 
-  // Tours terminal typing animation
   useEffect(() => {
     if (!toursInView) return;
 
@@ -337,13 +326,13 @@ export default function ToursTimeline() {
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
               >
-                {/* Horizontal timeline line */}
+                
                 <div className="absolute left-0 right-0 top-10 h-0.5 bg-[#4169e1]/30" style={{ width: `${tours.length * 350}px` }}></div>
 
                 <div className="flex gap-8 min-w-max">
                   {tours.map((tour, index) => (
                     <div key={tour.id} className="relative flex flex-col items-center" style={{ width: '320px' }}>
-                      {/* Timeline dot */}
+                      
                       <div className="w-4 h-4 bg-[#4169e1] rounded-full border-4 border-[#121217] relative z-10 mb-6"></div>
 
                       {editingTour?.id === tour.id ? (
@@ -413,22 +402,22 @@ export default function ToursTimeline() {
                       ) : (
                         <div className="bg-[#1a1a1f]/50 border border-[#4169e1]/30 p-4 hover:border-[#4169e1] transition-colors w-full flex flex-col">
                           <div className="flex justify-between items-start gap-2 mb-2">
-                            {/* Date Badge */}
+                            
                             <div className="inline-block bg-[#4169e1]/10 border border-[#4169e1] px-3 py-1">
                               <span className="text-[#4169e1] text-xs font-mono">
                                 {tour.date && (() => {
-                                  // Check if notes contain multi-year info like "Tour ran from 2022 to 2023"
+
                                   const multiYearMatch = tour.notes?.match(/Tour ran from (\d{4}) to (\d{4})/);
                                   if (multiYearMatch) {
                                     return `${multiYearMatch[1]}–${multiYearMatch[2]}`;
                                   }
-                                  // Otherwise just show the year
+
                                   return new Date(tour.date).getFullYear();
                                 })()}
                               </span>
                             </div>
 
-                            {/* Admin Controls */}
+                            
                             {isAdmin && (
                               <div className="flex gap-1">
                                 <Button
@@ -449,12 +438,12 @@ export default function ToursTimeline() {
                             )}
                           </div>
 
-                          {/* Tour Name */}
+                          
                           <h4 className="text-[#4169e1] font-bold text-base mb-2">
                             {tour.tourName}
                           </h4>
 
-                          {/* Venue & Location */}
+                          
                           {tour.venue && (
                             <p className="text-white text-xs flex items-start gap-1">
                               <span className="text-[#4169e1]">📍</span>
@@ -465,7 +454,7 @@ export default function ToursTimeline() {
                             <p className="text-gray-300 text-xs ml-4">{tour.location}</p>
                           )}
 
-                          {/* Notes */}
+                          
                           {tour.notes && (
                             <p className="text-gray-300 text-xs mt-2 italic border-l-2 border-[#4169e1]/30 pl-2">
                               {tour.notes}

@@ -13,27 +13,24 @@ export default function Discography({ idolId = "ado" }) {
   const [discographyCmd, setDiscographyCmd] = useState("");
   const [doneDiscography, setDoneDiscography] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState("all"); // "all", "album", "single"
-  const [expanded, setExpanded] = useState(false); // View more toggle
+  const [filter, setFilter] = useState("all");
+  const [expanded, setExpanded] = useState(false);
   const { isAdmin } = useCurrentUser();
 
-  // Intersection observer state
   const discographyRef = useRef(null);
   const [discographyInView, setDiscographyInView] = useState(false);
 
   const discographyCommand = `ls -la ~/${idolId}/discography/`;
 
-  // Get theme color based on idol
   const themeColor = idolId === "miku" ? "#39c5bb" : "#4169e1";
   const themeName = idolId === "miku" ? "miku" : "ado";
 
-  // Fetch discography from API
   const fetchDiscography = async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/${idolId}-discography`);
       const data = await res.json();
-      // Ensure data is an array
+
       if (Array.isArray(data)) {
         setAlbums(data);
       } else {
@@ -49,13 +46,12 @@ export default function Discography({ idolId = "ado" }) {
   };
 
   useEffect(() => {
-    setAlbums([]); // Reset albums when idol changes
-    setDoneDiscography(false); // Reset animation
-    setDiscographyInView(false); // Reset intersection observer
+    setAlbums([]);
+    setDoneDiscography(false);
+    setDiscographyInView(false);
     fetchDiscography();
   }, [idolId]);
 
-  // Intersection observer for typing animation
   useEffect(() => {
     const observerOptions = {
       threshold: 0.1,
@@ -81,7 +77,6 @@ export default function Discography({ idolId = "ado" }) {
     };
   }, [discographyInView]);
 
-  // Discography terminal typing animation
   useEffect(() => {
     if (!discographyInView) return;
 
@@ -125,13 +120,11 @@ export default function Discography({ idolId = "ado" }) {
     }
   };
 
-  // Filter albums based on selected filter
   const filteredAlbums = albums.filter(album => {
     if (filter === "all") return true;
     return album.type === filter;
   });
 
-  // Limit to 12 items when collapsed
   const displayLimit = 12;
   const shouldShowViewMore = filteredAlbums.length > displayLimit;
   const displayedAlbums = expanded ? filteredAlbums : filteredAlbums.slice(0, displayLimit);
@@ -159,7 +152,7 @@ export default function Discography({ idolId = "ado" }) {
                 Discography
               </header>
               <div className="flex gap-2 items-center flex-wrap">
-                {/* Filter buttons */}
+                
                 <div className="flex gap-1 border border-[var(--theme-color)]/30 p-1">
                   <Button
                     variant={filter === "all" ? "primary" : "default"}
@@ -220,7 +213,7 @@ export default function Discography({ idolId = "ado" }) {
                       rel="noopener noreferrer"
                       className="group bg-[#1a1a1f] border border-[var(--theme-color)]/20 hover:border-[var(--theme-color)] transition-all flex flex-col"
                     >
-                      {/* Album Cover */}
+                      
                       <div className="aspect-square bg-black relative overflow-hidden">
                         {album.coverUrl ? (
                           <img
@@ -233,7 +226,7 @@ export default function Discography({ idolId = "ado" }) {
                             No Cover
                           </div>
                         )}
-                        {/* Type badge */}
+                        
                         <div className="absolute top-1 right-1 bg-[var(--theme-color)]/90 px-1.5 py-0.5 flex items-center justify-center">
                           <span className="text-white text-[10px] font-bold uppercase text-center">
                             {album.type === "album" ? "Album" : "Single"}
@@ -241,7 +234,7 @@ export default function Discography({ idolId = "ado" }) {
                         </div>
                       </div>
 
-                      {/* Album Info */}
+                      
                       <div className="p-2 flex-1 flex flex-col items-center text-center">
                         <h4 className="text-[var(--theme-color)] text-xs font-bold line-clamp-2 group-hover:text-white transition-colors mb-1">
                           {album.name}
@@ -254,7 +247,7 @@ export default function Discography({ idolId = "ado" }) {
                   ))}
                 </div>
 
-                {/* View More Button */}
+                
                 {shouldShowViewMore && (
                   <div className="flex justify-center mt-4">
                     <Button
@@ -269,7 +262,7 @@ export default function Discography({ idolId = "ado" }) {
               </>
             )}
 
-            {/* Spotify Attribution */}
+            
             <div className="border-t border-[var(--theme-color)]/30 pt-4 mt-6">
               <p className="text-gray-500 text-xs">
                 Discography powered by{" "}

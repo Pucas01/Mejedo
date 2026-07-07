@@ -9,20 +9,16 @@ export default function WidgetManager() {
 
   if (!isLoaded) return null;
 
-  // Get all non-minimized widgets
   const activeWidgets = Array.from(widgets.values()).filter(w => !w.minimized);
 
   return (
     <>
-      {/* Render all active widgets */}
       {activeWidgets.map(widget => (
         <WidgetWindow key={widget.id} widget={widget} />
       ))}
 
-      {/* Floating '+' button */}
       <FloatingWidgetButton />
 
-      {/* Widget selection menu */}
       <WidgetMenu />
     </>
   );

@@ -49,16 +49,14 @@ export default function Footer() {
       setPageSize(total);
     };
 
-    // Calculate on initial load
     if (document.readyState === "complete") {
       calculateSize();
     } else {
       window.addEventListener("load", calculateSize);
     }
 
-    // Recalculate when DOM changes (page navigation, content loads)
     const observer = new MutationObserver(() => {
-      // Debounce the calculation to avoid excessive updates
+
       setTimeout(calculateSize, 500);
     });
 

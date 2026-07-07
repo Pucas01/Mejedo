@@ -13,15 +13,13 @@ export default function WordStatsModal({ show, onClose }) {
   const [filtered, setFiltered] = useState(true);
   const fileInputRef = useRef(null);
 
-  // Format word for display (handle user mentions and emojis)
   function formatWord(word) {
-    // Check if the word contains emoji pattern like "emojiname1234567890"
-    // Emoji names can be 2+ chars, IDs are exactly 17-20 digits
+
     const emojiMatch = word.match(/^([a-z_]{2,})(\d{17,20})$/i);
     if (emojiMatch) {
       return `${emojiMatch[1]} (emoji)`;
     }
-    // Check if the word is just a user ID (all digits, 17-20 chars)
+
     else if (/^\d{17,20}$/.test(word)) {
       return `@user-${word.slice(-4)}`;
     }
@@ -154,7 +152,7 @@ export default function WordStatsModal({ show, onClose }) {
         <WindowDecoration title="Word Stats Manager" onClose={onClose} />
 
         <div className="flex-1 overflow-y-auto p-4">
-          {/* Export/Import buttons */}
+          
           <div className="flex gap-3 mb-4">
             <Button variant="primary" size="sm" onClick={handleExport}>
               Export Database
@@ -183,7 +181,7 @@ export default function WordStatsModal({ show, onClose }) {
             <div className="text-gray-400">No word stats recorded yet.</div>
           ) : (
             <div className="space-y-4">
-              {/* Guild list */}
+              
               <div>
                 <h3 className="text-[#39ff14] font-bold mb-2">Servers with Stats</h3>
                 <div className="space-y-2">
@@ -235,7 +233,7 @@ export default function WordStatsModal({ show, onClose }) {
                 </div>
               </div>
 
-              {/* Selected guild stats */}
+              
               {selectedGuild && guildStats && (
                 <div className="border-t border-[#39ff14]/30 pt-4">
                   <div className="flex justify-between items-center mb-3">

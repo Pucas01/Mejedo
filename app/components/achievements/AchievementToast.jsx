@@ -15,7 +15,6 @@ export default function AchievementToast() {
       setCurrentAchievement(pendingAchievement);
       setVisible(true);
 
-      // Play Steam achievement sound
       if (audioRef.current) {
         audioRef.current.currentTime = 0;
         audioRef.current.volume = 0.5;

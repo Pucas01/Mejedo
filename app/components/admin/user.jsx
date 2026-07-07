@@ -15,26 +15,25 @@ export default function Terminal() {
   const [focused, setFocused] = useState(false);
 
   useEffect(() => {
-    // autofocus the container so it receives keyboard events
+
     if (containerRef.current) containerRef.current.focus();
   }, []);
 
   useEffect(() => {
-    // scroll to bottom whenever outputs or currentInput changes
+
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [outputs, currentInput]);
 
-  // keyboard handling
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
     const onKeyDown = (e) => {
-      // If user is typing normally
+
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        // printable
+
         setCurrentInput((s) => s + e.key);
         e.preventDefault();
         return;
@@ -75,7 +74,7 @@ export default function Terminal() {
       }
 
       if (e.key === "Tab") {
-        // prevent tab out
+
         e.preventDefault();
         return;
       }
@@ -88,7 +87,7 @@ export default function Terminal() {
   async function runCommand(raw) {
     const cmd = raw.trim();
     if (cmd === "") {
-      // print empty command line (like pressing enter with nothing)
+
       pushOutput(cmd, "");
       setHistory((h) => [...h, cmd]);
       setHistoryIndex(-1);
@@ -96,13 +95,11 @@ export default function Terminal() {
       return;
     }
 
-    // show the command immediately
     pushOutput(cmd, "…");
     setHistory((h) => [...h, cmd]);
     setHistoryIndex(-1);
     setCurrentInput("");
 
-    // parse command
     const parts = cmd.split(/\s+/);
     const base = parts[0].toLowerCase();
     try {
@@ -121,7 +118,7 @@ passwd <u> <p>       Reset user password
       }
 
       if (base === "clear") {
-        // clear output history
+
         setOutputs([]);
         return;
       }
@@ -140,7 +137,7 @@ passwd <u> <p>       Reset user password
           return;
         }
         const json = await res.json();
-        // json.users expected
+
         const rows = (json.users || []).map((u) => `${u.username} (${u.role})`).join("\n");
         replaceLastOutput(cmd, rows || "(no users)");
         return;
@@ -210,7 +207,6 @@ passwd <u> <p>       Reset user password
         return;
       }
 
-      // unknown command
       replaceLastOutput(cmd, `command not found: ${base}`);
     } catch (err) {
       console.error("command error", err);
@@ -220,7 +216,7 @@ passwd <u> <p>       Reset user password
 
   function pushOutput(cmd, result) {
     setOutputs((o) => [...o, { cmd, result }]);
-    // small timeout to ensure scroll runs after render
+
     setTimeout(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }, 10);
@@ -237,7 +233,6 @@ passwd <u> <p>       Reset user password
     }, 10);
   }
 
-  // clicking the terminal focuses it
   function handleFocus() {
     setFocused(true);
     if (containerRef.current) containerRef.current.focus();

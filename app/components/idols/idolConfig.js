@@ -1,10 +1,10 @@
-// Configuration for all idols
+
 export const idols = {
   ado: {
     id: "ado",
     name: "Ado",
     fullName: "Ado (アド)",
-    theme: "ado", // Uses ado theme (blue)
+    theme: "ado",
     color: "#4169e1",
     spotifyId: "6mEQK9m2krja6X1cfsAjfl",
     birthDate: "October 24, 2002",
