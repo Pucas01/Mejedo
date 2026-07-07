@@ -15,10 +15,12 @@ export default function Terminal() {
   const [focused, setFocused] = useState(false);
 
   useEffect(() => {
+
     if (containerRef.current) containerRef.current.focus();
   }, []);
 
   useEffect(() => {
+
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
@@ -29,7 +31,9 @@ export default function Terminal() {
     if (!el) return;
 
     const onKeyDown = (e) => {
+
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+
         setCurrentInput((s) => s + e.key);
         e.preventDefault();
         return;
@@ -70,6 +74,7 @@ export default function Terminal() {
       }
 
       if (e.key === "Tab") {
+
         e.preventDefault();
         return;
       }
@@ -82,6 +87,7 @@ export default function Terminal() {
   async function runCommand(raw) {
     const cmd = raw.trim();
     if (cmd === "") {
+
       pushOutput(cmd, "");
       setHistory((h) => [...h, cmd]);
       setHistoryIndex(-1);
@@ -112,6 +118,7 @@ passwd <u> <p>       Reset user password
       }
 
       if (base === "clear") {
+
         setOutputs([]);
         return;
       }
@@ -130,6 +137,7 @@ passwd <u> <p>       Reset user password
           return;
         }
         const json = await res.json();
+
         const rows = (json.users || []).map((u) => `${u.username} (${u.role})`).join("\n");
         replaceLastOutput(cmd, rows || "(no users)");
         return;
@@ -208,6 +216,7 @@ passwd <u> <p>       Reset user password
 
   function pushOutput(cmd, result) {
     setOutputs((o) => [...o, { cmd, result }]);
+
     setTimeout(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }, 10);

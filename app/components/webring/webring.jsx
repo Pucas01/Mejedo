@@ -81,6 +81,7 @@ function WebringWidget({ src, name, dataWidget }) {
     }, 100);
 
     return () => {
+
       if (containerRef.current) {
         containerRef.current.innerHTML = "";
       }
@@ -212,6 +213,7 @@ export default function Webring() {
 
   return (
     <div className="flex flex-col gap-6 p-4 text-xl min-h-screen text-white justify-start">
+      
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative flex flex-col overflow-hidden">
         <WindowDecoration title="Webring - webrings.txt" showControls={true} />
         <div className="p-6 flex-1 relative">

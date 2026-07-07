@@ -30,6 +30,7 @@ export default function Discography({ idolId = "ado" }) {
       setLoading(true);
       const res = await fetch(`/api/${idolId}-discography`);
       const data = await res.json();
+
       if (Array.isArray(data)) {
         setAlbums(data);
       } else {
@@ -151,6 +152,7 @@ export default function Discography({ idolId = "ado" }) {
                 Discography
               </header>
               <div className="flex gap-2 items-center flex-wrap">
+                
                 <div className="flex gap-1 border border-[var(--theme-color)]/30 p-1">
                   <Button
                     variant={filter === "all" ? "primary" : "default"}
@@ -211,6 +213,7 @@ export default function Discography({ idolId = "ado" }) {
                       rel="noopener noreferrer"
                       className="group bg-[#1a1a1f] border border-[var(--theme-color)]/20 hover:border-[var(--theme-color)] transition-all flex flex-col"
                     >
+                      
                       <div className="aspect-square bg-black relative overflow-hidden">
                         {album.coverUrl ? (
                           <img
@@ -223,6 +226,7 @@ export default function Discography({ idolId = "ado" }) {
                             No Cover
                           </div>
                         )}
+                        
                         <div className="absolute top-1 right-1 bg-[var(--theme-color)]/90 px-1.5 py-0.5 flex items-center justify-center">
                           <span className="text-white text-[10px] font-bold uppercase text-center">
                             {album.type === "album" ? "Album" : "Single"}

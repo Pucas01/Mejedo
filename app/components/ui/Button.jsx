@@ -13,6 +13,7 @@ export default function Button({
   ...props
 }) {
   const { theme } = useTheme();
+
   const baseStyles = `
     relative
     font-jetbrains

@@ -57,6 +57,7 @@ export default function MikuContent({ idol }) {
 
   return (
     <div className="flex flex-col gap-4 text-xl min-h-screen text-white justify-start">
+      
       <div ref={infoRef} className="bg-[#121217] min-h-[540px] border-2 border-[#39c5bb] shadow-lg relative flex flex-col overflow-hidden">
         <WindowDecoration title="Miku - info.txt" showControls={true} theme={theme.name} />
         <div className="p-8 flex-1 relative">

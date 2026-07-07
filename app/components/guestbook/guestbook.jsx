@@ -30,6 +30,7 @@ export default function GuestBook() {
   };
 
   const handleWebsiteClick = (e, url) => {
+
     if (unlockedAchievements.guestbook_visitor) {
       return;
     }

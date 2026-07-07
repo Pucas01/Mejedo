@@ -34,6 +34,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
   async function fetchData() {
     setLoading(true);
     try {
+
       const exportRes = await fetch("/api/game-stats/export", { credentials: "include" });
       if (exportRes.ok) {
         const data = await exportRes.json();
@@ -61,6 +62,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
     if (!guildId) return;
 
     try {
+
       const gamesRes = await fetch(`/api/game-stats/guild/${guildId}/top-games?limit=10`, {
         credentials: "include"
       });
@@ -158,6 +160,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
         <WindowDecoration title="Game Stats Manager" onClose={onClose} />
 
         <div className="flex-1 overflow-y-auto p-4">
+          
           <div className="flex gap-2 mb-4 border-b border-[#39ff14]/30 pb-2">
             <button
               onClick={() => setActiveTab("stats")}
@@ -255,6 +258,7 @@ export default function GameStatsModal({ show, onClose, discordGuildId }) {
             </div>
           ) : (
             <div className="space-y-4">
+              
               {allGuilds.length > 1 && (
                 <div className="mb-4">
                   <label className="block text-[#39ff14] text-sm font-bold mb-2">Select Guild</label>

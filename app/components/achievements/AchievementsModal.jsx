@@ -26,6 +26,7 @@ export default function AchievementsModal({ show, onClose }) {
       }}
     >
       <div className={`bg-[#121217] border-2 ${theme.colors.border} shadow-lg max-w-[600px] w-full max-h-[80vh] overflow-hidden flex flex-col animate-slideUp`}>
+        
         <WindowDecoration title="Achievements - trophies.txt" onClose={handleClose} theme={theme.name}/>
 
         <div className="px-6 py-3 bg-[#090909]">
@@ -42,6 +43,7 @@ export default function AchievementsModal({ show, onClose }) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-3">
+          
           {unlockedList.map((achievement) => (
             <div
               key={achievement.id}

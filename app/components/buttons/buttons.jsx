@@ -15,9 +15,11 @@ export default function ButtonsPage() {
     { url: "https://layercake.moe", img: "https://layercake.moe/assets/images/buttons/mine/layercake3.gif", alt: "its a cake but like layered" },
     { url: "https://poz.pet", img: "https://poz.pet/88x31/powered-by-poz.png", alt: "Poz, gay person on the internet" },
     { url: "https://medjed.nekoweb.org/", img: "https://medjed.nekoweb.org/assets/images/button.jpg", alt: "Medjed" },
+
     { url: "https://julieyess.neocities.org/rhythmwebring/rhythmgamewebring", img: "https://julieyess.neocities.org/rhythmwebring/Opera1.png", alt: "Rythmgaming" },
     { url: "https://archlinux.org/download/", img: "https://herz.moe/img/buttons/archlinux.gif", alt: "ArchLinux" },
     { img: "https://poz.pet/88x31/this-site-is-miku-approved.gif", alt: "AISHITE AISHITE AISHITE MOTO MOTO" },
+    { url: "https://luuumine.com", img: "https://luuumine.com/badges/luuumine.gif", alt: "luuumine" },
   ];
 
   const futabaStickers = [
@@ -43,6 +45,7 @@ export default function ButtonsPage() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
+      
       <div className="bg-[#121217] border-2 border-[#39ff14] shadow-lg relative flex flex-col">
         <WindowDecoration title="Kitty - mybutton.txt" showControls={true} />
 

@@ -27,6 +27,7 @@ export default function Idols() {
     if (newIdolId === selectedIdol) return;
 
     setIsTransitioning(true);
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => {
       setSelectedIdol(newIdolId);

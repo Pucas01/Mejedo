@@ -98,6 +98,7 @@ export default function AnnouncementsModal({ show, onClose }) {
         <WindowDecoration title="Announcements Manager" onClose={onClose} />
 
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          
           <div className="space-y-2">
             <h2 className="text-[#39ff14] text-xl font-bold">Send Announcement</h2>
           </div>

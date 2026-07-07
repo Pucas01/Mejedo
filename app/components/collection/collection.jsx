@@ -49,6 +49,7 @@ export default function CollectionPage() {
   };
 
   useEffect(() => {
+
     Promise.all([fetchConsoles(), fetchManga()]);
   }, []);
 

@@ -1,6 +1,7 @@
 "use client";
 import { useWidgets } from "../../hooks/useWidgets";
 import { useTheme } from "../../hooks/useTheme";
+import { useCrtFilter } from "../../hooks/useCrtFilter";
 import { useEffect, useRef } from "react";
 
 const availableWidgets = [
@@ -15,12 +16,14 @@ const availableWidgets = [
 export default function WidgetMenu() {
   const { menuOpen, setMenuOpen, createWidget, closeWidget, widgets, mascotVisible, onToggleMascot } = useWidgets();
   const { theme } = useTheme();
+  const { crtEnabled, toggleCrtFilter } = useCrtFilter();
   const menuRef = useRef(null);
 
   useEffect(() => {
     if (!menuOpen) return;
 
     const handleClickOutside = (e) => {
+
       if (menuRef.current && !menuRef.current.contains(e.target) &&
           !e.target.closest('[aria-label="Open widget menu"]')) {
         setMenuOpen(false);
@@ -49,8 +52,10 @@ export default function WidgetMenu() {
   if (!menuOpen) return null;
 
   const handleToggleWidget = (type) => {
+
     const existing = Array.from(widgets.values()).find(w => w.type === type && !w.minimized);
     if (existing) {
+
       closeWidget(existing.id);
       return;
     }
@@ -103,8 +108,10 @@ export default function WidgetMenu() {
           );
         })}
 
+        {}
         <div className="h-px mx-1 my-1" style={{ backgroundColor: `${theme.colors.primary}33` }}></div>
 
+        {}
         <button
           onClick={onToggleMascot}
           className={`w-full text-left px-4 py-1.5 flex items-center gap-2 transition-colors text-sm border-l-2 border-r-2
@@ -133,6 +140,38 @@ export default function WidgetMenu() {
           <div className="flex-1 min-w-0">
             <div className="text-white">
               Toggle Futaba
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={toggleCrtFilter}
+          className={`w-full text-left px-4 py-1.5 flex items-center gap-2 transition-colors text-sm border-l-2 border-r-2
+            ${crtEnabled
+              ? `${theme.colors.bg}/15 ${theme.colors.border} ${theme.colors.border}`
+              : 'bg-transparent border-l-transparent border-r-transparent'
+            }`}
+          onMouseEnter={(e) => {
+            if (!crtEnabled) {
+              e.currentTarget.style.borderLeftColor = `${theme.colors.primary}80`;
+              e.currentTarget.style.borderRightColor = `${theme.colors.primary}80`;
+              e.currentTarget.style.backgroundColor = `${theme.colors.primary}1a`;
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!crtEnabled) {
+              e.currentTarget.style.borderLeftColor = 'transparent';
+              e.currentTarget.style.borderRightColor = 'transparent';
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }
+          }}
+        >
+          <span className={`text-xs flex-shrink-0 ${crtEnabled ? theme.colors.text : 'text-red-500'}`}>
+            {crtEnabled ? '●' : '○'}
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="text-white">
+              CRT Filter
             </div>
           </div>
         </button>

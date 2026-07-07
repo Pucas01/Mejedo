@@ -56,6 +56,7 @@ export default function Footer() {
     }
 
     const observer = new MutationObserver(() => {
+
       setTimeout(calculateSize, 500);
     });
 

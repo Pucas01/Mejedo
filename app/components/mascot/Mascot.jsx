@@ -60,6 +60,7 @@ function Mascot() {
   try {
     achievements = useAchievements();
   } catch {
+
   }
 
   useEffect(() => {
@@ -127,6 +128,7 @@ function Mascot() {
   };
 
   const showRandomTip = (customMessage = null) => {
+
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
     }
@@ -149,6 +151,7 @@ function Mascot() {
 
     hideTimeoutRef.current = setTimeout(() => {
       setBubbleState("exiting");
+
       setTimeout(() => {
         setBubbleState("hidden");
       }, 250);
@@ -156,6 +159,7 @@ function Mascot() {
   };
 
   useEffect(() => {
+
     const initialTimeout = setTimeout(() => {
       showRandomTip();
     }, 10000);
@@ -194,11 +198,13 @@ function Mascot() {
 
   return (
     <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end">
+      
       {bubbleState !== "hidden" && (
         <div className={`relative mb-4 transition-transform duration-200 ${isHovered ? "-translate-y-2" : ""} ${getBubbleClass()}`}>
           <div className={`bg-[#121217] border-2 border-[#39ff14] ${config.bubble} text-white`}>
             {currentTip}
           </div>
+          
           <div className="absolute -bottom-2 right-6 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#39ff14]" />
           <div className="absolute -bottom-1 right-[26px] w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#121217]" />
         </div>
@@ -207,6 +213,7 @@ function Mascot() {
       <div
         className={`transition-transform duration-200 cursor-pointer ${isHovered ? "scale-110" : ""}`}
         onClick={() => {
+
           if (achievements?.updateStats) {
             achievements.updateStats("mascotClicks", 1);
           }
@@ -216,6 +223,7 @@ function Mascot() {
         onMouseLeave={() => setIsHovered(false)}
       >
         <div className={`bg-[#121217] border-2 border-[#39ff14] ${config.padding} pb-0`}>
+          
           <div className={`${config.container} flex items-end justify-center`}>
             <img
               key={bounceKey}

@@ -66,6 +66,7 @@ export default function ToursTimeline() {
     try {
       const res = await fetch("/api/ado-tours");
       const data = await res.json();
+
       const sorted = data.sort((a, b) => new Date(a.date) - new Date(b.date));
       setTours(sorted);
     } catch (err) {
@@ -104,6 +105,7 @@ export default function ToursTimeline() {
 
   useEffect(() => {
     if (doneTours && timelineRef.current && tours.length > 0) {
+
       timelineRef.current.scrollLeft = 0;
 
       setTimeout(() => {
@@ -324,11 +326,13 @@ export default function ToursTimeline() {
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
               >
+                
                 <div className="absolute left-0 right-0 top-10 h-0.5 bg-[#4169e1]/30" style={{ width: `${tours.length * 350}px` }}></div>
 
                 <div className="flex gap-8 min-w-max">
                   {tours.map((tour, index) => (
                     <div key={tour.id} className="relative flex flex-col items-center" style={{ width: '320px' }}>
+                      
                       <div className="w-4 h-4 bg-[#4169e1] rounded-full border-4 border-[#121217] relative z-10 mb-6"></div>
 
                       {editingTour?.id === tour.id ? (
@@ -398,13 +402,16 @@ export default function ToursTimeline() {
                       ) : (
                         <div className="bg-[#1a1a1f]/50 border border-[#4169e1]/30 p-4 hover:border-[#4169e1] transition-colors w-full flex flex-col">
                           <div className="flex justify-between items-start gap-2 mb-2">
+                            
                             <div className="inline-block bg-[#4169e1]/10 border border-[#4169e1] px-3 py-1">
                               <span className="text-[#4169e1] text-xs font-mono">
                                 {tour.date && (() => {
+
                                   const multiYearMatch = tour.notes?.match(/Tour ran from (\d{4}) to (\d{4})/);
                                   if (multiYearMatch) {
                                     return `${multiYearMatch[1]}–${multiYearMatch[2]}`;
                                   }
+
                                   return new Date(tour.date).getFullYear();
                                 })()}
                               </span>

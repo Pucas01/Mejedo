@@ -14,10 +14,12 @@ export default function WordStatsModal({ show, onClose }) {
   const fileInputRef = useRef(null);
 
   function formatWord(word) {
+
     const emojiMatch = word.match(/^([a-z_]{2,})(\d{17,20})$/i);
     if (emojiMatch) {
       return `${emojiMatch[1]} (emoji)`;
     }
+
     else if (/^\d{17,20}$/.test(word)) {
       return `@user-${word.slice(-4)}`;
     }
@@ -150,6 +152,7 @@ export default function WordStatsModal({ show, onClose }) {
         <WindowDecoration title="Word Stats Manager" onClose={onClose} />
 
         <div className="flex-1 overflow-y-auto p-4">
+          
           <div className="flex gap-3 mb-4">
             <Button variant="primary" size="sm" onClick={handleExport}>
               Export Database
@@ -178,6 +181,7 @@ export default function WordStatsModal({ show, onClose }) {
             <div className="text-gray-400">No word stats recorded yet.</div>
           ) : (
             <div className="space-y-4">
+              
               <div>
                 <h3 className="text-[#39ff14] font-bold mb-2">Servers with Stats</h3>
                 <div className="space-y-2">

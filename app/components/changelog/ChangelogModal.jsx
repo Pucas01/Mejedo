@@ -136,6 +136,7 @@ export default function ChangelogModal({ show, onClose }) {
           ) : (
             versions.map((version, idx) => (
               <div key={idx} className={`border-l-2 ${theme.colors.border} pl-4 relative group`}>
+                
                 {isAdmin && (
                   <div className="absolute -right-2 top-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button

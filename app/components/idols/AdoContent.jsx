@@ -216,9 +216,11 @@ export default function AdoContent({ idol }) {
 
   return (
     <>
+      
       {modalContent}
 
       <div className="flex flex-col gap-4 text-xl min-h-screen text-white justify-start">
+        
         <div ref={infoRef} className="bg-[#121217] min-h-[540px] border-2 border-[#4169e1] shadow-lg relative flex flex-col overflow-hidden">
         <WindowDecoration title="Ado - info.txt" showControls={true} theme={theme.name} />
         <div className="p-8 flex-1 relative">
@@ -332,6 +334,7 @@ export default function AdoContent({ idol }) {
                   </div>
                 ) : (
                   <>
+                    
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
                       {performances.map((perf) => (
                         <div

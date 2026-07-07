@@ -80,6 +80,7 @@ Some things im good at
         rotation={15}
         offset={{ x: 22, y: 22 }}
       />
+      
       {!doneTyping && (
         <div className="p-6 font-jetbrains text-xl flex flex-wrap">
           <span className="text-[#39ff14]">pucas01</span>

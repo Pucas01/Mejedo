@@ -43,6 +43,7 @@ function WidgetWindow({ widget }) {
   }, [widget.type]);
 
   const handleMouseDown = (e) => {
+
     if (e.target.closest('button') || e.target.closest('.widget-content')) return;
 
     setIsDragging(true);
@@ -81,6 +82,7 @@ function WidgetWindow({ widget }) {
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+
       document.body.style.userSelect = '';
     };
   }, [isDragging, widget.id, widget.position.x, widget.position.y, widget.size.width, updatePosition]);

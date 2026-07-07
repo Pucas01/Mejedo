@@ -32,6 +32,7 @@ export default function About() {
   const { unlock, unlockedAchievements } = useAchievements();
 
   const handleSocialClick = (e, url) => {
+
     if (unlockedAchievements.stalker) {
       return;
     }
@@ -164,6 +165,7 @@ export default function About() {
   }, []);
 
   useEffect(() => {
+
     if (!doneFastfetch) {
       setShowScrollIndicator(false);
       setIndicatorVisible(false);
@@ -172,13 +174,16 @@ export default function About() {
 
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
+
       if (scrollTop >= 100) {
         setIndicatorVisible(false);
+
         setTimeout(() => setShowScrollIndicator(false), 300);
       }
     };
 
     setShowScrollIndicator(true);
+
     setTimeout(() => setIndicatorVisible(true), 50);
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -189,6 +194,7 @@ export default function About() {
 
   return (
     <div className="relative flex flex-col gap-4 p-4 min-h-screen text-white justify-start">
+      
       {showScrollIndicator && (
         <div
           className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1 animate-bounce transition-opacity duration-300 ${
