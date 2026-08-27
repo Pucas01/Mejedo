@@ -272,8 +272,8 @@ export default function About() {
                 <p><span className="text-[#39ff14]">WM:</span> Hyprland {versions.hyprland} (Wayland)</p>
                 <p>
                   <span className="text-[#39ff14]">Dots: </span>
-                  <a href="https://github.com/end-4/dots-hyprland?tab=readme-ov-file#illogical-impulsequickshell" className="decoration-[#39ff14] underline-offset-5 hover:underline decoration-wavy">
-                    illogical-impulse (Quickshell)
+                  <a href="https://github.com/Pucas01/Mirai" className="decoration-[#39ff14] underline-offset-5 hover:underline decoration-wavy">
+                    Mirai (Quickshell)
                   </a>
                 </p>
               </div>
