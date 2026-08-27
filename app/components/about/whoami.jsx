@@ -5,23 +5,23 @@ import WindowDecoration from "../window/WindowDecoration.jsx";
 
 export default function Whoami({
   aboutText = `### Intro
-Hi! im Lucas, im... some? years old ( just look at the fetch  ) and a cis guy from the Netherlands
-not really a developer but website are fun i guess, im more of a SysAdmin guy (Selfhosting, Networking, Linux)
+Hi! im Pucas01, im... some? years old ( just look at the fetch  ) and a person from the Netherlands
+I spend most of my time developing software these days, im part of Linifadomra and work on projects like Courage Reborn (TP PC Port)
 |
 ### Fav things
 Im a big fan of these things:
 - Ado (she's my queen)
 - Chainsaw Man
-- The Legend of Zelda: Twilight Princess (I own 5 different copies)
+- The Legend of Zelda: Twilight Princess (I own 5 different copies) (and work on a PC port)
 - Miku / Teto / Rin / Len / Gumi
 And much much more
 |
 ### Skills
 Some things im good at 
+- uhhhh coding, Gulp..
 - Proxmox / Docker
 - Arch Linux (Hyprland BTW)
 - Networking stuff (Cisco CLI needs google sometimes)
-- HTML / CSS (Mejedo, Suichi)
 - Video editing (I make tiktoks)
 - Shitposting on twitter dot com`
 }) {
