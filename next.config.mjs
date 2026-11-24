@@ -30,7 +30,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://127.0.0.1:4000/api/:path*", // proxy to Express
+        destination: "http://127.0.0.1:4000/api/:path*",
       },
       {
         source: "/about",

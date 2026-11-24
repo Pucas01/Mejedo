@@ -46,9 +46,9 @@ async function initDB() {
         `INSERT INTO users (username, password, role) VALUES (?, ?, ?)`,
         [DEFAULT_ADMIN.username, hashed, "admin"]
       );
-      console.log(`✅ Default admin created: ${DEFAULT_ADMIN.username}/${DEFAULT_ADMIN.password}`);
+      console.log(`Default admin created: ${DEFAULT_ADMIN.username}/${DEFAULT_ADMIN.password}`);
     } else {
-      console.log("✅ Default admin already exists");
+      console.log("Default admin already exists");
     }
   } catch (err) {
     console.error("DB Initialization error:", err);
